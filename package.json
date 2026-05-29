@@ -1,7 +1,7 @@
 {
-  "name": "ccstatusline",
+  "name": "ccstatusline-gradient",
   "version": "2.2.19",
-  "description": "A customizable status line formatter for Claude Code CLI",
+  "description": "Fork of ccstatusline adding gradient and value-based dynamic colors to the Claude Code status line",
   "module": "src/ccstatusline.ts",
   "type": "module",
   "bin": {
@@ -70,7 +70,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sirmalloc/ccstatusline.git"
+    "url": "git+https://github.com/akkaz/ccstatusline-gradient.git"
   },
   "engines": {
     "node": ">=14.0.0"
