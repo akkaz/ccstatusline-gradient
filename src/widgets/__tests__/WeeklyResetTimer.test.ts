@@ -439,3 +439,19 @@ describe('WeeklyResetTimerWidget', () => {
         }
     });
 });
+
+describe('WeeklyResetTimerWidget.getFillRatio (weekly usage)', () => {
+    const widget = new WeeklyResetTimerWidget();
+    const ctx = (usageData?: Record<string, unknown>): RenderContext => (({ usageData }));
+
+    it('returns null when weekly usage is absent', () => {
+        expect(widget.getFillRatio(ctx())).toBeNull();
+        expect(widget.getFillRatio(ctx({}))).toBeNull();
+    });
+
+    it('returns weeklyUsage/100, clamped to [0,1]', () => {
+        expect(widget.getFillRatio(ctx({ weeklyUsage: 70 }))).toBeCloseTo(0.7);
+        expect(widget.getFillRatio(ctx({ weeklyUsage: 150 }))).toBe(1);
+        expect(widget.getFillRatio(ctx({ weeklyUsage: -10 }))).toBe(0);
+    });
+});

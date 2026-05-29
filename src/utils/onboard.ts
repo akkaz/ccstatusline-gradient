@@ -4,7 +4,7 @@ import * as https from 'https';
 import * as os from 'os';
 import * as path from 'path';
 
-import onboardConfig from '../onboard-config.json';
+import akkazPreset from '../presets/akkaz.json';
 import type { Settings } from '../types/Settings';
 
 import {
@@ -18,14 +18,16 @@ import {
     saveSettings
 } from './config';
 
-// The signature status line config shipped with the package, written to the
-// user's ccstatusline config on `--onboard`.
+// Bundled status line presets that `--onboard` can install. Imports are static
+// so `bun build` reliably bundles the JSON into the single-file output.
+const PRESETS: Record<string, unknown> = { akkaz: akkazPreset };
+const DEFAULT_PRESET = 'akkaz';
 
 // Nerd Fonts "latest" release asset (stable URL).
 const NERD_FONT_URL = 'https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip';
 const FONT_MATCH = 'JetBrainsMonoNerdFont-*.ttf';
 
-interface OnboardOptions { skipFont?: boolean }
+interface OnboardOptions { skipFont?: boolean; preset?: string }
 
 function log(msg: string): void {
     process.stdout.write(`${msg}\n`);
@@ -112,10 +114,17 @@ async function installNerdFont(): Promise<void> {
 }
 
 export async function runOnboard(options: OnboardOptions = {}): Promise<void> {
-    log('ccstatusline-gradient — onboarding\n');
+    const presetName = options.preset ?? DEFAULT_PRESET;
+    const preset = PRESETS[presetName];
+    if (!preset) {
+        log(`  ⚠ Unknown preset "${presetName}". Available: ${Object.keys(PRESETS).join(', ')}.`);
+        return;
+    }
+
+    log(`ccstatusline-gradient — onboarding (preset: ${presetName})\n`);
 
     // 1. Write the signature status line config.
-    await saveSettings(onboardConfig as unknown as Settings);
+    await saveSettings(preset as unknown as Settings);
     log(`  ✓ Wrote status line config → ${getConfigPath()}`);
 
     // 2. Wire up Claude Code's status line command (preserving other settings).

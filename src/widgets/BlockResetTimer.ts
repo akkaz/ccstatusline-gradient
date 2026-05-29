@@ -191,6 +191,16 @@ export class BlockResetTimerWidget implements Widget {
         return null;
     }
 
+    // Color tracks SESSION usage consumed (not the timer's own elapsed window),
+    // so a `dynamic:` color on this timer coincides with the session bar/%.
+    getFillRatio(context: RenderContext): number | null {
+        const value = context.usageData?.sessionUsage;
+        if (value === undefined) {
+            return null;
+        }
+        return Math.max(0, Math.min(1, value / 100));
+    }
+
     supportsRawValue(): boolean { return true; }
     supportsColors(item: WidgetItem): boolean { return true; }
 }

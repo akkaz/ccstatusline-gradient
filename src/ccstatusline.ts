@@ -280,7 +280,9 @@ async function main() {
     // Handle --onboard mode: write the signature config, wire up Claude Code's
     // status line, and install the Nerd Font in one command.
     if (process.argv.includes('--onboard')) {
-        await runOnboard({ skipFont: process.argv.includes('--no-font') });
+        const presetIdx = process.argv.indexOf('--preset');
+        const preset = presetIdx !== -1 ? process.argv[presetIdx + 1] : undefined;
+        await runOnboard({ skipFont: process.argv.includes('--no-font'), preset });
         return;
     }
 
