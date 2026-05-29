@@ -5,7 +5,7 @@
   "module": "src/ccstatusline.ts",
   "type": "module",
   "bin": {
-    "ccstatusline": "dist/ccstatusline.js"
+    "ccstatusline-gradient": "dist/ccstatusline.js"
   },
   "files": [
     "dist/"

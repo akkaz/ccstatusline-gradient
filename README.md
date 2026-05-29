@@ -40,35 +40,38 @@ widget **ends on the color the next one begins with**. Example for `Opus 4.8 ⚡
 { "type": "thinking-effort","color": "gradient:cc6b8e-f7c978" }        // seam → end
 ```
 
-## 🚀 Quick install (prebuilt, no build step)
+## 🚀 Install
 
-Requires **Node 18+**. The repo ships a prebuilt `dist/ccstatusline.js`.
+One command, just like upstream — no clone, no build step (Node 18+).
 
-```bash
-git clone https://github.com/akkaz/ccstatusline-gradient.git ~/.ccstatusline-gradient
-```
-
-Then point Claude Code at it — add this to `~/.claude/settings.json`:
+**1. Point Claude Code at it.** Add to `~/.claude/settings.json`:
 
 ```jsonc
 {
   "statusLine": {
     "type": "command",
-    "command": "node ~/.ccstatusline-gradient/dist/ccstatusline.js"
+    "command": "npx -y ccstatusline-gradient@latest"
   }
 }
 ```
 
-Drop one of the ready-made configs into `~/.config/ccstatusline/settings.json`:
+> Prefer the GitHub source (works even before the npm release):
+> `"command": "npx -y github:akkaz/ccstatusline-gradient"`
+
+**2. Configure it** — run the same command in a terminal to open the interactive TUI
+(add widgets, pick `g`radient / `d`ynamic colors, install a preset):
 
 ```bash
-mkdir -p ~/.config/ccstatusline
-cp ~/.ccstatusline-gradient/presets/retro-dynamic.json ~/.config/ccstatusline/settings.json
+npx -y ccstatusline-gradient@latest
 ```
 
-Restart Claude Code (the status line command is read at startup). You should see a gradient model name and a context bar that shifts color as it fills.
+That's it. Restart Claude Code (the status line command is read at startup).
 
-> **Interactive editor:** run `node ~/.ccstatusline-gradient/dist/ccstatusline.js` in a terminal to open the TUI, where you can add widgets and pick `g`radient / `d`ynamic colors live.
+> **Prefer a one-liner preset?** Drop a ready-made config in directly:
+> ```bash
+> mkdir -p ~/.config/ccstatusline
+> curl -fsSL https://raw.githubusercontent.com/akkaz/ccstatusline-gradient/main/presets/retro-dynamic.json -o ~/.config/ccstatusline/settings.json
+> ```
 
 ## 🧩 Default presets
 
