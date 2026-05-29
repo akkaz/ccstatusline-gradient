@@ -42,7 +42,24 @@ widget **ends on the color the next one begins with**. Example for `Opus 4.8 ⚡
 
 ## 🚀 Install
 
-One command, just like upstream — no clone, no build step (Node 18+).
+### ⚡ Fastest: one-command onboard
+
+Sets up **everything** in a single shot — writes a ready-made status line config,
+wires it into Claude Code, and installs the JetBrainsMono Nerd Font (for the icons):
+
+```bash
+npx -y ccstatusline-gradient@latest --onboard
+```
+
+Then restart Claude Code. Perfect for a fresh machine or an SSH server — one command and you're done.
+
+- `--no-font` skips the font download (e.g. on a remote server where the font lives on your local terminal).
+- Existing `~/.claude/settings.json` keys are preserved; your previous ccstatusline config is backed up.
+- Set your terminal font to **JetBrainsMono Nerd Font** to see the icons.
+
+### Manual (pick your own widgets)
+
+No clone, no build step (Node 18+).
 
 **1. Point Claude Code at it.** Add to `~/.claude/settings.json`:
 

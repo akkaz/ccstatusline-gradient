@@ -69487,16 +69487,16 @@ var init_claude_settings = __esm(async () => {
   writeFile2 = fs12.promises.writeFile;
   mkdir2 = fs12.promises.mkdir;
   CCSTATUSLINE_COMMANDS = {
-    AUTO_NPX: "npx -y ccstatusline@latest",
-    AUTO_BUNX: "bunx -y ccstatusline@latest",
-    GLOBAL: "ccstatusline",
-    NPM: "npx -y ccstatusline@latest",
-    BUNX: "bunx -y ccstatusline@latest",
-    SELF_MANAGED: "ccstatusline"
+    AUTO_NPX: "npx -y ccstatusline-gradient@latest",
+    AUTO_BUNX: "bunx -y ccstatusline-gradient@latest",
+    GLOBAL: "ccstatusline-gradient",
+    NPM: "npx -y ccstatusline-gradient@latest",
+    BUNX: "bunx -y ccstatusline-gradient@latest",
+    SELF_MANAGED: "ccstatusline-gradient"
   };
   PINNED_INSTALL_COMMANDS = {
-    NPM: (version2) => `npm install -g ccstatusline@${version2}`,
-    BUN: (version2) => `bun add -g ccstatusline@${version2}`
+    NPM: (version2) => `npm install -g ccstatusline-gradient@${version2}`,
+    BUN: (version2) => `bun add -g ccstatusline-gradient@${version2}`
   };
   VoiceConfigSchema = exports_external.object({ enabled: exports_external.boolean().optional() });
   RemoteSessionFileSchema = exports_external.object({
@@ -77755,6 +77755,179 @@ function handleHookInput(input) {
 
 // src/ccstatusline.ts
 await init_jsonl();
+
+// src/utils/onboard.ts
+import { execFileSync as execFileSync7 } from "child_process";
+import * as fs18 from "fs";
+import * as https3 from "https";
+import * as os16 from "os";
+import * as path15 from "path";
+// src/onboard-config.json
+var onboard_config_default = {
+  version: 3,
+  lines: [
+    [
+      { id: "model", type: "model", rawValue: true, bold: true, color: "gradient:3f51b1-5a55ae-7b5fac-8f6aae-a86aa4-cc6b8e" },
+      { id: "spM", type: "separator", character: " " },
+      { id: "lbl-think", type: "custom-text", customText: "", color: "hex:cc6b8e" },
+      { id: "spT", type: "separator", character: " " },
+      { id: "think", type: "thinking-effort", rawValue: true, color: "gradient:cc6b8e-f18271-f3a469-f7c978" }
+    ],
+    [
+      { id: "lbl-ctx", type: "custom-text", customText: "Context", color: "hex:8f6aae" },
+      { id: "sp1", type: "separator", character: " " },
+      { id: "ctx-bar", type: "context-bar", rawValue: true, color: "dynamic:8f6aae-cc6b8e-f18271", metadata: { display: "slider-only" } },
+      { id: "sp2", type: "separator", character: " " },
+      { id: "ctx-pct", type: "context-percentage", rawValue: true, color: "dynamic:8f6aae-cc6b8e-f18271" }
+    ],
+    [
+      { id: "lbl-ses", type: "custom-text", customText: "Session", color: "hex:8f6aae" },
+      { id: "sp3", type: "separator", character: " " },
+      { id: "ses-bar", type: "session-usage", rawValue: true, color: "dynamic:8f6aae-cc6b8e-f18271", metadata: { display: "slider-only" } },
+      { id: "ses-b-sp", type: "separator", character: " " },
+      { id: "ses", type: "session-usage", rawValue: true, color: "dynamic:8f6aae-cc6b8e-f18271" },
+      { id: "s2", type: "separator", character: " " },
+      { id: "lbl-r1", type: "custom-text", customText: "resets", color: "hex:8f6aae" },
+      { id: "sp4", type: "separator", character: " " },
+      { id: "reset", type: "reset-timer", rawValue: true, color: "hex:cc6b8e" },
+      { id: "s3", type: "separator", color: "hex:475569" },
+      { id: "lbl-wk", type: "custom-text", customText: "Week", color: "hex:8f6aae" },
+      { id: "sp5", type: "separator", character: " " },
+      { id: "wk-bar", type: "weekly-usage", rawValue: true, color: "dynamic:8f6aae-cc6b8e-f18271", metadata: { display: "slider-only" } },
+      { id: "wk-b-sp", type: "separator", character: " " },
+      { id: "wk", type: "weekly-usage", rawValue: true, color: "dynamic:8f6aae-cc6b8e-f18271" },
+      { id: "s4", type: "separator", character: " " },
+      { id: "lbl-r2", type: "custom-text", customText: "resets", color: "hex:8f6aae" },
+      { id: "sp6", type: "separator", character: " " },
+      { id: "wk-reset", type: "weekly-reset-timer", rawValue: true, color: "hex:cc6b8e" }
+    ]
+  ],
+  flexMode: "full-minus-40",
+  compactThreshold: 60,
+  colorLevel: 3,
+  inheritSeparatorColors: false,
+  globalBold: false,
+  gitCacheTtlSeconds: 5,
+  minimalistMode: false,
+  powerline: {
+    enabled: false,
+    separators: [""],
+    separatorInvertBackground: [false],
+    startCaps: [],
+    endCaps: [],
+    autoAlign: false,
+    continueThemeAcrossLines: false
+  }
+};
+
+// src/utils/onboard.ts
+await __promiseAll([
+  init_claude_settings(),
+  init_config()
+]);
+var NERD_FONT_URL = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip";
+var FONT_MATCH = "JetBrainsMonoNerdFont-*.ttf";
+function log2(msg) {
+  process.stdout.write(`${msg}
+`);
+}
+function download(url2, dest, redirects = 0) {
+  return new Promise((resolve6, reject2) => {
+    if (redirects > 5) {
+      reject2(new Error("too many redirects"));
+      return;
+    }
+    https3.get(url2, { headers: { "User-Agent": "ccstatusline-gradient" } }, (res) => {
+      const status = res.statusCode ?? 0;
+      if (status >= 300 && status < 400 && res.headers.location) {
+        res.resume();
+        download(res.headers.location, dest, redirects + 1).then(resolve6, reject2);
+        return;
+      }
+      if (status !== 200) {
+        res.resume();
+        reject2(new Error(`HTTP ${status}`));
+        return;
+      }
+      const file2 = fs18.createWriteStream(dest);
+      res.pipe(file2);
+      file2.on("finish", () => {
+        file2.close(() => {
+          resolve6();
+        });
+      });
+      file2.on("error", reject2);
+    }).on("error", reject2);
+  });
+}
+function nerdFontAlreadyInstalled() {
+  try {
+    const out = execFileSync7("fc-list", [], { encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] });
+    return /JetBrainsMono Nerd Font/i.test(out);
+  } catch {
+    return false;
+  }
+}
+async function installNerdFont() {
+  const platform5 = process.platform;
+  if (platform5 !== "linux" && platform5 !== "darwin") {
+    log2('  ⚠ Skipping font install on this OS. Install "JetBrainsMono Nerd Font" manually and select it in your terminal.');
+    return;
+  }
+  if (nerdFontAlreadyInstalled()) {
+    log2("  ✓ A JetBrainsMono Nerd Font is already installed.");
+    return;
+  }
+  const fontsDir = platform5 === "darwin" ? path15.join(os16.homedir(), "Library", "Fonts") : path15.join(os16.homedir(), ".local", "share", "fonts", "ccstatusline-gradient");
+  const tmpZip = path15.join(os16.tmpdir(), "ccstatusline-gradient-JetBrainsMono.zip");
+  try {
+    fs18.mkdirSync(fontsDir, { recursive: true });
+    log2("  ↓ Downloading JetBrainsMono Nerd Font…");
+    await download(NERD_FONT_URL, tmpZip);
+    execFileSync7("unzip", ["-o", tmpZip, FONT_MATCH, "-d", fontsDir], { stdio: "ignore" });
+    if (platform5 === "linux") {
+      execFileSync7("fc-cache", ["-f", fontsDir], { stdio: "ignore" });
+    }
+    log2(`  ✓ Installed JetBrainsMono Nerd Font to ${fontsDir}`);
+    log2('    → Set your terminal font to "JetBrainsMono Nerd Font" to see the icons.');
+  } catch (err) {
+    log2(`  ⚠ Could not auto-install the font (${err instanceof Error ? err.message : String(err)}).`);
+    log2('    Install "JetBrainsMono Nerd Font" manually: https://github.com/ryanoasis/nerd-fonts/releases/latest');
+  } finally {
+    try {
+      fs18.unlinkSync(tmpZip);
+    } catch {}
+  }
+}
+async function runOnboard(options = {}) {
+  log2(`ccstatusline-gradient — onboarding
+`);
+  await saveSettings(onboard_config_default);
+  log2(`  ✓ Wrote status line config → ${getConfigPath()}`);
+  let claudeSettings;
+  try {
+    claudeSettings = await loadClaudeSettings({ logErrors: false });
+  } catch {
+    claudeSettings = {};
+  }
+  claudeSettings.statusLine = {
+    type: "command",
+    command: CCSTATUSLINE_COMMANDS.AUTO_NPX,
+    padding: 0
+  };
+  await saveClaudeSettings(claudeSettings);
+  log2(`  ✓ Set Claude Code statusLine → "${CCSTATUSLINE_COMMANDS.AUTO_NPX}" (${getClaudeSettingsPath()})`);
+  if (options.skipFont) {
+    log2("  • Skipped font install (--no-font).");
+  } else {
+    await installNerdFont();
+  }
+  log2(`
+Done! Restart Claude Code to see your status line.`);
+  log2('Tip: run "npx -y ccstatusline-gradient@latest" anytime to tweak it in the TUI.');
+}
+
+// src/ccstatusline.ts
 await init_renderer2();
 // src/utils/usage-prefetch.ts
 await init_usage();
@@ -77947,8 +78120,8 @@ async function ensureWindowsUtf8CodePage() {
     return;
   }
   try {
-    const { execFileSync: execFileSync7 } = await import("child_process");
-    execFileSync7("chcp.com", ["65001"], { stdio: "ignore", windowsHide: true });
+    const { execFileSync: execFileSync8 } = await import("child_process");
+    execFileSync8("chcp.com", ["65001"], { stdio: "ignore", windowsHide: true });
   } catch {}
 }
 async function renderMultipleLines(data) {
@@ -78081,6 +78254,10 @@ async function main() {
   initConfigPath(parseConfigArg());
   if (process.argv.includes("--hook")) {
     await handleHook();
+    return;
+  }
+  if (process.argv.includes("--onboard")) {
+    await runOnboard({ skipFont: process.argv.includes("--no-font") });
     return;
   }
   if (!process.stdin.isTTY) {
