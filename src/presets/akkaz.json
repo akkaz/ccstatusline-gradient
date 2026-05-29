@@ -188,7 +188,7 @@
         "color": "hex:cc6b8e",
         "metadata": {
           "hideZero": "true",
-          "format": "icon-space-number",
+          "format": "icon-text-number",
           "nerdFont": "true"
         }
       }

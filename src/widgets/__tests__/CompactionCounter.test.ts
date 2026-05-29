@@ -88,6 +88,20 @@ describe('CompactionCounterWidget', () => {
             })).toBe('\uF021 3');
         });
 
+        it('renders the icon-text-number format with an ASCII icon and label', () => {
+            expect(render({
+                compactionData: { count: 3 },
+                item: { ...ITEM, metadata: { format: 'icon-text-number' } }
+            })).toBe('\u21BB compact 3');
+        });
+
+        it('renders the icon-text-number format with the compress Nerd Font glyph', () => {
+            expect(render({
+                compactionData: { count: 3 },
+                item: { ...ITEM, metadata: { format: 'icon-text-number', nerdFont: 'true' } }
+            })).toBe('\uF066 compact 3');
+        });
+
         it('treats legacy icon-number metadata as the default format', () => {
             expect(render({
                 compactionData: { count: 3 },
@@ -215,20 +229,31 @@ describe('CompactionCounterWidget', () => {
             });
         });
 
-        it('cycles icon-space-number -> text-and-number -> number -> icon-space-number', () => {
+        it('cycles icon-space-number -> icon-text-number -> text-and-number -> number -> icon-space-number', () => {
             const widget = new CompactionCounterWidget();
-            const textAndNumber = widget.handleEditorAction('cycle-format', ITEM);
+            const iconTextNumber = widget.handleEditorAction('cycle-format', ITEM);
+            const textAndNumber = widget.handleEditorAction('cycle-format', iconTextNumber ?? ITEM);
             const number = widget.handleEditorAction('cycle-format', textAndNumber ?? ITEM);
             const iconSpaceNumber = widget.handleEditorAction('cycle-format', number ?? ITEM);
 
+            expect(iconTextNumber?.metadata?.format).toBe('icon-text-number');
             expect(textAndNumber?.metadata?.format).toBe('text-and-number');
             expect(number?.metadata?.format).toBe('number');
             expect(iconSpaceNumber?.metadata?.format).toBeUndefined();
         });
 
-        it('removes nerd font metadata when cycling away from icon-space-number', () => {
+        it('keeps nerd font when cycling between icon formats', () => {
             const widget = new CompactionCounterWidget();
             const base: WidgetItem = { ...ITEM, metadata: { nerdFont: 'true' } };
+            const iconTextNumber = widget.handleEditorAction('cycle-format', base);
+
+            expect(iconTextNumber?.metadata?.format).toBe('icon-text-number');
+            expect(iconTextNumber?.metadata?.nerdFont).toBe('true');
+        });
+
+        it('removes nerd font metadata when cycling to a text-only format', () => {
+            const widget = new CompactionCounterWidget();
+            const base: WidgetItem = { ...ITEM, metadata: { format: 'icon-text-number', nerdFont: 'true' } };
             const textAndNumber = widget.handleEditorAction('cycle-format', base);
 
             expect(textAndNumber?.metadata?.format).toBe('text-and-number');

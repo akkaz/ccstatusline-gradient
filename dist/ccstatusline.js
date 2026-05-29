@@ -57150,7 +57150,7 @@ function getTerminalWidth() {
 function canDetectTerminalWidth() {
   return probeTerminalWidth() !== null;
 }
-var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.4.0";
+var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.5.0";
 var init_terminal = () => {};
 
 // src/utils/renderer.ts
@@ -68193,6 +68193,9 @@ class GitWorktreeOriginalBranchWidget {
 }
 
 // src/widgets/CompactionCounter.ts
+function formatHasIcon(format) {
+  return ICON_FORMATS.includes(format);
+}
 function getFormat2(item) {
   const format = item.metadata?.format;
   return FORMATS2.includes(format ?? "") ? format : DEFAULT_FORMAT2;
@@ -68205,24 +68208,21 @@ function removeNerdFont(item) {
   };
 }
 function setFormat2(item, format) {
-  if (format === DEFAULT_FORMAT2) {
-    const { format: removedFormat, ...restMetadata2 } = item.metadata ?? {};
-    return {
-      ...item,
-      metadata: Object.keys(restMetadata2).length > 0 ? restMetadata2 : undefined
-    };
+  const { format: removedFormat, [NERD_FONT_METADATA_KEY2]: prevNerdFont, ...restMetadata } = item.metadata ?? {};
+  const nextMetadata = { ...restMetadata };
+  if (format !== DEFAULT_FORMAT2) {
+    nextMetadata.format = format;
   }
-  const { [NERD_FONT_METADATA_KEY2]: removedNerdFont, ...restMetadata } = item.metadata ?? {};
+  if (formatHasIcon(format) && prevNerdFont !== undefined) {
+    nextMetadata[NERD_FONT_METADATA_KEY2] = prevNerdFont;
+  }
   return {
     ...item,
-    metadata: {
-      ...restMetadata,
-      format
-    }
+    metadata: Object.keys(nextMetadata).length > 0 ? nextMetadata : undefined
   };
 }
 function isNerdFontEnabled2(item) {
-  return item.metadata?.[NERD_FONT_METADATA_KEY2] === "true" && getFormat2(item) === DEFAULT_FORMAT2;
+  return item.metadata?.[NERD_FONT_METADATA_KEY2] === "true" && formatHasIcon(getFormat2(item));
 }
 function isHideZeroEnabled(item) {
   return item.metadata?.[HIDE_ZERO_METADATA_KEY] === "true";
@@ -68237,7 +68237,7 @@ function toggleHideZero(item) {
   };
 }
 function toggleNerdFont2(item) {
-  if (getFormat2(item) !== DEFAULT_FORMAT2) {
+  if (!formatHasIcon(getFormat2(item))) {
     return removeNerdFont(item);
   }
   if (!isNerdFontEnabled2(item)) {
@@ -68255,11 +68255,19 @@ function formatCount(count, format, icon) {
   switch (format) {
     case "icon-space-number":
       return `${icon} ${count}`;
+    case "icon-text-number":
+      return `${icon} ${COMPACTION_TEXT_LABEL} ${count}`;
     case "text-and-number":
       return `Compactions: ${count}`;
     case "number":
       return String(count);
   }
+}
+function getIcon(item, format) {
+  if (!isNerdFontEnabled2(item)) {
+    return COMPACTION_ICON;
+  }
+  return format === "icon-text-number" ? COMPACTION_COMPRESS_NERD_FONT_ICON : COMPACTION_NERD_FONT_ICON;
 }
 
 class CompactionCounterWidget {
@@ -68304,7 +68312,7 @@ class CompactionCounterWidget {
   }
   render(item, context, settings) {
     const format = getFormat2(item);
-    const icon = isNerdFontEnabled2(item) ? COMPACTION_NERD_FONT_ICON : COMPACTION_ICON;
+    const icon = getIcon(item, format);
     if (context.isPreview) {
       return formatCount(2, format, icon);
     }
@@ -68317,7 +68325,7 @@ class CompactionCounterWidget {
     const keybinds = [
       { key: "f", label: "(f)ormat", action: CYCLE_FORMAT_ACTION2 }
     ];
-    if (item === undefined || getFormat2(item) === DEFAULT_FORMAT2) {
+    if (item === undefined || formatHasIcon(getFormat2(item))) {
       keybinds.push({ key: "n", label: "(n)erd font", action: TOGGLE_NERD_FONT_ACTION2 });
     }
     keybinds.push({ key: "h", label: "(h)ide when zero", action: TOGGLE_HIDE_ZERO_ACTION });
@@ -68330,9 +68338,10 @@ class CompactionCounterWidget {
     return true;
   }
 }
-var COMPACTION_ICON = "↻", COMPACTION_NERD_FONT_ICON = "", FORMATS2, DEFAULT_FORMAT2 = "icon-space-number", CYCLE_FORMAT_ACTION2 = "cycle-format", TOGGLE_HIDE_ZERO_ACTION = "toggle-hide-zero", TOGGLE_NERD_FONT_ACTION2 = "toggle-nerd-font", HIDE_ZERO_METADATA_KEY = "hideZero", NERD_FONT_METADATA_KEY2 = "nerdFont";
+var COMPACTION_ICON = "↻", COMPACTION_COMPRESS_NERD_FONT_ICON = "", COMPACTION_TEXT_LABEL = "compact", COMPACTION_NERD_FONT_ICON = "", FORMATS2, ICON_FORMATS, DEFAULT_FORMAT2 = "icon-space-number", CYCLE_FORMAT_ACTION2 = "cycle-format", TOGGLE_HIDE_ZERO_ACTION = "toggle-hide-zero", TOGGLE_NERD_FONT_ACTION2 = "toggle-nerd-font", HIDE_ZERO_METADATA_KEY = "hideZero", NERD_FONT_METADATA_KEY2 = "nerdFont";
 var init_CompactionCounter = __esm(() => {
-  FORMATS2 = ["icon-space-number", "text-and-number", "number"];
+  FORMATS2 = ["icon-space-number", "icon-text-number", "text-and-number", "number"];
+  ICON_FORMATS = ["icon-space-number", "icon-text-number"];
 });
 
 // src/widgets/VoiceStatus.ts
@@ -77967,7 +77976,225 @@ var akkaz_default = {
         color: "hex:cc6b8e",
         metadata: {
           hideZero: "true",
-          format: "icon-space-number",
+          format: "icon-text-number",
+          nerdFont: "true"
+        }
+      }
+    ]
+  ],
+  flexMode: "full-minus-40",
+  compactThreshold: 60,
+  colorLevel: 3,
+  inheritSeparatorColors: false,
+  globalBold: false,
+  gitCacheTtlSeconds: 5,
+  minimalistMode: false,
+  powerline: {
+    enabled: false,
+    separators: [
+      ""
+    ],
+    separatorInvertBackground: [
+      false
+    ],
+    startCaps: [],
+    endCaps: [],
+    autoAlign: false,
+    continueThemeAcrossLines: false
+  }
+};
+// src/presets/barocco.json
+var barocco_default = {
+  version: 3,
+  lines: [
+    [
+      {
+        id: "model",
+        type: "model",
+        rawValue: true,
+        bold: true,
+        color: "gradient:009246-4ba373-f1f2f1"
+      },
+      {
+        id: "spM",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-think",
+        type: "custom-text",
+        customText: "",
+        color: "hex:f1f2f1"
+      },
+      {
+        id: "spT",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "think",
+        type: "thinking-effort",
+        rawValue: true,
+        color: "gradient:f1f2f1-e88a8f-ce2b37"
+      },
+      {
+        id: "s0",
+        type: "separator",
+        color: "hex:475569"
+      },
+      {
+        id: "lbl-ctx",
+        type: "custom-text",
+        customText: "Context",
+        color: "hex:009246"
+      },
+      {
+        id: "sp1",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-bar",
+        type: "context-bar",
+        rawValue: true,
+        color: "dynamic:009246-f1f2f1-ce2b37",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "sp2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-pct",
+        type: "context-percentage",
+        rawValue: true,
+        color: "dynamic:009246-f1f2f1-ce2b37"
+      }
+    ],
+    [
+      {
+        id: "lbl-ses",
+        type: "custom-text",
+        customText: "Session",
+        color: "hex:009246"
+      },
+      {
+        id: "sp3",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses-bar",
+        type: "session-usage",
+        rawValue: true,
+        color: "dynamic:009246-f1f2f1-ce2b37",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "ses-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses",
+        type: "session-usage",
+        rawValue: true,
+        color: "dynamic:009246-f1f2f1-ce2b37"
+      },
+      {
+        id: "s2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r1",
+        type: "custom-text",
+        customText: "",
+        color: "hex:009246"
+      },
+      {
+        id: "sp4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "reset",
+        type: "reset-timer",
+        rawValue: true,
+        color: "dynamic:009246-f1f2f1-ce2b37"
+      },
+      {
+        id: "s3",
+        type: "separator",
+        color: "hex:475569"
+      },
+      {
+        id: "lbl-wk",
+        type: "custom-text",
+        customText: "Week",
+        color: "hex:009246"
+      },
+      {
+        id: "sp5",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-bar",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "dynamic:009246-f1f2f1-ce2b37",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "wk-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "dynamic:009246-f1f2f1-ce2b37"
+      },
+      {
+        id: "s4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r2",
+        type: "custom-text",
+        customText: "",
+        color: "hex:009246"
+      },
+      {
+        id: "sp6",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-reset",
+        type: "weekly-reset-timer",
+        rawValue: true,
+        color: "dynamic:009246-f1f2f1-ce2b37"
+      }
+    ],
+    [
+      {
+        id: "compactions",
+        type: "compaction-counter",
+        color: "hex:ce2b37",
+        metadata: {
+          hideZero: "true",
+          format: "icon-text-number",
           nerdFont: "true"
         }
       }
@@ -78000,7 +78227,7 @@ await __promiseAll([
   init_claude_settings(),
   init_config()
 ]);
-var PRESETS = { akkaz: akkaz_default };
+var PRESETS = { akkaz: akkaz_default, barocco: barocco_default };
 var DEFAULT_PRESET = "akkaz";
 var NERD_FONT_URL = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip";
 var FONT_MATCH = "JetBrainsMonoNerdFont-*.ttf";

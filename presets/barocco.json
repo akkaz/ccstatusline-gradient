@@ -7,7 +7,7 @@
         "type": "model",
         "rawValue": true,
         "bold": true,
-        "color": "gradient:3f51b1-5a55ae-7b5fac-8f6aae-a86aa4-cc6b8e"
+        "color": "gradient:009246-4ba373-f1f2f1"
       },
       {
         "id": "spM",
@@ -18,7 +18,7 @@
         "id": "lbl-think",
         "type": "custom-text",
         "customText": "",
-        "color": "hex:cc6b8e"
+        "color": "hex:f1f2f1"
       },
       {
         "id": "spT",
@@ -29,7 +29,7 @@
         "id": "think",
         "type": "thinking-effort",
         "rawValue": true,
-        "color": "gradient:cc6b8e-f18271-f3a469-f7c978"
+        "color": "gradient:f1f2f1-e88a8f-ce2b37"
       },
       {
         "id": "s0",
@@ -40,7 +40,7 @@
         "id": "lbl-ctx",
         "type": "custom-text",
         "customText": "Context",
-        "color": "hex:8f6aae"
+        "color": "hex:009246"
       },
       {
         "id": "sp1",
@@ -51,7 +51,7 @@
         "id": "ctx-bar",
         "type": "context-bar",
         "rawValue": true,
-        "color": "dynamic:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "dynamic:009246-f1f2f1-ce2b37",
         "metadata": {
           "display": "slider-only"
         }
@@ -65,7 +65,7 @@
         "id": "ctx-pct",
         "type": "context-percentage",
         "rawValue": true,
-        "color": "dynamic:7b5fac-a86aa4-cc6b8e-f18271"
+        "color": "dynamic:009246-f1f2f1-ce2b37"
       }
     ],
     [
@@ -73,7 +73,7 @@
         "id": "lbl-ses",
         "type": "custom-text",
         "customText": "Session",
-        "color": "hex:8f6aae"
+        "color": "hex:009246"
       },
       {
         "id": "sp3",
@@ -84,7 +84,7 @@
         "id": "ses-bar",
         "type": "session-usage",
         "rawValue": true,
-        "color": "dynamic:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "dynamic:009246-f1f2f1-ce2b37",
         "metadata": {
           "display": "slider-only"
         }
@@ -98,7 +98,7 @@
         "id": "ses",
         "type": "session-usage",
         "rawValue": true,
-        "color": "dynamic:7b5fac-a86aa4-cc6b8e-f18271"
+        "color": "dynamic:009246-f1f2f1-ce2b37"
       },
       {
         "id": "s2",
@@ -108,8 +108,8 @@
       {
         "id": "lbl-r1",
         "type": "custom-text",
-        "customText": "",
-        "color": "hex:8f6aae"
+        "customText": "\uf1da",
+        "color": "hex:009246"
       },
       {
         "id": "sp4",
@@ -120,7 +120,7 @@
         "id": "reset",
         "type": "reset-timer",
         "rawValue": true,
-        "color": "dynamic:7b5fac-a86aa4-cc6b8e-f18271"
+        "color": "dynamic:009246-f1f2f1-ce2b37"
       },
       {
         "id": "s3",
@@ -131,7 +131,7 @@
         "id": "lbl-wk",
         "type": "custom-text",
         "customText": "Week",
-        "color": "hex:8f6aae"
+        "color": "hex:009246"
       },
       {
         "id": "sp5",
@@ -142,7 +142,7 @@
         "id": "wk-bar",
         "type": "weekly-usage",
         "rawValue": true,
-        "color": "dynamic:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "dynamic:009246-f1f2f1-ce2b37",
         "metadata": {
           "display": "slider-only"
         }
@@ -156,7 +156,7 @@
         "id": "wk",
         "type": "weekly-usage",
         "rawValue": true,
-        "color": "dynamic:7b5fac-a86aa4-cc6b8e-f18271"
+        "color": "dynamic:009246-f1f2f1-ce2b37"
       },
       {
         "id": "s4",
@@ -166,8 +166,8 @@
       {
         "id": "lbl-r2",
         "type": "custom-text",
-        "customText": "",
-        "color": "hex:8f6aae"
+        "customText": "\uf1da",
+        "color": "hex:009246"
       },
       {
         "id": "sp6",
@@ -178,14 +178,14 @@
         "id": "wk-reset",
         "type": "weekly-reset-timer",
         "rawValue": true,
-        "color": "dynamic:7b5fac-a86aa4-cc6b8e-f18271"
+        "color": "dynamic:009246-f1f2f1-ce2b37"
       }
     ],
     [
       {
         "id": "compactions",
         "type": "compaction-counter",
-        "color": "hex:cc6b8e",
+        "color": "hex:ce2b37",
         "metadata": {
           "hideZero": "true",
           "format": "icon-text-number",

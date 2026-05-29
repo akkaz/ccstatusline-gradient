@@ -5,6 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import akkazPreset from '../presets/akkaz.json';
+import baroccoPreset from '../presets/barocco.json';
 import type { Settings } from '../types/Settings';
 
 import {
@@ -20,7 +21,7 @@ import {
 
 // Bundled status line presets that `--onboard` can install. Imports are static
 // so `bun build` reliably bundles the JSON into the single-file output.
-const PRESETS: Record<string, unknown> = { akkaz: akkazPreset };
+const PRESETS: Record<string, unknown> = { akkaz: akkazPreset, barocco: baroccoPreset };
 const DEFAULT_PRESET = 'akkaz';
 
 // Nerd Fonts "latest" release asset (stable URL).

@@ -53,6 +53,10 @@ npx -y ccstatusline-gradient@latest --onboard
 
 Then restart Claude Code. Perfect for a fresh machine or an SSH server — one command and you're done.
 
+- `--preset <name>` picks the signature config to install. Built-in: **`akkaz`** (default — retro gradient identity row, dynamic green→red usage bars, compaction counter) and **`barocco`** (Italian tricolore 🇮🇹 — `model ⚡ effort` flows green→white→red, usage bars green→white→red).
+  ```bash
+  npx -y ccstatusline-gradient@latest --onboard --preset barocco
+  ```
 - `--no-font` skips the font download (e.g. on a remote server where the font lives on your local terminal).
 - Existing `~/.claude/settings.json` keys are preserved; your previous ccstatusline config is backed up.
 - Set your terminal font to **JetBrainsMono Nerd Font** to see the icons.
@@ -92,7 +96,14 @@ That's it. Restart Claude Code (the status line command is read at startup).
 
 ## 🧩 Default presets
 
-In [`presets/`](./presets):
+Two **signature presets** ship inside the package and can be installed with `--onboard --preset <name>`:
+
+| Preset | Look |
+| --- | --- |
+| `akkaz` *(onboard default)* | 3 lines. Identity row with a continuous **retro** gradient (`model ⚡ effort`), context + session + weekly with **dynamic** usage colors, reset timers that track their bar's color, and a compaction counter (a compress icon + `compact N`, hidden until the chat is compacted). |
+| `barocco` | Same layout, Italian tricolore 🇮🇹: `model ⚡ effort` flows **green→white→red**, labels/reset icons in green, usage bars **green→white→red** (green = low, red = full). |
+
+Plus drop-in JSON configs in [`presets/`](./presets) (copy straight into `~/.config/ccstatusline/settings.json`):
 
 | File | Look |
 | --- | --- |
