@@ -6,6 +6,7 @@ import type {
     WidgetEditorDisplay,
     WidgetItem
 } from '../types/Widget';
+import { calculateContextPercentageMetrics } from '../utils/context-percentage';
 import { getContextWindowMetrics } from '../utils/context-window';
 import {
     getContextConfig,
@@ -123,6 +124,14 @@ export class ContextBarWidget implements Widget {
         const display = `${makeUsageProgressBar(clampedPercent, barWidth)} ${usedK}k/${totalK}k (${Math.round(clampedPercent)}%)`;
 
         return item.rawValue ? display : `Context: ${display}`;
+    }
+
+    getFillRatio(context: RenderContext): number | null {
+        const metrics = calculateContextPercentageMetrics(context);
+        if (!metrics) {
+            return null;
+        }
+        return Math.max(0, Math.min(1, metrics.usedPercentage / 100));
     }
 
     getCustomKeybinds(): CustomKeybind[] {

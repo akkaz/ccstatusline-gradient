@@ -68,6 +68,16 @@ export class ContextPercentageWidget implements Widget {
         return null;
     }
 
+    getFillRatio(context: RenderContext): number | null {
+        const metrics = calculateContextPercentageMetrics(context);
+        if (!metrics) {
+            return null;
+        }
+        // Always the "used" fraction, so dynamic colors signal danger as the
+        // context fills regardless of the used/remaining display toggle.
+        return Math.max(0, Math.min(1, metrics.usedPercentage / 100));
+    }
+
     getCustomKeybinds(item?: WidgetItem): CustomKeybind[] {
         return [
             { key: 'u', label: '(u)sed/remaining', action: 'toggle-inverse' },

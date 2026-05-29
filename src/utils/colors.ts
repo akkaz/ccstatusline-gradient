@@ -4,6 +4,7 @@ import type { ColorEntry } from '../types/ColorEntry';
 
 import {
     applyGradientToText,
+    parseDynamicSpec,
     parseGradientSpec,
     rgbToAnsi256
 } from './gradient';
@@ -162,8 +163,13 @@ export function applyColors(
     if (foregroundColor) {
         // Per-character gradient foreground. Only possible with a real color palette;
         // at ansi16 (or for an unparseable spec) we fall through to a solid first stop
-        // via getColorAnsiCode below.
-        const gradientSpec = foregroundColor.startsWith('gradient:') ? parseGradientSpec(foregroundColor) : null;
+        // via getColorAnsiCode below. `dynamic:` values are normally resolved to a solid
+        // color by the renderer; here (e.g. TUI previews) we render them as a gradient.
+        const gradientSpec = foregroundColor.startsWith('gradient:')
+            ? parseGradientSpec(foregroundColor)
+            : foregroundColor.startsWith('dynamic:')
+                ? parseDynamicSpec(foregroundColor)
+                : null;
         if (gradientSpec && colorLevel !== 'ansi16') {
             return prefix + applyGradientToText(text, gradientSpec, colorLevel) + '\x1b[39m' + suffix;
         }
@@ -183,12 +189,13 @@ export function getColorAnsiCode(colorName: string | undefined, colorLevel: 'ans
     if (!colorName)
         return '';
 
-    // Handle gradient:<name> / gradient:RRGGBB-RRGGBB format.
-    // A single ANSI code cannot represent a gradient, so collapse to the first stop
-    // as a solid color. The per-character gradient is produced in applyColors(); this
-    // path is what the powerline renderer (which calls getColorAnsiCode directly) sees.
-    if (colorName.startsWith('gradient:')) {
-        const spec = parseGradientSpec(colorName);
+    // Handle gradient:<name> / gradient:RRGGBB-RRGGBB (and dynamic: as a preview/
+    // fallback) format. A single ANSI code cannot represent a gradient, so collapse to
+    // the first stop as a solid color. The per-character gradient is produced in
+    // applyColors(); this path is what the powerline renderer (which calls
+    // getColorAnsiCode directly) sees. (`dynamic:` is normally resolved upstream.)
+    if (colorName.startsWith('gradient:') || colorName.startsWith('dynamic:')) {
+        const spec = parseGradientSpec(colorName) ?? parseDynamicSpec(colorName);
         if (!spec)
             return '';
         const hex = spec.stops[0]?.replace(/^#/, '') ?? '';

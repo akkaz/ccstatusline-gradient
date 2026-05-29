@@ -17,6 +17,7 @@ import {
 } from '../../utils/colors';
 import {
     GRADIENT_PRESET_NAMES,
+    parseDynamicSpec,
     parseGradientSpec
 } from '../../utils/gradient';
 import { shouldInsertInput } from '../../utils/input-guards';
@@ -39,6 +40,13 @@ export interface ColorMenuProps {
     onBack: () => void;
 }
 
+// Value-based color ramps offered when picking a `dynamic:` color (low -> high).
+const DYNAMIC_RAMPS: { label: string; value: string }[] = [
+    { label: 'green → yellow → red', value: '22c55e-eab308-ef4444' },
+    { label: 'green → red', value: '22c55e-ef4444' },
+    { label: 'cyan → violet → red', value: '38bdf8-a855f7-ef4444' }
+];
+
 export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
     const [showSeparators, setShowSeparators] = useState(false);
     const [hexInputMode, setHexInputMode] = useState(false);
@@ -47,6 +55,7 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
     const [ansi256Input, setAnsi256Input] = useState('');
     const [showClearConfirm, setShowClearConfirm] = useState(false);
     const [gradientMode, setGradientMode] = useState(false);
+    const [gradientKind, setGradientKind] = useState<'gradient' | 'dynamic'>('gradient');
     const [gradientIndex, setGradientIndex] = useState(0);
     const [gradientCustomStep, setGradientCustomStep] = useState<'start' | 'end' | null>(null);
     const [gradientStartHex, setGradientStartHex] = useState('');
@@ -66,6 +75,19 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
     });
     const [highlightedItemId, setHighlightedItemId] = useState(colorableWidgets[0]?.id ?? null);
     const [editingBackground, setEditingBackground] = useState(false);
+
+    // Items shown in the gradient/dynamic picker, depending on the chosen kind.
+    const gradientPresetItems: { label: string; value: string }[] = gradientKind === 'dynamic'
+        ? DYNAMIC_RAMPS
+        : GRADIENT_PRESET_NAMES.map(name => ({ label: name, value: name }));
+
+    // Whether the highlighted widget supports value-based (dynamic) colors.
+    const highlightedWidget = highlightedItemId && highlightedItemId !== 'back'
+        ? colorableWidgets.find(w => w.id === highlightedItemId)
+        : undefined;
+    const supportsDynamic = highlightedWidget
+        ? getWidget(highlightedWidget.type)?.getFillRatio !== undefined
+        : false;
 
     // Handle keyboard input
     const hasNoItems = colorableWidgets.length === 0;
@@ -184,7 +206,7 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
                             setGradientHexInput('');
                             setGradientCustomStep('end');
                         } else {
-                            applyGradientValue(`gradient:${gradientStartHex}-${gradientHexInput}`);
+                            applyGradientValue(`${gradientKind}:${gradientStartHex}-${gradientHexInput}`);
                         }
                     }
                 } else if (key.backspace || key.delete) {
@@ -199,7 +221,7 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
             }
 
             // Preset list navigation (last item is the "Custom" entry)
-            const total = GRADIENT_PRESET_NAMES.length + 1;
+            const total = gradientPresetItems.length + 1;
             if (key.escape) {
                 exitGradient();
             } else if (key.upArrow) {
@@ -207,8 +229,9 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
             } else if (key.downArrow) {
                 setGradientIndex((gradientIndex + 1) % total);
             } else if (key.return) {
-                if (gradientIndex < GRADIENT_PRESET_NAMES.length) {
-                    applyGradientValue(`gradient:${GRADIENT_PRESET_NAMES[gradientIndex]}`);
+                const preset = gradientPresetItems[gradientIndex];
+                if (preset) {
+                    applyGradientValue(`${gradientKind}:${preset.value}`);
                 } else {
                     setGradientStartHex('');
                     setGradientHexInput('');
@@ -245,6 +268,17 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
         } else if (input === 'g' || input === 'G') {
             // Enter gradient selection mode (foreground only, needs a real color palette)
             if (highlightedItemId && highlightedItemId !== 'back' && !editingBackground && settings.colorLevel >= 2) {
+                setGradientKind('gradient');
+                setGradientMode(true);
+                setGradientIndex(0);
+                setGradientCustomStep(null);
+                setGradientStartHex('');
+                setGradientHexInput('');
+            }
+        } else if (input === 'd' || input === 'D') {
+            // Enter dynamic (value-based) color mode - only for fill widgets
+            if (highlightedItemId && highlightedItemId !== 'back' && !editingBackground && settings.colorLevel >= 2 && supportsDynamic) {
+                setGradientKind('dynamic');
                 setGradientMode(true);
                 setGradientIndex(0);
                 setGradientCustomStep(null);
@@ -417,13 +451,15 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
                 displayName = `ANSI ${currentColor.substring(8)}`;
             } else if (currentColor.startsWith('hex:')) {
                 displayName = `#${currentColor.substring(4)}`;
-            } else if (currentColor.startsWith('gradient:')) {
-                const body = currentColor.substring(9);
-                const spec = parseGradientSpec(currentColor);
+            } else if (currentColor.startsWith('gradient:') || currentColor.startsWith('dynamic:')) {
+                const isDynamic = currentColor.startsWith('dynamic:');
+                const tag = isDynamic ? 'Dynamic' : 'Gradient';
+                const body = currentColor.substring(isDynamic ? 8 : 9);
+                const spec = isDynamic ? parseDynamicSpec(currentColor) : parseGradientSpec(currentColor);
                 if (spec && GRADIENT_PRESET_NAMES.includes(body.toLowerCase())) {
-                    displayName = `Gradient: ${body.toLowerCase()}`;
+                    displayName = `${tag}: ${body.toLowerCase()}`;
                 } else if (spec) {
-                    displayName = `Gradient: ${spec.stops.join(' → ')}`;
+                    displayName = `${tag}: ${spec.stops.join(' → ')}`;
                 } else {
                     displayName = currentColor;
                 }
@@ -443,15 +479,22 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
         const level = getColorLevelString(settings.colorLevel);
         const widgetName = selectedWidget ? getItemLabel(selectedWidget) : '';
 
+        const kindLabel = gradientKind === 'dynamic' ? 'Dynamic Color' : 'Gradient';
+
         if (gradientCustomStep) {
+            const lowHigh = gradientKind === 'dynamic'
+                ? (gradientCustomStep === 'start' ? 'Enter LOW-value hex color (without #):' : 'Enter HIGH-value hex color (without #):')
+                : (gradientCustomStep === 'start' ? 'Enter START hex color (without #):' : 'Enter END hex color (without #):');
             return (
                 <Box flexDirection='column'>
                     <Text bold>
-                        Custom Gradient
+                        Custom
+                        {' '}
+                        {kindLabel}
                         {widgetName ? ` - ${widgetName}` : ''}
                     </Text>
                     <Box marginTop={1} flexDirection='column'>
-                        <Text>{gradientCustomStep === 'start' ? 'Enter START hex color (without #):' : 'Enter END hex color (without #):'}</Text>
+                        <Text>{lowHigh}</Text>
                         {gradientCustomStep === 'end' && (
                             <Text dimColor>
                                 Start: #
@@ -470,25 +513,31 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
             );
         }
 
+        const customLabel = gradientKind === 'dynamic' ? 'Custom (low → high)' : 'Custom (start → end)';
         return (
             <Box flexDirection='column'>
                 <Text bold>
-                    Select Gradient
+                    Select
+                    {' '}
+                    {kindLabel}
                     {widgetName ? ` - ${widgetName}` : ''}
                 </Text>
                 <Box marginTop={1}>
-                    <Text dimColor>↑↓ to select, Enter to apply, ESC to cancel</Text>
+                    <Text dimColor>
+                        ↑↓ to select, Enter to apply, ESC to cancel
+                        {gradientKind === 'dynamic' ? ' (color tracks the value)' : ''}
+                    </Text>
                 </Box>
                 <Box marginTop={1} flexDirection='column'>
-                    {GRADIENT_PRESET_NAMES.map((name, idx) => (
-                        <Text key={name}>
+                    {gradientPresetItems.map((preset, idx) => (
+                        <Text key={preset.value}>
                             {idx === gradientIndex ? '▶ ' : '  '}
-                            {applyColors(name, `gradient:${name}`, undefined, idx === gradientIndex, level)}
+                            {applyColors(preset.label, `${gradientKind}:${preset.value}`, undefined, idx === gradientIndex, level)}
                         </Text>
                     ))}
-                    <Text key='__custom' bold={gradientIndex === GRADIENT_PRESET_NAMES.length}>
-                        {gradientIndex === GRADIENT_PRESET_NAMES.length ? '▶ ' : '  '}
-                        Custom (start → end)
+                    <Text key='__custom' bold={gradientIndex === gradientPresetItems.length}>
+                        {gradientIndex === gradientPresetItems.length ? '▶ ' : '  '}
+                        {customLabel}
                     </Text>
                 </Box>
             </Box>
@@ -582,6 +631,7 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
                         , (f) to toggle bg/fg, (b)old,
                         {settings.colorLevel === 3 ? ' (h)ex,' : settings.colorLevel === 2 ? ' (a)nsi256,' : ''}
                         {!editingBackground && settings.colorLevel >= 2 ? ' (g)radient,' : ''}
+                        {!editingBackground && settings.colorLevel >= 2 && supportsDynamic ? ' (d)ynamic,' : ''}
                         {' '}
                         (r)eset, (c)lear all, ESC to go back
                     </Text>

@@ -45,6 +45,9 @@ export interface Widget {
     supportsColors(item: WidgetItem): boolean;
     handleEditorAction?(action: string, item: WidgetItem): WidgetItem | null;
     getNumericValue?(context: RenderContext, item: WidgetItem): number | null;
+    // Normalized 0..1 "fill" ratio (e.g. fraction of context/usage consumed).
+    // Used by `dynamic:` colors to pick a value-based color. Return null when unknown.
+    getFillRatio?(context: RenderContext, item: WidgetItem): number | null;
 }
 
 export interface WidgetEditorProps {

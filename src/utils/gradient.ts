@@ -38,14 +38,9 @@ export const GRADIENT_PRESET_NAMES: string[] = Object.keys(GRADIENT_PRESETS);
 
 const HEX6 = /^[0-9A-Fa-f]{6}$/;
 
-// Parse a `gradient:<name>` or `gradient:RRGGBB-RRGGBB[-RRGGBB...]` color value.
-// Returns null for anything that is not a valid gradient spec (never throws).
-export function parseGradientSpec(color: string | undefined): GradientSpec | null {
-    if (!color?.startsWith('gradient:')) {
-        return null;
-    }
-
-    const body = color.slice('gradient:'.length);
+// Parse the stop list shared by `gradient:` and `dynamic:`: either a named preset
+// or `RRGGBB-RRGGBB[-RRGGBB...]`. Returns null for anything invalid (never throws).
+function parseStops(body: string): GradientSpec | null {
     if (!body) {
         return null;
     }
@@ -72,6 +67,33 @@ export function parseGradientSpec(color: string | undefined): GradientSpec | nul
     }
 
     return null;
+}
+
+// Parse a `gradient:<name>` or `gradient:RRGGBB-RRGGBB[-RRGGBB...]` color value
+// (a per-character positional gradient). Returns null when not a gradient spec.
+export function parseGradientSpec(color: string | undefined): GradientSpec | null {
+    return color?.startsWith('gradient:') ? parseStops(color.slice('gradient:'.length)) : null;
+}
+
+// Parse a `dynamic:<name>` / `dynamic:RRGGBB-RRGGBB...` value. Same stop syntax as
+// gradients, but used to pick a single color by a widget's current value.
+export function parseDynamicSpec(color: string | undefined): GradientSpec | null {
+    return color?.startsWith('dynamic:') ? parseStops(color.slice('dynamic:'.length)) : null;
+}
+
+// Resolve a `dynamic:` color to a concrete `hex:RRGGBB` solid color by sampling the
+// gradient at `ratio` (0..1, clamped). Returns undefined when `color` is not a valid
+// dynamic spec. Always uses RGB interpolation for a predictable value->color ramp.
+export function resolveDynamicColor(color: string | undefined, ratio: number): string | undefined {
+    const spec = parseDynamicSpec(color);
+    if (!spec) {
+        return undefined;
+    }
+
+    const t = Math.max(0, Math.min(1, ratio));
+    const { r, g, b } = tinygradient(spec.stops).rgbAt(t).toRgb();
+    const hex = [r, g, b].map(n => n.toString(16).padStart(2, '0')).join('');
+    return `hex:${hex}`;
 }
 
 // Convert an RGB triple to the nearest xterm 256-color palette index.

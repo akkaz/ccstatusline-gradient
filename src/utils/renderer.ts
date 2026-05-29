@@ -19,6 +19,7 @@ import {
     getPowerlineTheme
 } from './colors';
 import { calculateContextPercentage } from './context-percentage';
+import { resolveDynamicColor } from './gradient';
 import { getTerminalWidth } from './terminal';
 import { getWidget } from './widgets';
 
@@ -751,9 +752,18 @@ export function renderStatusLine(
                     // Preserve original colors from command output
                     elements.push({ content: finalOutput, type: widget.type, widget });
                 } else {
+                    // Resolve a dynamic (value-based) foreground color to a solid
+                    // color based on the widget's current fill ratio.
+                    let effectiveColor = widget.color ?? defaultColor;
+                    if (widget.color?.startsWith('dynamic:')) {
+                        const ratio = getWidget(widget.type)?.getFillRatio?.(context, widget);
+                        const resolved = (ratio === null || ratio === undefined) ? undefined : resolveDynamicColor(widget.color, ratio);
+                        effectiveColor = resolved ?? defaultColor;
+                    }
+
                     // Normal widget rendering with colors
                     elements.push({
-                        content: applyColorsWithOverride(widgetText, widget.color ?? defaultColor, widget.backgroundColor, widget.bold),
+                        content: applyColorsWithOverride(widgetText, effectiveColor, widget.backgroundColor, widget.bold),
                         type: widget.type,
                         widget
                     });
