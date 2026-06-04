@@ -17,7 +17,7 @@ import {
     getPackageManagerShellOptions
 } from './package-manager-executable';
 
-export const NPM_REGISTRY_LATEST_URL = 'https://registry.npmjs.org/ccstatusline/latest';
+export const NPM_REGISTRY_LATEST_URL = 'https://registry.npmjs.org/ccstatusline-gradient/latest';
 const DEFAULT_REGISTRY_TIMEOUT_MS = 5000;
 const GLOBAL_UPDATE_TIMEOUT_MS = 120000;
 
@@ -300,8 +300,8 @@ export function runGlobalPackageInstall(
 ): Promise<void> {
     const executable = getPackageManagerExecutable(packageManager, platform);
     const args = packageManager === 'npm'
-        ? ['install', '-g', `ccstatusline@${version}`]
-        : ['add', '-g', `ccstatusline@${version}`];
+        ? ['install', '-g', `ccstatusline-gradient@${version}`]
+        : ['add', '-g', `ccstatusline-gradient@${version}`];
 
     return new Promise((resolve, reject) => {
         execFile(

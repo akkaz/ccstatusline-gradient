@@ -8,9 +8,19 @@ import type {
 } from '../types/Widget';
 
 const COMPACTION_ICON = '↻';
+// fa-compress (arrows pointing inward) — used by the icon-text-number format to
+// convey "compacted" more clearly than the plain refresh glyph.
+const COMPACTION_COMPRESS_NERD_FONT_ICON = '';
+const COMPACTION_TEXT_LABEL = 'compact';
 const COMPACTION_NERD_FONT_ICON = '\uF021';
-const FORMATS = ['icon-space-number', 'text-and-number', 'number'] as const;
+const FORMATS = ['icon-space-number', 'icon-text-number', 'text-and-number', 'number'] as const;
 type CompactionCounterFormat = typeof FORMATS[number];
+
+const ICON_FORMATS: readonly CompactionCounterFormat[] = ['icon-space-number', 'icon-text-number'];
+
+function formatHasIcon(format: CompactionCounterFormat): boolean {
+    return ICON_FORMATS.includes(format);
+}
 
 const DEFAULT_FORMAT: CompactionCounterFormat = 'icon-space-number';
 const CYCLE_FORMAT_ACTION = 'cycle-format';
@@ -35,30 +45,26 @@ function removeNerdFont(item: WidgetItem): WidgetItem {
 }
 
 function setFormat(item: WidgetItem, format: CompactionCounterFormat): WidgetItem {
-    if (format === DEFAULT_FORMAT) {
-        const { format: removedFormat, ...restMetadata } = item.metadata ?? {};
-        void removedFormat;
+    const { format: removedFormat, [NERD_FONT_METADATA_KEY]: prevNerdFont, ...restMetadata } = item.metadata ?? {};
+    void removedFormat;
 
-        return {
-            ...item,
-            metadata: Object.keys(restMetadata).length > 0 ? restMetadata : undefined
-        };
+    const nextMetadata: Record<string, string> = { ...restMetadata };
+    if (format !== DEFAULT_FORMAT) {
+        nextMetadata.format = format;
     }
-
-    const { [NERD_FONT_METADATA_KEY]: removedNerdFont, ...restMetadata } = item.metadata ?? {};
-    void removedNerdFont;
+    // Keep the Nerd Font preference only while the format still renders an icon.
+    if (formatHasIcon(format) && prevNerdFont !== undefined) {
+        nextMetadata[NERD_FONT_METADATA_KEY] = prevNerdFont;
+    }
 
     return {
         ...item,
-        metadata: {
-            ...restMetadata,
-            format
-        }
+        metadata: Object.keys(nextMetadata).length > 0 ? nextMetadata : undefined
     };
 }
 
 function isNerdFontEnabled(item: WidgetItem): boolean {
-    return item.metadata?.[NERD_FONT_METADATA_KEY] === 'true' && getFormat(item) === DEFAULT_FORMAT;
+    return item.metadata?.[NERD_FONT_METADATA_KEY] === 'true' && formatHasIcon(getFormat(item));
 }
 
 function isHideZeroEnabled(item: WidgetItem): boolean {
@@ -76,7 +82,7 @@ function toggleHideZero(item: WidgetItem): WidgetItem {
 }
 
 function toggleNerdFont(item: WidgetItem): WidgetItem {
-    if (getFormat(item) !== DEFAULT_FORMAT) {
+    if (!formatHasIcon(getFormat(item))) {
         return removeNerdFont(item);
     }
 
@@ -96,9 +102,17 @@ function toggleNerdFont(item: WidgetItem): WidgetItem {
 function formatCount(count: number, format: CompactionCounterFormat, icon: string): string {
     switch (format) {
         case 'icon-space-number': return `${icon} ${count}`;
+        case 'icon-text-number': return `${icon} ${COMPACTION_TEXT_LABEL} ${count}`;
         case 'text-and-number': return `Compactions: ${count}`;
         case 'number': return String(count);
     }
+}
+
+function getIcon(item: WidgetItem, format: CompactionCounterFormat): string {
+    if (!isNerdFontEnabled(item)) {
+        return COMPACTION_ICON;
+    }
+    return format === 'icon-text-number' ? COMPACTION_COMPRESS_NERD_FONT_ICON : COMPACTION_NERD_FONT_ICON;
 }
 
 /**
@@ -152,7 +166,7 @@ export class CompactionCounterWidget implements Widget {
 
     render(item: WidgetItem, context: RenderContext, settings: Settings): string | null {
         const format = getFormat(item);
-        const icon = isNerdFontEnabled(item) ? COMPACTION_NERD_FONT_ICON : COMPACTION_ICON;
+        const icon = getIcon(item, format);
 
         if (context.isPreview) {
             return formatCount(2, format, icon);
@@ -170,7 +184,7 @@ export class CompactionCounterWidget implements Widget {
             { key: 'f', label: '(f)ormat', action: CYCLE_FORMAT_ACTION }
         ];
 
-        if (item === undefined || getFormat(item) === DEFAULT_FORMAT) {
+        if (item === undefined || formatHasIcon(getFormat(item))) {
             keybinds.push({ key: 'n', label: '(n)erd font', action: TOGGLE_NERD_FONT_ACTION });
         }
 

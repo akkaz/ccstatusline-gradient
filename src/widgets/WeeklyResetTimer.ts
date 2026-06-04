@@ -284,14 +284,14 @@ export class WeeklyResetTimerWidget implements Widget {
         return null;
     }
 
-    // Fraction of the weekly usage window already elapsed, so the dynamic ramp
-    // deepens as the weekly reset approaches.
+    // Color tracks WEEKLY usage consumed (not the timer's own elapsed window),
+    // so a dynamic color on this reset timer coincides with the weekly bar/%.
     getFillRatio(context: RenderContext): number | null {
-        const window = resolveWeeklyUsageWindow(context.usageData ?? {});
-        if (!window) {
+        const value = context.usageData?.weeklyUsage;
+        if (value === undefined) {
             return null;
         }
-        return Math.max(0, Math.min(1, window.elapsedPercent / 100));
+        return Math.max(0, Math.min(1, value / 100));
     }
 
     supportsRawValue(): boolean { return true; }

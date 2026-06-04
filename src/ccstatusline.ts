@@ -29,6 +29,7 @@ import {
     getSpeedMetricsCollection,
     getTokenMetrics
 } from './utils/jsonl';
+import { runOnboard } from './utils/onboard';
 import { advanceGlobalPowerlineThemeIndex } from './utils/powerline-theme-index';
 import {
     calculateMaxWidthsFromPreRendered,
@@ -273,6 +274,15 @@ async function main() {
     // Handle --hook mode (cross-platform hook handler for widgets)
     if (process.argv.includes('--hook')) {
         await handleHook();
+        return;
+    }
+
+    // Handle --onboard mode: write the signature config, wire up Claude Code's
+    // status line, and install the Nerd Font in one command.
+    if (process.argv.includes('--onboard')) {
+        const presetIdx = process.argv.indexOf('--preset');
+        const preset = presetIdx !== -1 ? process.argv[presetIdx + 1] : undefined;
+        await runOnboard({ skipFont: process.argv.includes('--no-font'), preset });
         return;
     }
 

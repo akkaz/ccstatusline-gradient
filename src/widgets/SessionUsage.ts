@@ -117,18 +117,16 @@ export class SessionUsageWidget implements Widget {
         return formatRawOrLabeledValue(item, 'Session: ', `${percent.toFixed(1)}%`);
     }
 
-    getCustomKeybinds(item?: WidgetItem): CustomKeybind[] {
-        return getUsagePercentCustomKeybinds(item);
-    }
-
-    // Tracks raw session usage, independent of the inverted display toggle, so the
-    // dynamic ramp deepens as usage climbs.
     getFillRatio(context: RenderContext): number | null {
-        const usage = context.usageData?.sessionUsage;
-        if (usage === undefined) {
+        const value = context.usageData?.sessionUsage;
+        if (value === undefined) {
             return null;
         }
-        return Math.max(0, Math.min(1, usage / 100));
+        return Math.max(0, Math.min(1, value / 100));
+    }
+
+    getCustomKeybinds(item?: WidgetItem): CustomKeybind[] {
+        return getUsagePercentCustomKeybinds(item);
     }
 
     supportsRawValue(): boolean { return true; }

@@ -32,6 +32,16 @@ export function getPackageVersion(): string {
     return '';
 }
 
+// Width detection can momentarily report an implausibly small value during a
+// terminal resize drag: the PTY passes through many intermediate sizes and
+// Claude Code re-invokes ccstatusline on each SIGWINCH. Truncating the status
+// line to such a transient width produces a mangled line that Claude Code then
+// caches until the next data-driven refresh, leaving it frozen on screen. Below
+// this floor we report "width unknown" so the renderer skips truncation
+// entirely — a briefly un-truncated line is far better than a frozen, mutilated
+// one. (An explicit CCSTATUSLINE_WIDTH override bypasses this floor.)
+const MIN_RELIABLE_TERMINAL_WIDTH = 40;
+
 function probeTerminalWidth(): number | null {
     // Explicit override. Useful when ccstatusline is spawned in a context where
     // no ancestor process owns a TTY at all — e.g. some Claude Code >= 2.1.139
@@ -53,6 +63,18 @@ function probeTerminalWidth(): number | null {
         return null;
     }
 
+    const detected = detectRawTerminalWidth();
+
+    // Treat an implausibly small detected width as undetectable (see the
+    // MIN_RELIABLE_TERMINAL_WIDTH comment above for the resize-race rationale).
+    if (detected !== null && detected < MIN_RELIABLE_TERMINAL_WIDTH) {
+        return null;
+    }
+
+    return detected;
+}
+
+function detectRawTerminalWidth(): number | null {
     // Claude Code can spawn ccstatusline with piped stdio, leaving the immediate
     // parent process without a controlling TTY. Walk up a few ancestors until we
     // find the shell process that owns the real PTY.

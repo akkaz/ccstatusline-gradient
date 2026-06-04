@@ -191,14 +191,14 @@ export class BlockResetTimerWidget implements Widget {
         return null;
     }
 
-    // Fraction of the current 5hr block window already elapsed, so the dynamic
-    // ramp deepens as the reset approaches.
+    // Color tracks SESSION usage consumed (not the timer's own elapsed window),
+    // so a dynamic color on this reset timer coincides with the session bar/%.
     getFillRatio(context: RenderContext): number | null {
-        const window = resolveUsageWindowWithFallback(context.usageData ?? {}, context.blockMetrics);
-        if (!window) {
+        const value = context.usageData?.sessionUsage;
+        if (value === undefined) {
             return null;
         }
-        return Math.max(0, Math.min(1, window.elapsedPercent / 100));
+        return Math.max(0, Math.min(1, value / 100));
     }
 
     supportsRawValue(): boolean { return true; }

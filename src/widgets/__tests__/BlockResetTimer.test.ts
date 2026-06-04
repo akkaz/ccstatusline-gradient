@@ -287,3 +287,19 @@ describe('BlockResetTimerWidget', () => {
         }
     });
 });
+
+describe('BlockResetTimerWidget.getFillRatio (session usage)', () => {
+    const widget = new BlockResetTimerWidget();
+    const ctx = (usageData?: Record<string, unknown>): RenderContext => (({ usageData }));
+
+    it('returns null when session usage is absent', () => {
+        expect(widget.getFillRatio(ctx())).toBeNull();
+        expect(widget.getFillRatio(ctx({}))).toBeNull();
+    });
+
+    it('returns sessionUsage/100, clamped to [0,1]', () => {
+        expect(widget.getFillRatio(ctx({ sessionUsage: 40 }))).toBeCloseTo(0.4);
+        expect(widget.getFillRatio(ctx({ sessionUsage: 150 }))).toBe(1);
+        expect(widget.getFillRatio(ctx({ sessionUsage: -10 }))).toBe(0);
+    });
+});

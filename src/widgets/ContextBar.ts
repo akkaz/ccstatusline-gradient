@@ -6,6 +6,7 @@ import type {
     WidgetEditorDisplay,
     WidgetItem
 } from '../types/Widget';
+import { calculateContextPercentageMetrics } from '../utils/context-percentage';
 import { getContextWindowMetrics } from '../utils/context-window';
 import {
     getContextConfig,
@@ -125,32 +126,18 @@ export class ContextBarWidget implements Widget {
         return item.rawValue ? display : `Context: ${display}`;
     }
 
+    getFillRatio(context: RenderContext): number | null {
+        const metrics = calculateContextPercentageMetrics(context);
+        if (!metrics) {
+            return null;
+        }
+        return Math.max(0, Math.min(1, metrics.usedPercentage / 100));
+    }
+
     getCustomKeybinds(): CustomKeybind[] {
         return [
             { key: 'p', label: '(p)rogress toggle', action: 'toggle-progress' }
         ];
-    }
-
-    getFillRatio(context: RenderContext): number | null {
-        const contextWindowMetrics = getContextWindowMetrics(context.data);
-
-        let total = contextWindowMetrics.windowSize;
-        let used = contextWindowMetrics.contextLengthTokens;
-
-        if (used === null && context.tokenMetrics) {
-            used = context.tokenMetrics.contextLength;
-        }
-
-        if (total === null && context.tokenMetrics) {
-            const modelIdentifier = getModelContextIdentifier(context.data?.model);
-            total = getContextConfig(modelIdentifier).maxTokens;
-        }
-
-        if (used === null || total === null || total <= 0) {
-            return null;
-        }
-
-        return Math.max(0, Math.min(1, used / total));
     }
 
     supportsRawValue(): boolean { return true; }
