@@ -284,6 +284,16 @@ export class WeeklyResetTimerWidget implements Widget {
         return null;
     }
 
+    // Fraction of the weekly usage window already elapsed, so the dynamic ramp
+    // deepens as the weekly reset approaches.
+    getFillRatio(context: RenderContext): number | null {
+        const window = resolveWeeklyUsageWindow(context.usageData ?? {});
+        if (!window) {
+            return null;
+        }
+        return Math.max(0, Math.min(1, window.elapsedPercent / 100));
+    }
+
     supportsRawValue(): boolean { return true; }
     supportsColors(item: WidgetItem): boolean { return true; }
 }

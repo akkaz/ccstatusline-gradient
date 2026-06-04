@@ -10,6 +10,7 @@ export const WidgetItemSchema = z.object({
     color: z.string().optional(),
     backgroundColor: z.string().optional(),
     bold: z.boolean().optional(),
+    dynamic: z.boolean().optional(),
     character: z.string().optional(),
     rawValue: z.boolean().optional(),
     customText: z.string().optional(),
@@ -45,6 +46,13 @@ export interface Widget {
     supportsColors(item: WidgetItem): boolean;
     handleEditorAction?(action: string, item: WidgetItem): WidgetItem | null;
     getNumericValue?(context: RenderContext, item: WidgetItem): number | null;
+
+    // Fraction in [0, 1] representing how "full" this widget's metric is right now
+    // (e.g. context used, session usage, elapsed reset window). Used to sample a
+    // dynamic color ramp when the item has `dynamic` enabled. Return null when no
+    // meaningful fill can be computed (e.g. missing data). Widgets without a
+    // fillable metric omit this method.
+    getFillRatio?(context: RenderContext, item: WidgetItem): number | null;
 }
 
 export interface WidgetEditorProps {

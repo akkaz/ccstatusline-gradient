@@ -25,7 +25,8 @@ import {
     cycleWidgetColor,
     resetWidgetStyling,
     setWidgetColor,
-    toggleWidgetBold
+    toggleWidgetBold,
+    toggleWidgetDynamic
 } from './color-menu/mutations';
 
 export interface ColorMenuProps {
@@ -268,6 +269,16 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
                     onUpdate(newItems);
                 }
             }
+        } else if (input === 'd' || input === 'D') {
+            if (highlightedItemId && highlightedItemId !== 'back') {
+                // Toggle dynamic (value-driven) coloring for the highlighted item,
+                // but only for widgets that expose a fill ratio to sample.
+                const selectedWidget = colorableWidgets.find(widget => widget.id === highlightedItemId);
+                if (selectedWidget && getWidget(selectedWidget.type)?.getFillRatio) {
+                    const newItems = toggleWidgetDynamic(widgets, selectedWidget.id);
+                    onUpdate(newItems);
+                }
+            }
         } else if (input === 'r' || input === 'R') {
             if (highlightedItemId && highlightedItemId !== 'back') {
                 // Reset all styling (color, background, and bold) for the highlighted item
@@ -348,8 +359,9 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
             }
         }
         const styledLabel = applyColors(label, widget.color ?? defaultColor, widget.backgroundColor, widget.bold, level);
+        const dynamicMarker = widget.dynamic ? chalk.dim(' [dyn]') : '';
         return {
-            label: styledLabel,
+            label: styledLabel + dynamicMarker,
             value: widget.id
         };
     });
@@ -576,6 +588,7 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
                         , (f) to toggle bg/fg, (b)old,
                         {settings.colorLevel === 3 ? ' (h)ex,' : settings.colorLevel === 2 ? ' (a)nsi256,' : ''}
                         {!editingBackground && settings.colorLevel >= 2 ? ' (g)radient,' : ''}
+                        {!editingBackground && selectedWidget && getWidget(selectedWidget.type)?.getFillRatio ? ' (d)ynamic,' : ''}
                         {' '}
                         (r)eset, (c)lear all, ESC to go back
                     </Text>
@@ -598,6 +611,7 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
                                 {' '}
                                 {colorDisplay}
                                 {selectedWidget.bold && chalk.bold(' [BOLD]')}
+                                {selectedWidget.dynamic && chalk.dim(' [DYN]')}
                             </Text>
                         </Box>
                     ) : (

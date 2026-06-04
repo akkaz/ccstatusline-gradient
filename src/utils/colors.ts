@@ -3,10 +3,15 @@ import chalk, { type ChalkInstance } from 'chalk';
 import type { ColorEntry } from '../types/ColorEntry';
 
 import {
+    ansi256ToRgb,
     applyGradientToText,
+    deriveRampFromSolid,
     isGradientSpec,
     parseGradientSpec,
-    rgbToAnsi256
+    rgbToAnsi256,
+    rgbToHex,
+    sampleGradient,
+    type Rgb
 } from './gradient';
 
 // Re-export for backward compatibility
@@ -255,6 +260,79 @@ export function getColorAnsiCode(colorName: string | undefined, colorLevel: 'ans
     const ansiRegex = new RegExp(`^(${escapeChar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\[[^m]+m)`);
     const match = ansiRegex.exec(colored);
     return match?.[1] ?? '';
+}
+
+// Truecolor RGB for the named foreground palette, mirroring the `truecolor` hexes
+// in createColorMap(). Kept as a plain table so dynamic color derivation can resolve
+// a named base color deterministically, without depending on chalk's global level
+// (which governs whether a chalk instance emits a 38;2 truecolor SGR at all).
+const NAMED_FOREGROUND_HEX: Record<string, string> = {
+    black: '000000',
+    red: 'cc0000',
+    green: '4e9a06',
+    yellow: 'c4a000',
+    blue: '3465a4',
+    magenta: '75507b',
+    cyan: '06989a',
+    white: 'd3d7cf',
+    brightBlack: '555753',
+    brightRed: 'ef2929',
+    brightGreen: '8ae234',
+    brightYellow: 'fce94f',
+    brightBlue: '729fcf',
+    brightMagenta: 'ad7fa8',
+    brightCyan: '34e2e2',
+    brightWhite: 'eeeeec'
+};
+
+function hexStringToRgb(hex: string): Rgb | null {
+    if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
+        return null;
+    }
+    return {
+        r: parseInt(hex.slice(0, 2), 16),
+        g: parseInt(hex.slice(2, 4), 16),
+        b: parseInt(hex.slice(4, 6), 16)
+    };
+}
+
+// Resolve a solid color value (named palette color, `hex:RRGGBB`, or `ansi256:N`)
+// to RGB. Returns null for values that aren't solid colors (e.g. gradient specs,
+// which are handled separately by the dynamic resolver).
+function resolveSolidColorToRgb(colorName: string): Rgb | null {
+    if (colorName.startsWith('hex:')) {
+        return hexStringToRgb(colorName.slice(4));
+    }
+
+    if (colorName.startsWith('ansi256:')) {
+        const code = parseInt(colorName.slice(8), 10);
+        return Number.isNaN(code) ? null : ansi256ToRgb(code);
+    }
+
+    const namedHex = NAMED_FOREGROUND_HEX[colorName] ?? NAMED_FOREGROUND_HEX[bgToFg(colorName) ?? ''];
+    return namedHex ? hexStringToRgb(namedHex) : null;
+}
+
+// Resolve a widget's dynamic (value-driven) color for a given fill ratio in
+// [0, 1]. The ramp sampled is the widget color's own gradient stops when it is a
+// `gradient:` spec, otherwise a 3-stop intensity ramp derived from the solid base
+// color (pale at low fill -> deep at high fill, staying in-hue). Returns a solid
+// `hex:RRGGBB` value, or undefined when the base color can't be resolved (callers
+// then fall back to the unmodified base color).
+export function resolveDynamicColor(baseColor: string | undefined, ratio: number): string | undefined {
+    let stops = parseGradientSpec(baseColor);
+    if (!stops) {
+        if (!baseColor) {
+            return undefined;
+        }
+        const baseRgb = resolveSolidColorToRgb(baseColor);
+        if (!baseRgb) {
+            return undefined;
+        }
+        stops = deriveRampFromSolid(baseRgb);
+    }
+
+    return 'hex:' + rgbToHex(sampleGradient(stops, ratio));
 }
 
 export function getColorDisplayName(colorName: string): string {

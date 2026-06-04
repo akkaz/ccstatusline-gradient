@@ -17,7 +17,8 @@ import {
     applyColors,
     bgToFg,
     getColorAnsiCode,
-    getPowerlineTheme
+    getPowerlineTheme,
+    resolveDynamicColor
 } from './colors';
 import { calculateContextPercentage } from './context-percentage';
 import {
@@ -780,9 +781,19 @@ export function renderStatusLine(
                     // Preserve original colors from command output
                     elements.push({ content: finalOutput, type: widget.type, widget });
                 } else {
-                    // Normal widget rendering with colors
+                    // Normal widget rendering with colors. When the item has dynamic
+                    // coloring enabled and the widget exposes a fill ratio, resolve the
+                    // base color (solid or gradient) to a single value sampled at that
+                    // ratio; otherwise the base color is used unchanged.
+                    let effectiveColor = widget.color ?? defaultColor;
+                    if (widget.dynamic) {
+                        const ratio = getWidget(widget.type)?.getFillRatio?.(context, widget);
+                        if (ratio !== null && ratio !== undefined) {
+                            effectiveColor = resolveDynamicColor(widget.color ?? defaultColor, ratio) ?? effectiveColor;
+                        }
+                    }
                     elements.push({
-                        content: applyColorsWithOverride(widgetText, widget.color ?? defaultColor, widget.backgroundColor, widget.bold),
+                        content: applyColorsWithOverride(widgetText, effectiveColor, widget.backgroundColor, widget.bold),
                         type: widget.type,
                         widget
                     });

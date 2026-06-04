@@ -191,6 +191,16 @@ export class BlockResetTimerWidget implements Widget {
         return null;
     }
 
+    // Fraction of the current 5hr block window already elapsed, so the dynamic
+    // ramp deepens as the reset approaches.
+    getFillRatio(context: RenderContext): number | null {
+        const window = resolveUsageWindowWithFallback(context.usageData ?? {}, context.blockMetrics);
+        if (!window) {
+            return null;
+        }
+        return Math.max(0, Math.min(1, window.elapsedPercent / 100));
+    }
+
     supportsRawValue(): boolean { return true; }
     supportsColors(item: WidgetItem): boolean { return true; }
 }

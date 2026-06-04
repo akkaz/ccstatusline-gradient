@@ -121,6 +121,16 @@ export class WeeklyUsageWidget implements Widget {
         return getUsagePercentCustomKeybinds(item);
     }
 
+    // Tracks raw weekly usage, independent of the inverted display toggle, so the
+    // dynamic ramp deepens as usage climbs.
+    getFillRatio(context: RenderContext): number | null {
+        const usage = context.usageData?.weeklyUsage;
+        if (usage === undefined) {
+            return null;
+        }
+        return Math.max(0, Math.min(1, usage / 100));
+    }
+
     supportsRawValue(): boolean { return true; }
     supportsColors(item: WidgetItem): boolean { return true; }
 }

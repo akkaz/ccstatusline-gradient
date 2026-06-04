@@ -75,6 +75,16 @@ export class ContextPercentageWidget implements Widget {
         ];
     }
 
+    // Always reflects context actually used, independent of the used/remaining
+    // display toggle, so the dynamic ramp deepens as the window fills.
+    getFillRatio(context: RenderContext): number | null {
+        const metrics = calculateContextPercentageMetrics(context);
+        if (metrics === null) {
+            return null;
+        }
+        return Math.max(0, Math.min(1, metrics.usedPercentage / 100));
+    }
+
     supportsRawValue(): boolean { return true; }
     supportsColors(item: WidgetItem): boolean { return true; }
 }

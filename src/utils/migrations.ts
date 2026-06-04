@@ -120,6 +120,34 @@ function copyV1Fields(data: Record<string, unknown>, target: Record<string, unkn
     }
 }
 
+const DYNAMIC_COLOR_PREFIX = 'dynamic:';
+
+// v3 stored value-driven colors as a `dynamic:<stops>` color value. v4 splits that
+// into an orthogonal `dynamic: true` flag plus a normal `gradient:<stops>` base
+// color, so the same stops are reused both as a positional gradient and as the
+// fill-sampled dynamic ramp. Rewrite every widget item in place, leaving any other
+// color value untouched.
+function migrateDynamicColors(data: Record<string, unknown>): void {
+    if (!Array.isArray(data.lines)) {
+        return;
+    }
+
+    for (const line of data.lines) {
+        if (!Array.isArray(line)) {
+            continue;
+        }
+        for (const item of line) {
+            if (!isRecord(item) || typeof item.color !== 'string') {
+                continue;
+            }
+            if (item.color.startsWith(DYNAMIC_COLOR_PREFIX)) {
+                item.color = 'gradient:' + item.color.slice(DYNAMIC_COLOR_PREFIX.length);
+                item.dynamic = true;
+            }
+        }
+    }
+}
+
 // Define all migrations here
 export const migrations: Migration[] = [
     {
@@ -167,6 +195,23 @@ export const migrations: Migration[] = [
                 message: 'ccstatusline updated to v2.0.2, 5hr block timer widget added',
                 remaining: 12
             };
+
+            return migrated;
+        }
+    },
+    {
+        fromVersion: 3,
+        toVersion: 4,
+        description: 'Migrate from v3 to v4',
+        migrate: (data) => {
+            const migrated: Record<string, unknown> = { ...data };
+
+            // Convert legacy `dynamic:<stops>` colors into a gradient base color plus
+            // an orthogonal `dynamic: true` flag.
+            migrateDynamicColors(migrated);
+
+            // Update version to 4
+            migrated.version = 4;
 
             return migrated;
         }

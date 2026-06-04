@@ -183,6 +183,49 @@ export function sampleGradient(stops: Rgb[], t: number): Rgb {
     });
 }
 
+// Format an RGB triple as a bare `RRGGBB` hex string (no leading `#`), clamping
+// and rounding each channel into 0-255.
+export function rgbToHex(rgb: Rgb): string {
+    const toHex = (channel: number): string => Math.round(Math.min(255, Math.max(0, channel))).toString(16).padStart(2, '0');
+    return toHex(rgb.r) + toHex(rgb.g) + toHex(rgb.b);
+}
+
+// Build a 3-stop intensity ramp from a single base color for value-driven
+// ("dynamic") coloring. Hue is held constant in OKLab while only lightness and
+// chroma vary: a pale, lightened tint at the low end -> the base color in the
+// middle -> a deep, more-saturated shade at the high end. Scaling `a` and `b` by a
+// common factor preserves the OKLab hue angle (atan2(b, a)), so an orange base
+// stays orange across the whole ramp (pale->deep), blue stays blue, and so on.
+// Out-of-gamut results from pushing chroma are clamped by `linearToSrgb`.
+export function deriveRampFromSolid(base: Rgb): Rgb[] {
+    const lab = rgbToOklab(base);
+    const light: Oklab = { L: Math.min(1, lab.L + 0.18), a: lab.a * 0.5, b: lab.b * 0.5 };
+    const deep: Oklab = { L: Math.max(0, lab.L - 0.16), a: lab.a * 1.18, b: lab.b * 1.18 };
+    return [oklabToRgb(light), base, oklabToRgb(deep)];
+}
+
+// Inverse of `rgbToAnsi256` for the indices that forward map can produce: the
+// 6x6x6 color cube (16-231) and the 24-step grayscale ramp (232-255). Used to
+// recover an RGB base color when a widget's solid color is given as `ansi256:N`.
+// The 16 standard colors (0-15) are theme-dependent and not representable here, so
+// they fall back to mid-gray.
+export function ansi256ToRgb(code: number): Rgb {
+    if (code >= 232 && code <= 255) {
+        const level = 8 + (code - 232) * 10;
+        return { r: level, g: level, b: level };
+    }
+    if (code >= 16 && code <= 231) {
+        const c = code - 16;
+        const channel = (v: number): number => (v === 0 ? 0 : v * 40 + 55);
+        return {
+            r: channel(Math.floor(c / 36)),
+            g: channel(Math.floor((c % 36) / 6)),
+            b: channel(c % 6)
+        };
+    }
+    return { r: 128, g: 128, b: 128 };
+}
+
 // Map an RGB color to the nearest xterm-256 palette index (6x6x6 cube plus the
 // grayscale ramp) for ansi256 terminals.
 export function rgbToAnsi256(rgb: Rgb): number {
