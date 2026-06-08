@@ -57355,7 +57355,7 @@ function getTerminalWidth() {
 function canDetectTerminalWidth() {
   return probeTerminalWidth() !== null;
 }
-var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.6.0", MIN_RELIABLE_TERMINAL_WIDTH = 40;
+var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.7.0", MIN_RELIABLE_TERMINAL_WIDTH = 40;
 var init_terminal = () => {};
 
 // src/utils/renderer.ts
