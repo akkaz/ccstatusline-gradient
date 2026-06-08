@@ -57355,7 +57355,7 @@ function getTerminalWidth() {
 function canDetectTerminalWidth() {
   return probeTerminalWidth() !== null;
 }
-var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.5.1", MIN_RELIABLE_TERMINAL_WIDTH = 40;
+var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.6.0", MIN_RELIABLE_TERMINAL_WIDTH = 40;
 var init_terminal = () => {};
 
 // src/utils/renderer.ts
@@ -77999,6 +77999,7 @@ import * as fs18 from "fs";
 import * as https3 from "https";
 import * as os16 from "os";
 import * as path15 from "path";
+import * as readline from "readline";
 // src/presets/akkaz.json
 var akkaz_default = {
   version: 4,
@@ -78451,6 +78452,1060 @@ var barocco_default = {
     continueThemeAcrossLines: false
   }
 };
+// src/presets/bosco.json
+var bosco_default = {
+  version: 4,
+  lines: [
+    [
+      {
+        id: "model",
+        type: "model",
+        rawValue: true,
+        bold: true,
+        color: "gradient:1b4332-40916c-95d5b2"
+      },
+      {
+        id: "spM",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-think",
+        type: "custom-text",
+        customText: "",
+        color: "hex:95d5b2"
+      },
+      {
+        id: "spT",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "think",
+        type: "thinking-effort",
+        rawValue: true,
+        color: "gradient:40916c-95d5b2"
+      },
+      {
+        id: "s0",
+        type: "separator",
+        color: "hex:2d3a32"
+      },
+      {
+        id: "lbl-ctx",
+        type: "custom-text",
+        customText: "Context",
+        color: "hex:74c69d"
+      },
+      {
+        id: "sp1",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-bar",
+        type: "context-bar",
+        rawValue: true,
+        color: "gradient:52b788-95d5b2-ffba08",
+        metadata: {
+          display: "slider-only"
+        },
+        dynamic: true
+      },
+      {
+        id: "sp2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-pct",
+        type: "context-percentage",
+        rawValue: true,
+        color: "gradient:52b788-95d5b2-ffba08",
+        dynamic: true
+      }
+    ],
+    [
+      {
+        id: "lbl-ses",
+        type: "custom-text",
+        customText: "Session",
+        color: "hex:74c69d"
+      },
+      {
+        id: "sp3",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses-bar",
+        type: "session-usage",
+        rawValue: true,
+        color: "gradient:52b788-95d5b2-ffba08",
+        metadata: {
+          display: "slider-only"
+        },
+        dynamic: true
+      },
+      {
+        id: "ses-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses",
+        type: "session-usage",
+        rawValue: true,
+        color: "gradient:52b788-95d5b2-ffba08",
+        dynamic: true
+      },
+      {
+        id: "s2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r1",
+        type: "custom-text",
+        customText: "",
+        color: "hex:74c69d"
+      },
+      {
+        id: "sp4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "reset",
+        type: "reset-timer",
+        rawValue: true,
+        color: "gradient:52b788-95d5b2-ffba08",
+        dynamic: true
+      },
+      {
+        id: "s3",
+        type: "separator",
+        color: "hex:2d3a32"
+      },
+      {
+        id: "lbl-wk",
+        type: "custom-text",
+        customText: "Week",
+        color: "hex:74c69d"
+      },
+      {
+        id: "sp5",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-bar",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "gradient:52b788-95d5b2-ffba08",
+        metadata: {
+          display: "slider-only"
+        },
+        dynamic: true
+      },
+      {
+        id: "wk-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "gradient:52b788-95d5b2-ffba08",
+        dynamic: true
+      },
+      {
+        id: "s4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r2",
+        type: "custom-text",
+        customText: "",
+        color: "hex:74c69d"
+      },
+      {
+        id: "sp6",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-reset",
+        type: "weekly-reset-timer",
+        rawValue: true,
+        color: "gradient:52b788-95d5b2-ffba08",
+        dynamic: true
+      }
+    ]
+  ],
+  flexMode: "full-minus-40",
+  compactThreshold: 60,
+  colorLevel: 3,
+  inheritSeparatorColors: false,
+  globalBold: false,
+  gitCacheTtlSeconds: 5,
+  minimalistMode: false,
+  powerline: {
+    enabled: false,
+    separators: [
+      ""
+    ],
+    separatorInvertBackground: [
+      false
+    ],
+    startCaps: [],
+    endCaps: [],
+    autoAlign: false,
+    continueThemeAcrossLines: false
+  }
+};
+// src/presets/brace.json
+var brace_default = {
+  version: 4,
+  lines: [
+    [
+      {
+        id: "model",
+        type: "model",
+        rawValue: true,
+        bold: true,
+        color: "gradient:6a040f-d00000-ffba08"
+      },
+      {
+        id: "spM",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-think",
+        type: "custom-text",
+        customText: "",
+        color: "hex:ffba08"
+      },
+      {
+        id: "spT",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "think",
+        type: "thinking-effort",
+        rawValue: true,
+        color: "gradient:d00000-ffba08"
+      },
+      {
+        id: "s0",
+        type: "separator",
+        color: "hex:3d1f1f"
+      },
+      {
+        id: "lbl-ctx",
+        type: "custom-text",
+        customText: "Context",
+        color: "hex:e85d04"
+      },
+      {
+        id: "sp1",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-bar",
+        type: "context-bar",
+        rawValue: true,
+        color: "gradient:ffba08-f48c06-dc2f02",
+        metadata: {
+          display: "slider-only"
+        },
+        dynamic: true
+      },
+      {
+        id: "sp2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-pct",
+        type: "context-percentage",
+        rawValue: true,
+        color: "gradient:ffba08-f48c06-dc2f02",
+        dynamic: true
+      }
+    ],
+    [
+      {
+        id: "lbl-ses",
+        type: "custom-text",
+        customText: "Session",
+        color: "hex:e85d04"
+      },
+      {
+        id: "sp3",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses-bar",
+        type: "session-usage",
+        rawValue: true,
+        color: "gradient:ffba08-f48c06-dc2f02",
+        metadata: {
+          display: "slider-only"
+        },
+        dynamic: true
+      },
+      {
+        id: "ses-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses",
+        type: "session-usage",
+        rawValue: true,
+        color: "gradient:ffba08-f48c06-dc2f02",
+        dynamic: true
+      },
+      {
+        id: "s2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r1",
+        type: "custom-text",
+        customText: "",
+        color: "hex:e85d04"
+      },
+      {
+        id: "sp4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "reset",
+        type: "reset-timer",
+        rawValue: true,
+        color: "gradient:ffba08-f48c06-dc2f02",
+        dynamic: true
+      },
+      {
+        id: "s3",
+        type: "separator",
+        color: "hex:3d1f1f"
+      },
+      {
+        id: "lbl-wk",
+        type: "custom-text",
+        customText: "Week",
+        color: "hex:e85d04"
+      },
+      {
+        id: "sp5",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-bar",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "gradient:ffba08-f48c06-dc2f02",
+        metadata: {
+          display: "slider-only"
+        },
+        dynamic: true
+      },
+      {
+        id: "wk-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "gradient:ffba08-f48c06-dc2f02",
+        dynamic: true
+      },
+      {
+        id: "s4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r2",
+        type: "custom-text",
+        customText: "",
+        color: "hex:e85d04"
+      },
+      {
+        id: "sp6",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-reset",
+        type: "weekly-reset-timer",
+        rawValue: true,
+        color: "gradient:ffba08-f48c06-dc2f02",
+        dynamic: true
+      }
+    ]
+  ],
+  flexMode: "full-minus-40",
+  compactThreshold: 60,
+  colorLevel: 3,
+  inheritSeparatorColors: false,
+  globalBold: false,
+  gitCacheTtlSeconds: 5,
+  minimalistMode: false,
+  powerline: {
+    enabled: false,
+    separators: [
+      ""
+    ],
+    separatorInvertBackground: [
+      false
+    ],
+    startCaps: [],
+    endCaps: [],
+    autoAlign: false,
+    continueThemeAcrossLines: false
+  }
+};
+// src/presets/carbonara.json
+var carbonara_default = {
+  version: 4,
+  lines: [
+    [
+      {
+        id: "model",
+        type: "model",
+        rawValue: true,
+        bold: true,
+        color: "hex:f4d35e"
+      },
+      {
+        id: "spM",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-think",
+        type: "custom-text",
+        customText: "",
+        color: "hex:2b2118"
+      },
+      {
+        id: "spT",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "think",
+        type: "thinking-effort",
+        rawValue: true,
+        color: "hex:e09f3e"
+      },
+      {
+        id: "s0",
+        type: "separator",
+        color: "hex:6f5643"
+      },
+      {
+        id: "lbl-ctx",
+        type: "custom-text",
+        customText: "Context",
+        color: "hex:b08968"
+      },
+      {
+        id: "sp1",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-bar",
+        type: "context-bar",
+        rawValue: true,
+        color: "hex:f6bd60",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "sp2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-pct",
+        type: "context-percentage",
+        rawValue: true,
+        color: "hex:f6bd60"
+      }
+    ],
+    [
+      {
+        id: "lbl-ses",
+        type: "custom-text",
+        customText: "Session",
+        color: "hex:b08968"
+      },
+      {
+        id: "sp3",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses-bar",
+        type: "session-usage",
+        rawValue: true,
+        color: "hex:f6bd60",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "ses-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses",
+        type: "session-usage",
+        rawValue: true,
+        color: "hex:f6bd60"
+      },
+      {
+        id: "s2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r1",
+        type: "custom-text",
+        customText: "",
+        color: "hex:b08968"
+      },
+      {
+        id: "sp4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "reset",
+        type: "reset-timer",
+        rawValue: true,
+        color: "hex:f6bd60"
+      },
+      {
+        id: "s3",
+        type: "separator",
+        color: "hex:6f5643"
+      },
+      {
+        id: "lbl-wk",
+        type: "custom-text",
+        customText: "Week",
+        color: "hex:b08968"
+      },
+      {
+        id: "sp5",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-bar",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "hex:f6bd60",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "wk-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "hex:f6bd60"
+      },
+      {
+        id: "s4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r2",
+        type: "custom-text",
+        customText: "",
+        color: "hex:b08968"
+      },
+      {
+        id: "sp6",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-reset",
+        type: "weekly-reset-timer",
+        rawValue: true,
+        color: "hex:f6bd60"
+      }
+    ]
+  ],
+  flexMode: "full-minus-40",
+  compactThreshold: 60,
+  colorLevel: 3,
+  inheritSeparatorColors: false,
+  globalBold: false,
+  gitCacheTtlSeconds: 5,
+  minimalistMode: false,
+  powerline: {
+    enabled: false,
+    separators: [
+      ""
+    ],
+    separatorInvertBackground: [
+      false
+    ],
+    startCaps: [],
+    endCaps: [],
+    autoAlign: false,
+    continueThemeAcrossLines: false
+  }
+};
+// src/presets/inchiostro.json
+var inchiostro_default = {
+  version: 4,
+  lines: [
+    [
+      {
+        id: "model",
+        type: "model",
+        rawValue: true,
+        bold: true,
+        color: "hex:e5e7eb"
+      },
+      {
+        id: "spM",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-think",
+        type: "custom-text",
+        customText: "",
+        color: "hex:22d3ee"
+      },
+      {
+        id: "spT",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "think",
+        type: "thinking-effort",
+        rawValue: true,
+        color: "hex:9ca3af"
+      },
+      {
+        id: "s0",
+        type: "separator",
+        color: "hex:374151"
+      },
+      {
+        id: "lbl-ctx",
+        type: "custom-text",
+        customText: "Context",
+        color: "hex:6b7280"
+      },
+      {
+        id: "sp1",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-bar",
+        type: "context-bar",
+        rawValue: true,
+        color: "hex:9ca3af",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "sp2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-pct",
+        type: "context-percentage",
+        rawValue: true,
+        color: "hex:9ca3af"
+      }
+    ],
+    [
+      {
+        id: "lbl-ses",
+        type: "custom-text",
+        customText: "Session",
+        color: "hex:6b7280"
+      },
+      {
+        id: "sp3",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses-bar",
+        type: "session-usage",
+        rawValue: true,
+        color: "hex:9ca3af",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "ses-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses",
+        type: "session-usage",
+        rawValue: true,
+        color: "hex:9ca3af"
+      },
+      {
+        id: "s2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r1",
+        type: "custom-text",
+        customText: "",
+        color: "hex:6b7280"
+      },
+      {
+        id: "sp4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "reset",
+        type: "reset-timer",
+        rawValue: true,
+        color: "hex:9ca3af"
+      },
+      {
+        id: "s3",
+        type: "separator",
+        color: "hex:374151"
+      },
+      {
+        id: "lbl-wk",
+        type: "custom-text",
+        customText: "Week",
+        color: "hex:6b7280"
+      },
+      {
+        id: "sp5",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-bar",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "hex:9ca3af",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "wk-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "hex:9ca3af"
+      },
+      {
+        id: "s4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r2",
+        type: "custom-text",
+        customText: "",
+        color: "hex:6b7280"
+      },
+      {
+        id: "sp6",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-reset",
+        type: "weekly-reset-timer",
+        rawValue: true,
+        color: "hex:9ca3af"
+      }
+    ]
+  ],
+  flexMode: "full-minus-40",
+  compactThreshold: 60,
+  colorLevel: 3,
+  inheritSeparatorColors: false,
+  globalBold: false,
+  gitCacheTtlSeconds: 5,
+  minimalistMode: false,
+  powerline: {
+    enabled: false,
+    separators: [
+      ""
+    ],
+    separatorInvertBackground: [
+      false
+    ],
+    startCaps: [],
+    endCaps: [],
+    autoAlign: false,
+    continueThemeAcrossLines: false
+  }
+};
+// src/presets/vapor.json
+var vapor_default = {
+  version: 4,
+  lines: [
+    [
+      {
+        id: "model",
+        type: "model",
+        rawValue: true,
+        bold: true,
+        color: "gradient:00d4ff-7b2ff7-ff2e97"
+      },
+      {
+        id: "spM",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-think",
+        type: "custom-text",
+        customText: "",
+        color: "hex:ff2e97"
+      },
+      {
+        id: "spT",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "think",
+        type: "thinking-effort",
+        rawValue: true,
+        color: "gradient:7b2ff7-ff2e97"
+      },
+      {
+        id: "s0",
+        type: "separator",
+        color: "hex:3b2f63"
+      },
+      {
+        id: "lbl-ctx",
+        type: "custom-text",
+        customText: "Context",
+        color: "hex:9d7bff"
+      },
+      {
+        id: "sp1",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-bar",
+        type: "context-bar",
+        rawValue: true,
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
+        metadata: {
+          display: "slider-only"
+        },
+        dynamic: true
+      },
+      {
+        id: "sp2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-pct",
+        type: "context-percentage",
+        rawValue: true,
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
+        dynamic: true
+      }
+    ],
+    [
+      {
+        id: "lbl-ses",
+        type: "custom-text",
+        customText: "Session",
+        color: "hex:9d7bff"
+      },
+      {
+        id: "sp3",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses-bar",
+        type: "session-usage",
+        rawValue: true,
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
+        metadata: {
+          display: "slider-only"
+        },
+        dynamic: true
+      },
+      {
+        id: "ses-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses",
+        type: "session-usage",
+        rawValue: true,
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
+        dynamic: true
+      },
+      {
+        id: "s2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r1",
+        type: "custom-text",
+        customText: "",
+        color: "hex:9d7bff"
+      },
+      {
+        id: "sp4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "reset",
+        type: "reset-timer",
+        rawValue: true,
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
+        dynamic: true
+      },
+      {
+        id: "s3",
+        type: "separator",
+        color: "hex:3b2f63"
+      },
+      {
+        id: "lbl-wk",
+        type: "custom-text",
+        customText: "Week",
+        color: "hex:9d7bff"
+      },
+      {
+        id: "sp5",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-bar",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
+        metadata: {
+          display: "slider-only"
+        },
+        dynamic: true
+      },
+      {
+        id: "wk-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
+        dynamic: true
+      },
+      {
+        id: "s4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r2",
+        type: "custom-text",
+        customText: "",
+        color: "hex:9d7bff"
+      },
+      {
+        id: "sp6",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-reset",
+        type: "weekly-reset-timer",
+        rawValue: true,
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
+        dynamic: true
+      }
+    ]
+  ],
+  flexMode: "full-minus-40",
+  compactThreshold: 60,
+  colorLevel: 3,
+  inheritSeparatorColors: false,
+  globalBold: false,
+  gitCacheTtlSeconds: 5,
+  minimalistMode: false,
+  powerline: {
+    enabled: false,
+    separators: [
+      ""
+    ],
+    separatorInvertBackground: [
+      false
+    ],
+    startCaps: [],
+    endCaps: [],
+    autoAlign: false,
+    continueThemeAcrossLines: false
+  }
+};
 
 // src/utils/onboard.ts
 init_colors();
@@ -78460,7 +79515,16 @@ await __promiseAll([
   init_config(),
   init_renderer2()
 ]);
-var PRESETS = { akkaz: akkaz_default, barocco: barocco_default };
+var PRESET_LIST = [
+  { name: "akkaz", settings: akkaz_default, blurb: "Retro indigo→amber gradient · full telemetry · dynamic bars" },
+  { name: "vapor", settings: vapor_default, blurb: "Synthwave · cyan→magenta neon gradient" },
+  { name: "bosco", settings: bosco_default, blurb: "Forest greens · usage runs green→amber as it fills" },
+  { name: "brace", settings: brace_default, blurb: "Embers · amber→deep-red, runs hot toward your limits" },
+  { name: "barocco", settings: barocco_default, blurb: "Italian tricolore \uD83C\uDDEE\uD83C\uDDF9 · green→white→red" },
+  { name: "inchiostro", settings: inchiostro_default, blurb: "Ink on paper · solid monochrome, one cyan accent (no gradient)" },
+  { name: "carbonara", settings: carbonara_default, blurb: "Cozy & warm · egg-yellow + pancetta tones (no gradient)" }
+];
+var PRESETS = Object.fromEntries(PRESET_LIST.map((p) => [p.name, p.settings]));
 var DEFAULT_PRESET = "akkaz";
 var NERD_FONT_URL = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip";
 var FONT_MATCH = "JetBrainsMonoNerdFont-*.ttf";
@@ -78529,6 +79593,44 @@ function renderPreviewLines(preset) {
     }
   }
   return out;
+}
+function isInteractive() {
+  return process.stdin.isTTY && process.stdout.isTTY;
+}
+function ask(question) {
+  return new Promise((resolve6) => {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve6(answer);
+    });
+  });
+}
+async function pickPreset(level) {
+  log2(`  ${source_default.dim("Pick a style — live preview of each:")}
+`);
+  PRESET_LIST.forEach((p, i) => {
+    log2(`  ${source_default.bold(String(i + 1))}. ${gradientText(p.name, level)}  ${source_default.dim(p.blurb)}`);
+    const preview = renderPreviewLines(p.settings);
+    if (preview[0]) {
+      log2(`     ${preview[0]}`);
+    }
+    log2("");
+  });
+  const answer = (await ask(`  Choose 1-${PRESET_LIST.length} or a name (Enter = ${DEFAULT_PRESET}): `)).trim();
+  if (answer === "") {
+    return DEFAULT_PRESET;
+  }
+  const byNumber = PRESET_LIST[Number.parseInt(answer, 10) - 1];
+  if (byNumber) {
+    return byNumber.name;
+  }
+  const byName = PRESET_LIST.find((p) => p.name === answer.toLowerCase());
+  if (byName) {
+    return byName.name;
+  }
+  log2(`  ${source_default.dim(`"${answer}" not recognized — using ${DEFAULT_PRESET}.`)}`);
+  return DEFAULT_PRESET;
 }
 function download(url2, dest, redirects = 0) {
   return new Promise((resolve6, reject2) => {
@@ -78599,20 +79701,20 @@ async function installNerdFont() {
   }
 }
 async function runOnboard(options = {}) {
-  const presetName = options.preset ?? DEFAULT_PRESET;
-  const preset = PRESETS[presetName];
-  if (!preset) {
-    log2(`  ⚠ Unknown preset "${presetName}". Available: ${Object.keys(PRESETS).join(", ")}.`);
+  if (options.preset && !PRESETS[options.preset]) {
+    log2(`  ⚠ Unknown preset "${options.preset}". Available: ${PRESET_LIST.map((p) => p.name).join(", ")}.`);
     return;
   }
-  const presetSettings = preset;
-  const level = colorLevelString(presetSettings.colorLevel);
-  source_default.level = presetSettings.colorLevel;
+  source_default.level = akkaz_default.colorLevel;
   updateColorMap();
+  const level = colorLevelString(source_default.level);
   log2("");
   log2(renderBanner(level));
-  log2(`   ${gradientText("ccstatusline · gradient edition", level)}`);
-  log2(`   ${source_default.dim(`onboarding · preset: ${presetName}`)}
+  log2(`   ${gradientText("ccstatusline · gradient edition", level)}
+`);
+  const presetName = options.preset ?? (isInteractive() ? await pickPreset(level) : DEFAULT_PRESET);
+  const presetSettings = PRESETS[presetName];
+  log2(`  ${source_default.dim(`Style: ${presetName}`)}
 `);
   await saveSettings(presetSettings);
   log2(`  ✓ Wrote status line config → ${getConfigPath()}`);

@@ -4,9 +4,15 @@ import * as fs from 'fs';
 import * as https from 'https';
 import * as os from 'os';
 import * as path from 'path';
+import * as readline from 'readline';
 
 import akkazPreset from '../presets/akkaz.json';
 import baroccoPreset from '../presets/barocco.json';
+import boscoPreset from '../presets/bosco.json';
+import bracePreset from '../presets/brace.json';
+import carbonaraPreset from '../presets/carbonara.json';
+import inchiostroPreset from '../presets/inchiostro.json';
+import vaporPreset from '../presets/vapor.json';
 import type { Settings } from '../types/Settings';
 
 import {
@@ -33,8 +39,20 @@ import {
 import { advanceGlobalSeparatorIndex } from './separator-index';
 
 // Bundled status line presets that `--onboard` can install. Imports are static
-// so `bun build` reliably bundles the JSON into the single-file output.
-const PRESETS: Record<string, unknown> = { akkaz: akkazPreset, barocco: baroccoPreset };
+// so `bun build` reliably bundles the JSON into the single-file output. Order is
+// the order shown in the interactive picker (gradient signatures first, the two
+// solid/no-gradient looks last); the first entry is the default.
+interface PresetInfo { name: string; settings: unknown; blurb: string }
+const PRESET_LIST: PresetInfo[] = [
+    { name: 'akkaz', settings: akkazPreset, blurb: 'Retro indigo→amber gradient · full telemetry · dynamic bars' },
+    { name: 'vapor', settings: vaporPreset, blurb: 'Synthwave · cyan→magenta neon gradient' },
+    { name: 'bosco', settings: boscoPreset, blurb: 'Forest greens · usage runs green→amber as it fills' },
+    { name: 'brace', settings: bracePreset, blurb: 'Embers · amber→deep-red, runs hot toward your limits' },
+    { name: 'barocco', settings: baroccoPreset, blurb: 'Italian tricolore 🇮🇹 · green→white→red' },
+    { name: 'inchiostro', settings: inchiostroPreset, blurb: 'Ink on paper · solid monochrome, one cyan accent (no gradient)' },
+    { name: 'carbonara', settings: carbonaraPreset, blurb: 'Cozy & warm · egg-yellow + pancetta tones (no gradient)' }
+];
+const PRESETS: Record<string, unknown> = Object.fromEntries(PRESET_LIST.map(p => [p.name, p.settings]));
 const DEFAULT_PRESET = 'akkaz';
 
 // Nerd Fonts "latest" release asset (stable URL).
@@ -138,6 +156,50 @@ function renderPreviewLines(preset: Settings): string[] {
     return out;
 }
 
+function isInteractive(): boolean {
+    return process.stdin.isTTY && process.stdout.isTTY;
+}
+
+// Prompt for a single line of input (readline closes after one answer).
+function ask(question: string): Promise<string> {
+    return new Promise((resolve) => {
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        rl.question(question, (answer) => {
+            rl.close();
+            resolve(answer);
+        });
+    });
+}
+
+// Show every bundled preset with a live, real-renderer preview of its first line,
+// then let the user pick one. Empty/invalid input falls back to the default.
+async function pickPreset(level: ColorLevel): Promise<string> {
+    log(`  ${chalk.dim('Pick a style — live preview of each:')}\n`);
+    PRESET_LIST.forEach((p, i) => {
+        log(`  ${chalk.bold(String(i + 1))}. ${gradientText(p.name, level)}  ${chalk.dim(p.blurb)}`);
+        const preview = renderPreviewLines(p.settings as Settings);
+        if (preview[0]) {
+            log(`     ${preview[0]}`);
+        }
+        log('');
+    });
+
+    const answer = (await ask(`  Choose 1-${PRESET_LIST.length} or a name (Enter = ${DEFAULT_PRESET}): `)).trim();
+    if (answer === '') {
+        return DEFAULT_PRESET;
+    }
+    const byNumber = PRESET_LIST[Number.parseInt(answer, 10) - 1];
+    if (byNumber) {
+        return byNumber.name;
+    }
+    const byName = PRESET_LIST.find(p => p.name === answer.toLowerCase());
+    if (byName) {
+        return byName.name;
+    }
+    log(`  ${chalk.dim(`"${answer}" not recognized — using ${DEFAULT_PRESET}.`)}`);
+    return DEFAULT_PRESET;
+}
+
 // Download a URL to a file, following GitHub's redirects to the CDN.
 function download(url: string, dest: string, redirects = 0): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -219,25 +281,30 @@ async function installNerdFont(): Promise<void> {
 }
 
 export async function runOnboard(options: OnboardOptions = {}): Promise<void> {
-    const presetName = options.preset ?? DEFAULT_PRESET;
-    const preset = PRESETS[presetName];
-    if (!preset) {
-        log(`  ⚠ Unknown preset "${presetName}". Available: ${Object.keys(PRESETS).join(', ')}.`);
+    // An explicit --preset must be valid; bail early with the available names.
+    if (options.preset && !PRESETS[options.preset]) {
+        log(`  ⚠ Unknown preset "${options.preset}". Available: ${PRESET_LIST.map(p => p.name).join(', ')}.`);
         return;
     }
 
-    const presetSettings = preset as unknown as Settings;
-    const level = colorLevelString(presetSettings.colorLevel);
-
-    // Enable color for the brand header and the preview below.
-    chalk.level = presetSettings.colorLevel;
+    // Enable color for the brand header, the picker and the previews. All presets
+    // are truecolor; use the default's level as the baseline.
+    chalk.level = (akkazPreset as unknown as Settings).colorLevel;
     updateColorMap();
+    const level = colorLevelString(chalk.level);
 
     // Brand header: the "akkaz" wordmark in the retro gradient.
     log('');
     log(renderBanner(level));
-    log(`   ${gradientText('ccstatusline · gradient edition', level)}`);
-    log(`   ${chalk.dim(`onboarding · preset: ${presetName}`)}\n`);
+    log(`   ${gradientText('ccstatusline · gradient edition', level)}\n`);
+
+    // Resolve the preset: explicit flag wins; otherwise let the user pick
+    // interactively (with live previews), or fall back to the default when
+    // there's no TTY (piped/automated runs).
+    const presetName = options.preset
+        ?? (isInteractive() ? await pickPreset(level) : DEFAULT_PRESET);
+    const presetSettings = PRESETS[presetName] as Settings;
+    log(`  ${chalk.dim(`Style: ${presetName}`)}\n`);
 
     // 1. Write the signature status line config.
     await saveSettings(presetSettings);

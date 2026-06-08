@@ -1,0 +1,213 @@
+{
+    "version": 4,
+    "lines": [
+        [
+            {
+                "id": "model",
+                "type": "model",
+                "rawValue": true,
+                "bold": true,
+                "color": "gradient:6a040f-d00000-ffba08"
+            },
+            {
+                "id": "spM",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "lbl-think",
+                "type": "custom-text",
+                "customText": "",
+                "color": "hex:ffba08"
+            },
+            {
+                "id": "spT",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "think",
+                "type": "thinking-effort",
+                "rawValue": true,
+                "color": "gradient:d00000-ffba08"
+            },
+            {
+                "id": "s0",
+                "type": "separator",
+                "color": "hex:3d1f1f"
+            },
+            {
+                "id": "lbl-ctx",
+                "type": "custom-text",
+                "customText": "Context",
+                "color": "hex:e85d04"
+            },
+            {
+                "id": "sp1",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "ctx-bar",
+                "type": "context-bar",
+                "rawValue": true,
+                "color": "gradient:ffba08-f48c06-dc2f02",
+                "metadata": {
+                    "display": "slider-only"
+                },
+                "dynamic": true
+            },
+            {
+                "id": "sp2",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "ctx-pct",
+                "type": "context-percentage",
+                "rawValue": true,
+                "color": "gradient:ffba08-f48c06-dc2f02",
+                "dynamic": true
+            }
+        ],
+        [
+            {
+                "id": "lbl-ses",
+                "type": "custom-text",
+                "customText": "Session",
+                "color": "hex:e85d04"
+            },
+            {
+                "id": "sp3",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "ses-bar",
+                "type": "session-usage",
+                "rawValue": true,
+                "color": "gradient:ffba08-f48c06-dc2f02",
+                "metadata": {
+                    "display": "slider-only"
+                },
+                "dynamic": true
+            },
+            {
+                "id": "ses-b-sp",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "ses",
+                "type": "session-usage",
+                "rawValue": true,
+                "color": "gradient:ffba08-f48c06-dc2f02",
+                "dynamic": true
+            },
+            {
+                "id": "s2",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "lbl-r1",
+                "type": "custom-text",
+                "customText": "",
+                "color": "hex:e85d04"
+            },
+            {
+                "id": "sp4",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "reset",
+                "type": "reset-timer",
+                "rawValue": true,
+                "color": "gradient:ffba08-f48c06-dc2f02",
+                "dynamic": true
+            },
+            {
+                "id": "s3",
+                "type": "separator",
+                "color": "hex:3d1f1f"
+            },
+            {
+                "id": "lbl-wk",
+                "type": "custom-text",
+                "customText": "Week",
+                "color": "hex:e85d04"
+            },
+            {
+                "id": "sp5",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "wk-bar",
+                "type": "weekly-usage",
+                "rawValue": true,
+                "color": "gradient:ffba08-f48c06-dc2f02",
+                "metadata": {
+                    "display": "slider-only"
+                },
+                "dynamic": true
+            },
+            {
+                "id": "wk-b-sp",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "wk",
+                "type": "weekly-usage",
+                "rawValue": true,
+                "color": "gradient:ffba08-f48c06-dc2f02",
+                "dynamic": true
+            },
+            {
+                "id": "s4",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "lbl-r2",
+                "type": "custom-text",
+                "customText": "",
+                "color": "hex:e85d04"
+            },
+            {
+                "id": "sp6",
+                "type": "separator",
+                "character": " "
+            },
+            {
+                "id": "wk-reset",
+                "type": "weekly-reset-timer",
+                "rawValue": true,
+                "color": "gradient:ffba08-f48c06-dc2f02",
+                "dynamic": true
+            }
+        ]
+    ],
+    "flexMode": "full-minus-40",
+    "compactThreshold": 60,
+    "colorLevel": 3,
+    "inheritSeparatorColors": false,
+    "globalBold": false,
+    "gitCacheTtlSeconds": 5,
+    "minimalistMode": false,
+    "powerline": {
+        "enabled": false,
+        "separators": [
+            ""
+        ],
+        "separatorInvertBackground": [
+            false
+        ],
+        "startCaps": [],
+        "endCaps": [],
+        "autoAlign": false,
+        "continueThemeAcrossLines": false
+    }
+}

@@ -20,7 +20,8 @@ npx -y ccstatusline-gradient@latest --onboard
 
 Then **restart Claude Code**. That's it.
 
-- Pick a different look: `--onboard --preset barocco` (Italian tricolore 🇮🇹). Built-in presets: **`akkaz`** (default) and **`barocco`**.
+- Run it **without `--preset`** and you get an interactive picker — every built-in style with a **live preview**, choose one and go.
+- Know what you want? Skip the picker: `--onboard --preset bosco`.
 - On a remote server where the font lives in your local terminal, add `--no-font`.
 - Set your terminal font to **JetBrainsMono Nerd Font** to see the icons.
 - Your existing `~/.claude/settings.json` keys are preserved; the previous ccstatusline config is backed up.
@@ -73,12 +74,17 @@ Truecolor (`colorLevel: 3`) is recommended; at 256-color the gradients degrade g
 
 ## Presets
 
-Two **signature presets** ship in the package (`--onboard --preset <name>`):
+Seven **signature presets** ship in the package — run `--onboard` to pick one from the live preview, or `--onboard --preset <name>`:
 
-| Preset | Look |
-| --- | --- |
-| **`akkaz`** *(default)* | 3 lines. Identity row with a continuous **retro** gradient (`model ⚡ effort`); context + session + weekly bars colored **dynamically** by usage; reset timers that track their bar's color; a compaction counter (`⊟ compact N`, hidden until the chat is compacted). |
-| **`barocco`** | Same layout, Italian tricolore 🇮🇹: `model ⚡ effort` flows **green → white → red**, usage bars **green → white → red** (green = low, red = full). |
+| Preset | Gradient? | Look |
+| --- | :---: | --- |
+| **`akkaz`** *(default)* | ✅ | Retro **indigo → amber** identity row (`model ⚡ effort`); context/session/weekly bars colored **dynamically** by usage; reset timers tracking their bar; compaction counter (`⊟ compact N`). |
+| **`vapor`** | ✅ | Synthwave **cyan → magenta** neon. |
+| **`bosco`** | ✅ | Forest greens; usage runs **green → amber** as it fills. |
+| **`brace`** | ✅ | Embers **amber → deep-red** — runs hot toward your limits. |
+| **`barocco`** | ✅ | Italian tricolore 🇮🇹 — **green → white → red**. |
+| **`inchiostro`** | — | Ink on paper: solid **monochrome**, one cyan accent. |
+| **`carbonara`** | — | Cozy & warm: **egg-yellow + pancetta** tones. |
 
 Drop-in JSON configs also live in [`presets/`](./presets) — copy one straight into `~/.config/ccstatusline/settings.json`:
 
