@@ -20,8 +20,8 @@ npx -y ccstatusline-gradient@latest --onboard
 
 Then **restart Claude Code**. That's it.
 
-- Run it **without `--preset`** and you get an interactive picker — every built-in style with a **live preview**, choose one and go.
-- Know what you want? Skip the picker: `--onboard --preset bosco`.
+- Run it **without `--preset`** and you get an arrow-key picker — **↑/↓** through every built-in style with a **live preview** of each, **Enter** to apply. None fit? Pick **Full configurator** to jump straight into the TUI.
+- Know what you want? Skip the picker: `--onboard --preset ferro`.
 - On a remote server where the font lives in your local terminal, add `--no-font`.
 - Set your terminal font to **JetBrainsMono Nerd Font** to see the icons.
 - Your existing `~/.claude/settings.json` keys are preserved; the previous ccstatusline config is backed up.
@@ -74,17 +74,17 @@ Truecolor (`colorLevel: 3`) is recommended; at 256-color the gradients degrade g
 
 ## Presets
 
-Seven **signature presets** ship in the package — run `--onboard` to pick one from the live preview, or `--onboard --preset <name>`:
+Seven **signature presets** ship in the package — run `--onboard` to pick one from the live preview, or `--onboard --preset <name>`. Three are gradient; the rest are sober solid-color looks, each with a thematic Nerd Font badge:
 
 | Preset | Gradient? | Look |
 | --- | :---: | --- |
 | **`akkaz`** *(default)* | ✅ | Retro **indigo → amber** identity row (`model ⚡ effort`); context/session/weekly bars colored **dynamically** by usage; reset timers tracking their bar; compaction counter (`⊟ compact N`). |
+| **`barocco`** | ✅ | Italian tricolore — **green → white → red**. |
 | **`vapor`** | ✅ | Synthwave **cyan → magenta** neon. |
-| **`bosco`** | ✅ | Forest greens; usage runs **green → amber** as it fills. |
-| **`brace`** | ✅ | Embers **amber → deep-red** — runs hot toward your limits. |
-| **`barocco`** | ✅ | Italian tricolore 🇮🇹 — **green → white → red**. |
-| **`inchiostro`** | — | Ink on paper: solid **monochrome**, one cyan accent. |
-| **`carbonara`** | — | Cozy & warm: **egg-yellow + pancetta** tones. |
+| **`inchiostro`** | — | Ink on paper ✎ — solid **monochrome**, one cyan accent. |
+| **`carbonara`** | — | Warm & cozy  — egg-yellow + pancetta tones. |
+| **`ferro`** | — | Brushed steel  — cool gray-blue, calm and professional. |
+| **`bosco`** | — | Forest  — solid greens, quiet and natural. |
 
 Drop-in JSON configs also live in [`presets/`](./presets) — copy one straight into `~/.config/ccstatusline/settings.json`:
 

@@ -3,11 +3,22 @@
     "lines": [
         [
             {
+                "id": "badge",
+                "type": "custom-text",
+                "customText": "",
+                "color": "hex:52b788"
+            },
+            {
+                "id": "spB",
+                "type": "separator",
+                "character": " "
+            },
+            {
                 "id": "model",
                 "type": "model",
                 "rawValue": true,
                 "bold": true,
-                "color": "gradient:1b4332-40916c-95d5b2"
+                "color": "hex:b7e4c7"
             },
             {
                 "id": "spM",
@@ -18,7 +29,7 @@
                 "id": "lbl-think",
                 "type": "custom-text",
                 "customText": "",
-                "color": "hex:95d5b2"
+                "color": "hex:52b788"
             },
             {
                 "id": "spT",
@@ -29,7 +40,7 @@
                 "id": "think",
                 "type": "thinking-effort",
                 "rawValue": true,
-                "color": "gradient:40916c-95d5b2"
+                "color": "hex:6f8f7d"
             },
             {
                 "id": "s0",
@@ -40,7 +51,7 @@
                 "id": "lbl-ctx",
                 "type": "custom-text",
                 "customText": "Context",
-                "color": "hex:74c69d"
+                "color": "hex:6f8f7d"
             },
             {
                 "id": "sp1",
@@ -51,11 +62,10 @@
                 "id": "ctx-bar",
                 "type": "context-bar",
                 "rawValue": true,
-                "color": "gradient:52b788-95d5b2-ffba08",
+                "color": "hex:52b788",
                 "metadata": {
                     "display": "slider-only"
-                },
-                "dynamic": true
+                }
             },
             {
                 "id": "sp2",
@@ -66,8 +76,7 @@
                 "id": "ctx-pct",
                 "type": "context-percentage",
                 "rawValue": true,
-                "color": "gradient:52b788-95d5b2-ffba08",
-                "dynamic": true
+                "color": "hex:52b788"
             }
         ],
         [
@@ -75,7 +84,7 @@
                 "id": "lbl-ses",
                 "type": "custom-text",
                 "customText": "Session",
-                "color": "hex:74c69d"
+                "color": "hex:6f8f7d"
             },
             {
                 "id": "sp3",
@@ -86,11 +95,10 @@
                 "id": "ses-bar",
                 "type": "session-usage",
                 "rawValue": true,
-                "color": "gradient:52b788-95d5b2-ffba08",
+                "color": "hex:52b788",
                 "metadata": {
                     "display": "slider-only"
-                },
-                "dynamic": true
+                }
             },
             {
                 "id": "ses-b-sp",
@@ -101,8 +109,7 @@
                 "id": "ses",
                 "type": "session-usage",
                 "rawValue": true,
-                "color": "gradient:52b788-95d5b2-ffba08",
-                "dynamic": true
+                "color": "hex:52b788"
             },
             {
                 "id": "s2",
@@ -113,7 +120,7 @@
                 "id": "lbl-r1",
                 "type": "custom-text",
                 "customText": "",
-                "color": "hex:74c69d"
+                "color": "hex:6f8f7d"
             },
             {
                 "id": "sp4",
@@ -124,8 +131,7 @@
                 "id": "reset",
                 "type": "reset-timer",
                 "rawValue": true,
-                "color": "gradient:52b788-95d5b2-ffba08",
-                "dynamic": true
+                "color": "hex:52b788"
             },
             {
                 "id": "s3",
@@ -136,7 +142,7 @@
                 "id": "lbl-wk",
                 "type": "custom-text",
                 "customText": "Week",
-                "color": "hex:74c69d"
+                "color": "hex:6f8f7d"
             },
             {
                 "id": "sp5",
@@ -147,11 +153,10 @@
                 "id": "wk-bar",
                 "type": "weekly-usage",
                 "rawValue": true,
-                "color": "gradient:52b788-95d5b2-ffba08",
+                "color": "hex:52b788",
                 "metadata": {
                     "display": "slider-only"
-                },
-                "dynamic": true
+                }
             },
             {
                 "id": "wk-b-sp",
@@ -162,8 +167,7 @@
                 "id": "wk",
                 "type": "weekly-usage",
                 "rawValue": true,
-                "color": "gradient:52b788-95d5b2-ffba08",
-                "dynamic": true
+                "color": "hex:52b788"
             },
             {
                 "id": "s4",
@@ -174,7 +178,7 @@
                 "id": "lbl-r2",
                 "type": "custom-text",
                 "customText": "",
-                "color": "hex:74c69d"
+                "color": "hex:6f8f7d"
             },
             {
                 "id": "sp6",
@@ -185,8 +189,7 @@
                 "id": "wk-reset",
                 "type": "weekly-reset-timer",
                 "rawValue": true,
-                "color": "gradient:52b788-95d5b2-ffba08",
-                "dynamic": true
+                "color": "hex:52b788"
             }
         ]
     ],

@@ -282,7 +282,10 @@ async function main() {
     if (process.argv.includes('--onboard')) {
         const presetIdx = process.argv.indexOf('--preset');
         const preset = presetIdx !== -1 ? process.argv[presetIdx + 1] : undefined;
-        await runOnboard({ skipFont: process.argv.includes('--no-font'), preset });
+        const result = await runOnboard({ skipFont: process.argv.includes('--no-font'), preset });
+        if (result.openTui) {
+            runTUI();
+        }
         return;
     }
 

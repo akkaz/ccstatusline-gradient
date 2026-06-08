@@ -78458,11 +78458,22 @@ var bosco_default = {
   lines: [
     [
       {
+        id: "badge",
+        type: "custom-text",
+        customText: "",
+        color: "hex:52b788"
+      },
+      {
+        id: "spB",
+        type: "separator",
+        character: " "
+      },
+      {
         id: "model",
         type: "model",
         rawValue: true,
         bold: true,
-        color: "gradient:1b4332-40916c-95d5b2"
+        color: "hex:b7e4c7"
       },
       {
         id: "spM",
@@ -78473,7 +78484,7 @@ var bosco_default = {
         id: "lbl-think",
         type: "custom-text",
         customText: "",
-        color: "hex:95d5b2"
+        color: "hex:52b788"
       },
       {
         id: "spT",
@@ -78484,7 +78495,7 @@ var bosco_default = {
         id: "think",
         type: "thinking-effort",
         rawValue: true,
-        color: "gradient:40916c-95d5b2"
+        color: "hex:6f8f7d"
       },
       {
         id: "s0",
@@ -78495,7 +78506,7 @@ var bosco_default = {
         id: "lbl-ctx",
         type: "custom-text",
         customText: "Context",
-        color: "hex:74c69d"
+        color: "hex:6f8f7d"
       },
       {
         id: "sp1",
@@ -78506,11 +78517,10 @@ var bosco_default = {
         id: "ctx-bar",
         type: "context-bar",
         rawValue: true,
-        color: "gradient:52b788-95d5b2-ffba08",
+        color: "hex:52b788",
         metadata: {
           display: "slider-only"
-        },
-        dynamic: true
+        }
       },
       {
         id: "sp2",
@@ -78521,8 +78531,7 @@ var bosco_default = {
         id: "ctx-pct",
         type: "context-percentage",
         rawValue: true,
-        color: "gradient:52b788-95d5b2-ffba08",
-        dynamic: true
+        color: "hex:52b788"
       }
     ],
     [
@@ -78530,7 +78539,7 @@ var bosco_default = {
         id: "lbl-ses",
         type: "custom-text",
         customText: "Session",
-        color: "hex:74c69d"
+        color: "hex:6f8f7d"
       },
       {
         id: "sp3",
@@ -78541,11 +78550,10 @@ var bosco_default = {
         id: "ses-bar",
         type: "session-usage",
         rawValue: true,
-        color: "gradient:52b788-95d5b2-ffba08",
+        color: "hex:52b788",
         metadata: {
           display: "slider-only"
-        },
-        dynamic: true
+        }
       },
       {
         id: "ses-b-sp",
@@ -78556,8 +78564,7 @@ var bosco_default = {
         id: "ses",
         type: "session-usage",
         rawValue: true,
-        color: "gradient:52b788-95d5b2-ffba08",
-        dynamic: true
+        color: "hex:52b788"
       },
       {
         id: "s2",
@@ -78568,7 +78575,7 @@ var bosco_default = {
         id: "lbl-r1",
         type: "custom-text",
         customText: "",
-        color: "hex:74c69d"
+        color: "hex:6f8f7d"
       },
       {
         id: "sp4",
@@ -78579,8 +78586,7 @@ var bosco_default = {
         id: "reset",
         type: "reset-timer",
         rawValue: true,
-        color: "gradient:52b788-95d5b2-ffba08",
-        dynamic: true
+        color: "hex:52b788"
       },
       {
         id: "s3",
@@ -78591,7 +78597,7 @@ var bosco_default = {
         id: "lbl-wk",
         type: "custom-text",
         customText: "Week",
-        color: "hex:74c69d"
+        color: "hex:6f8f7d"
       },
       {
         id: "sp5",
@@ -78602,11 +78608,10 @@ var bosco_default = {
         id: "wk-bar",
         type: "weekly-usage",
         rawValue: true,
-        color: "gradient:52b788-95d5b2-ffba08",
+        color: "hex:52b788",
         metadata: {
           display: "slider-only"
-        },
-        dynamic: true
+        }
       },
       {
         id: "wk-b-sp",
@@ -78617,8 +78622,7 @@ var bosco_default = {
         id: "wk",
         type: "weekly-usage",
         rawValue: true,
-        color: "gradient:52b788-95d5b2-ffba08",
-        dynamic: true
+        color: "hex:52b788"
       },
       {
         id: "s4",
@@ -78629,7 +78633,7 @@ var bosco_default = {
         id: "lbl-r2",
         type: "custom-text",
         customText: "",
-        color: "hex:74c69d"
+        color: "hex:6f8f7d"
       },
       {
         id: "sp6",
@@ -78640,222 +78644,7 @@ var bosco_default = {
         id: "wk-reset",
         type: "weekly-reset-timer",
         rawValue: true,
-        color: "gradient:52b788-95d5b2-ffba08",
-        dynamic: true
-      }
-    ]
-  ],
-  flexMode: "full-minus-40",
-  compactThreshold: 60,
-  colorLevel: 3,
-  inheritSeparatorColors: false,
-  globalBold: false,
-  gitCacheTtlSeconds: 5,
-  minimalistMode: false,
-  powerline: {
-    enabled: false,
-    separators: [
-      ""
-    ],
-    separatorInvertBackground: [
-      false
-    ],
-    startCaps: [],
-    endCaps: [],
-    autoAlign: false,
-    continueThemeAcrossLines: false
-  }
-};
-// src/presets/brace.json
-var brace_default = {
-  version: 4,
-  lines: [
-    [
-      {
-        id: "model",
-        type: "model",
-        rawValue: true,
-        bold: true,
-        color: "gradient:6a040f-d00000-ffba08"
-      },
-      {
-        id: "spM",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "lbl-think",
-        type: "custom-text",
-        customText: "",
-        color: "hex:ffba08"
-      },
-      {
-        id: "spT",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "think",
-        type: "thinking-effort",
-        rawValue: true,
-        color: "gradient:d00000-ffba08"
-      },
-      {
-        id: "s0",
-        type: "separator",
-        color: "hex:3d1f1f"
-      },
-      {
-        id: "lbl-ctx",
-        type: "custom-text",
-        customText: "Context",
-        color: "hex:e85d04"
-      },
-      {
-        id: "sp1",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "ctx-bar",
-        type: "context-bar",
-        rawValue: true,
-        color: "gradient:ffba08-f48c06-dc2f02",
-        metadata: {
-          display: "slider-only"
-        },
-        dynamic: true
-      },
-      {
-        id: "sp2",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "ctx-pct",
-        type: "context-percentage",
-        rawValue: true,
-        color: "gradient:ffba08-f48c06-dc2f02",
-        dynamic: true
-      }
-    ],
-    [
-      {
-        id: "lbl-ses",
-        type: "custom-text",
-        customText: "Session",
-        color: "hex:e85d04"
-      },
-      {
-        id: "sp3",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "ses-bar",
-        type: "session-usage",
-        rawValue: true,
-        color: "gradient:ffba08-f48c06-dc2f02",
-        metadata: {
-          display: "slider-only"
-        },
-        dynamic: true
-      },
-      {
-        id: "ses-b-sp",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "ses",
-        type: "session-usage",
-        rawValue: true,
-        color: "gradient:ffba08-f48c06-dc2f02",
-        dynamic: true
-      },
-      {
-        id: "s2",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "lbl-r1",
-        type: "custom-text",
-        customText: "",
-        color: "hex:e85d04"
-      },
-      {
-        id: "sp4",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "reset",
-        type: "reset-timer",
-        rawValue: true,
-        color: "gradient:ffba08-f48c06-dc2f02",
-        dynamic: true
-      },
-      {
-        id: "s3",
-        type: "separator",
-        color: "hex:3d1f1f"
-      },
-      {
-        id: "lbl-wk",
-        type: "custom-text",
-        customText: "Week",
-        color: "hex:e85d04"
-      },
-      {
-        id: "sp5",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "wk-bar",
-        type: "weekly-usage",
-        rawValue: true,
-        color: "gradient:ffba08-f48c06-dc2f02",
-        metadata: {
-          display: "slider-only"
-        },
-        dynamic: true
-      },
-      {
-        id: "wk-b-sp",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "wk",
-        type: "weekly-usage",
-        rawValue: true,
-        color: "gradient:ffba08-f48c06-dc2f02",
-        dynamic: true
-      },
-      {
-        id: "s4",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "lbl-r2",
-        type: "custom-text",
-        customText: "",
-        color: "hex:e85d04"
-      },
-      {
-        id: "sp6",
-        type: "separator",
-        character: " "
-      },
-      {
-        id: "wk-reset",
-        type: "weekly-reset-timer",
-        rawValue: true,
-        color: "gradient:ffba08-f48c06-dc2f02",
-        dynamic: true
+        color: "hex:52b788"
       }
     ]
   ],
@@ -78886,6 +78675,17 @@ var carbonara_default = {
   lines: [
     [
       {
+        id: "badge",
+        type: "custom-text",
+        customText: "",
+        color: "hex:e09f3e"
+      },
+      {
+        id: "spB",
+        type: "separator",
+        character: " "
+      },
+      {
         id: "model",
         type: "model",
         rawValue: true,
@@ -78901,7 +78701,7 @@ var carbonara_default = {
         id: "lbl-think",
         type: "custom-text",
         customText: "",
-        color: "hex:2b2118"
+        color: "hex:e09f3e"
       },
       {
         id: "spT",
@@ -78912,7 +78712,7 @@ var carbonara_default = {
         id: "think",
         type: "thinking-effort",
         rawValue: true,
-        color: "hex:e09f3e"
+        color: "hex:b08968"
       },
       {
         id: "s0",
@@ -78934,7 +78734,7 @@ var carbonara_default = {
         id: "ctx-bar",
         type: "context-bar",
         rawValue: true,
-        color: "hex:f6bd60",
+        color: "hex:e9c46a",
         metadata: {
           display: "slider-only"
         }
@@ -78948,7 +78748,7 @@ var carbonara_default = {
         id: "ctx-pct",
         type: "context-percentage",
         rawValue: true,
-        color: "hex:f6bd60"
+        color: "hex:e9c46a"
       }
     ],
     [
@@ -78967,7 +78767,7 @@ var carbonara_default = {
         id: "ses-bar",
         type: "session-usage",
         rawValue: true,
-        color: "hex:f6bd60",
+        color: "hex:e9c46a",
         metadata: {
           display: "slider-only"
         }
@@ -78981,7 +78781,7 @@ var carbonara_default = {
         id: "ses",
         type: "session-usage",
         rawValue: true,
-        color: "hex:f6bd60"
+        color: "hex:e9c46a"
       },
       {
         id: "s2",
@@ -79003,7 +78803,7 @@ var carbonara_default = {
         id: "reset",
         type: "reset-timer",
         rawValue: true,
-        color: "hex:f6bd60"
+        color: "hex:e9c46a"
       },
       {
         id: "s3",
@@ -79025,7 +78825,7 @@ var carbonara_default = {
         id: "wk-bar",
         type: "weekly-usage",
         rawValue: true,
-        color: "hex:f6bd60",
+        color: "hex:e9c46a",
         metadata: {
           display: "slider-only"
         }
@@ -79039,7 +78839,7 @@ var carbonara_default = {
         id: "wk",
         type: "weekly-usage",
         rawValue: true,
-        color: "hex:f6bd60"
+        color: "hex:e9c46a"
       },
       {
         id: "s4",
@@ -79061,7 +78861,224 @@ var carbonara_default = {
         id: "wk-reset",
         type: "weekly-reset-timer",
         rawValue: true,
-        color: "hex:f6bd60"
+        color: "hex:e9c46a"
+      }
+    ]
+  ],
+  flexMode: "full-minus-40",
+  compactThreshold: 60,
+  colorLevel: 3,
+  inheritSeparatorColors: false,
+  globalBold: false,
+  gitCacheTtlSeconds: 5,
+  minimalistMode: false,
+  powerline: {
+    enabled: false,
+    separators: [
+      ""
+    ],
+    separatorInvertBackground: [
+      false
+    ],
+    startCaps: [],
+    endCaps: [],
+    autoAlign: false,
+    continueThemeAcrossLines: false
+  }
+};
+// src/presets/ferro.json
+var ferro_default = {
+  version: 4,
+  lines: [
+    [
+      {
+        id: "badge",
+        type: "custom-text",
+        customText: "",
+        color: "hex:88c0d0"
+      },
+      {
+        id: "spB",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "model",
+        type: "model",
+        rawValue: true,
+        bold: true,
+        color: "hex:c7d0d9"
+      },
+      {
+        id: "spM",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-think",
+        type: "custom-text",
+        customText: "",
+        color: "hex:88c0d0"
+      },
+      {
+        id: "spT",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "think",
+        type: "thinking-effort",
+        rawValue: true,
+        color: "hex:7d8aa0"
+      },
+      {
+        id: "s0",
+        type: "separator",
+        color: "hex:3b4252"
+      },
+      {
+        id: "lbl-ctx",
+        type: "custom-text",
+        customText: "Context",
+        color: "hex:7d8aa0"
+      },
+      {
+        id: "sp1",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-bar",
+        type: "context-bar",
+        rawValue: true,
+        color: "hex:5e81ac",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "sp2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ctx-pct",
+        type: "context-percentage",
+        rawValue: true,
+        color: "hex:5e81ac"
+      }
+    ],
+    [
+      {
+        id: "lbl-ses",
+        type: "custom-text",
+        customText: "Session",
+        color: "hex:7d8aa0"
+      },
+      {
+        id: "sp3",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses-bar",
+        type: "session-usage",
+        rawValue: true,
+        color: "hex:5e81ac",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "ses-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "ses",
+        type: "session-usage",
+        rawValue: true,
+        color: "hex:5e81ac"
+      },
+      {
+        id: "s2",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r1",
+        type: "custom-text",
+        customText: "",
+        color: "hex:7d8aa0"
+      },
+      {
+        id: "sp4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "reset",
+        type: "reset-timer",
+        rawValue: true,
+        color: "hex:5e81ac"
+      },
+      {
+        id: "s3",
+        type: "separator",
+        color: "hex:3b4252"
+      },
+      {
+        id: "lbl-wk",
+        type: "custom-text",
+        customText: "Week",
+        color: "hex:7d8aa0"
+      },
+      {
+        id: "sp5",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-bar",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "hex:5e81ac",
+        metadata: {
+          display: "slider-only"
+        }
+      },
+      {
+        id: "wk-b-sp",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk",
+        type: "weekly-usage",
+        rawValue: true,
+        color: "hex:5e81ac"
+      },
+      {
+        id: "s4",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "lbl-r2",
+        type: "custom-text",
+        customText: "",
+        color: "hex:7d8aa0"
+      },
+      {
+        id: "sp6",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "wk-reset",
+        type: "weekly-reset-timer",
+        rawValue: true,
+        color: "hex:5e81ac"
       }
     ]
   ],
@@ -79092,6 +79109,17 @@ var inchiostro_default = {
   lines: [
     [
       {
+        id: "badge",
+        type: "custom-text",
+        customText: "",
+        color: "hex:22d3ee"
+      },
+      {
+        id: "spB",
+        type: "separator",
+        character: " "
+      },
+      {
         id: "model",
         type: "model",
         rawValue: true,
@@ -79118,7 +79146,7 @@ var inchiostro_default = {
         id: "think",
         type: "thinking-effort",
         rawValue: true,
-        color: "hex:9ca3af"
+        color: "hex:6b7280"
       },
       {
         id: "s0",
@@ -79508,6 +79536,7 @@ var vapor_default = {
 };
 
 // src/utils/onboard.ts
+init_ansi();
 init_colors();
 init_gradient();
 await __promiseAll([
@@ -79517,15 +79546,17 @@ await __promiseAll([
 ]);
 var PRESET_LIST = [
   { name: "akkaz", settings: akkaz_default, blurb: "Retro indigo→amber gradient · full telemetry · dynamic bars" },
+  { name: "barocco", settings: barocco_default, blurb: "Italian tricolore · green→white→red gradient" },
   { name: "vapor", settings: vapor_default, blurb: "Synthwave · cyan→magenta neon gradient" },
-  { name: "bosco", settings: bosco_default, blurb: "Forest greens · usage runs green→amber as it fills" },
-  { name: "brace", settings: brace_default, blurb: "Embers · amber→deep-red, runs hot toward your limits" },
-  { name: "barocco", settings: barocco_default, blurb: "Italian tricolore \uD83C\uDDEE\uD83C\uDDF9 · green→white→red" },
-  { name: "inchiostro", settings: inchiostro_default, blurb: "Ink on paper · solid monochrome, one cyan accent (no gradient)" },
-  { name: "carbonara", settings: carbonara_default, blurb: "Cozy & warm · egg-yellow + pancetta tones (no gradient)" }
+  { name: "inchiostro", settings: inchiostro_default, blurb: "Ink on paper ✎ · solid monochrome, cyan accent" },
+  { name: "carbonara", settings: carbonara_default, blurb: "Warm & cozy  · egg-yellow + pancetta" },
+  { name: "ferro", settings: ferro_default, blurb: "Brushed steel  · cool gray-blue, calm and pro" },
+  { name: "bosco", settings: bosco_default, blurb: "Forest  · solid greens, quiet and natural" }
 ];
 var PRESETS = Object.fromEntries(PRESET_LIST.map((p) => [p.name, p.settings]));
 var DEFAULT_PRESET = "akkaz";
+var OPEN_TUI = "\x00open-tui";
+var CANCEL = "\x00cancel";
 var NERD_FONT_URL = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip";
 var FONT_MATCH = "JetBrainsMonoNerdFont-*.ttf";
 var AKKAZ_BANNER = [
@@ -79597,40 +79628,89 @@ function renderPreviewLines(preset) {
 function isInteractive() {
   return process.stdin.isTTY && process.stdout.isTTY;
 }
-function ask(question) {
-  return new Promise((resolve6) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve6(answer);
-    });
+function buildPickerRegion(entries, selected, level, width) {
+  const fit = (s) => truncateStyledText(s, Math.max(0, width - 1), { ellipsis: true });
+  const lines = [];
+  entries.forEach((e, i) => {
+    const on = i === selected;
+    const marker = on ? gradientText("❯", level) : " ";
+    const num = source_default.bold(String(i + 1));
+    const name = on ? source_default.bold(gradientText(e.label, level)) : source_default.bold(e.label);
+    lines.push(fit(`  ${marker} ${num}. ${name}  ${source_default.dim(e.blurb)}`));
+    lines.push(fit(`     ${e.preview}`));
   });
+  lines.push("");
+  lines.push(`  ${source_default.dim("↑/↓ move · 1-9 jump · Enter confirm · q quit")}`);
+  return lines;
 }
 async function pickPreset(level) {
+  const width = process.stdout.columns && process.stdout.columns > 0 ? process.stdout.columns : 100;
+  const entries = PRESET_LIST.map((p) => ({
+    label: p.name,
+    blurb: p.blurb,
+    preview: renderPreviewLines(p.settings)[0] ?? "",
+    value: p.name
+  }));
+  entries.push({
+    label: "Full configurator",
+    blurb: "none of these — build your own in the TUI",
+    preview: source_default.dim("     ↳ opens the interactive editor"),
+    value: OPEN_TUI
+  });
   log2(`  ${source_default.dim("Pick a style — live preview of each:")}
 `);
-  PRESET_LIST.forEach((p, i) => {
-    log2(`  ${source_default.bold(String(i + 1))}. ${gradientText(p.name, level)}  ${source_default.dim(p.blurb)}`);
-    const preview = renderPreviewLines(p.settings);
-    if (preview[0]) {
-      log2(`     ${preview[0]}`);
-    }
-    log2("");
+  let selected = 0;
+  const regionLines = entries.length * 2 + 2;
+  let drawn = false;
+  const draw = () => {
+    const body = buildPickerRegion(entries, selected, level, width).join(`
+`);
+    process.stdout.write(`${drawn ? `\x1B[${regionLines}A` : ""}\x1B[0J${body}
+`);
+    drawn = true;
+  };
+  readline.emitKeypressEvents(process.stdin);
+  const wasRaw = process.stdin.isRaw;
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+  }
+  process.stdin.resume();
+  return new Promise((resolve6) => {
+    const cleanup = () => {
+      process.stdin.removeListener("keypress", onKey);
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(wasRaw);
+      }
+      process.stdin.pause();
+      process.stdout.write(`
+`);
+    };
+    const finish = (value) => {
+      cleanup();
+      resolve6(value);
+    };
+    const onKey = (str, key) => {
+      if (key.name === "up" || key.name === "k") {
+        selected = (selected - 1 + entries.length) % entries.length;
+        draw();
+      } else if (key.name === "down" || key.name === "j") {
+        selected = (selected + 1) % entries.length;
+        draw();
+      } else if (str && /^[1-9]$/.test(str) && Number(str) <= entries.length) {
+        selected = Number(str) - 1;
+        draw();
+      } else if (key.name === "return" || key.name === "enter") {
+        finish(entries[selected]?.value ?? DEFAULT_PRESET);
+      } else if (key.name === "escape" || str === "q") {
+        finish(CANCEL);
+      } else if (key.ctrl && key.name === "c") {
+        cleanup();
+        process.exit(130);
+      }
+    };
+    process.stdin.on("keypress", onKey);
+    draw();
   });
-  const answer = (await ask(`  Choose 1-${PRESET_LIST.length} or a name (Enter = ${DEFAULT_PRESET}): `)).trim();
-  if (answer === "") {
-    return DEFAULT_PRESET;
-  }
-  const byNumber = PRESET_LIST[Number.parseInt(answer, 10) - 1];
-  if (byNumber) {
-    return byNumber.name;
-  }
-  const byName = PRESET_LIST.find((p) => p.name === answer.toLowerCase());
-  if (byName) {
-    return byName.name;
-  }
-  log2(`  ${source_default.dim(`"${answer}" not recognized — using ${DEFAULT_PRESET}.`)}`);
-  return DEFAULT_PRESET;
 }
 function download(url2, dest, redirects = 0) {
   return new Promise((resolve6, reject2) => {
@@ -79703,7 +79783,7 @@ async function installNerdFont() {
 async function runOnboard(options = {}) {
   if (options.preset && !PRESETS[options.preset]) {
     log2(`  ⚠ Unknown preset "${options.preset}". Available: ${PRESET_LIST.map((p) => p.name).join(", ")}.`);
-    return;
+    return { openTui: false };
   }
   source_default.level = akkaz_default.colorLevel;
   updateColorMap();
@@ -79713,6 +79793,13 @@ async function runOnboard(options = {}) {
   log2(`   ${gradientText("ccstatusline · gradient edition", level)}
 `);
   const presetName = options.preset ?? (isInteractive() ? await pickPreset(level) : DEFAULT_PRESET);
+  if (presetName === OPEN_TUI) {
+    return { openTui: true };
+  }
+  if (presetName === CANCEL) {
+    log2(`  ${source_default.dim("Cancelled — nothing was changed.")}`);
+    return { openTui: false };
+  }
   const presetSettings = PRESETS[presetName];
   log2(`  ${source_default.dim(`Style: ${presetName}`)}
 `);
@@ -79750,6 +79837,7 @@ async function runOnboard(options = {}) {
   ${gradientText("All set! Restart Claude Code to see it in action.", level)}`);
   log2(`  ${source_default.dim("Tip: rerun")} npx -y ccstatusline-gradient@latest ${source_default.dim("anytime to tweak it in the TUI.")}`);
   log2(`  ${gradientText("— forged with ❤ by akkaz", level)}`);
+  return { openTui: false };
 }
 
 // src/ccstatusline.ts
@@ -80084,7 +80172,10 @@ async function main() {
   if (process.argv.includes("--onboard")) {
     const presetIdx = process.argv.indexOf("--preset");
     const preset = presetIdx !== -1 ? process.argv[presetIdx + 1] : undefined;
-    await runOnboard({ skipFont: process.argv.includes("--no-font"), preset });
+    const result2 = await runOnboard({ skipFont: process.argv.includes("--no-font"), preset });
+    if (result2.openTui) {
+      runTUI();
+    }
     return;
   }
   if (!process.stdin.isTTY) {

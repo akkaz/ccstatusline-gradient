@@ -3,6 +3,17 @@
     "lines": [
         [
             {
+                "id": "badge",
+                "type": "custom-text",
+                "customText": "",
+                "color": "hex:22d3ee"
+            },
+            {
+                "id": "spB",
+                "type": "separator",
+                "character": " "
+            },
+            {
                 "id": "model",
                 "type": "model",
                 "rawValue": true,
@@ -29,7 +40,7 @@
                 "id": "think",
                 "type": "thinking-effort",
                 "rawValue": true,
-                "color": "hex:9ca3af"
+                "color": "hex:6b7280"
             },
             {
                 "id": "s0",
