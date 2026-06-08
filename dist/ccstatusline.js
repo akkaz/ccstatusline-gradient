@@ -57355,7 +57355,7 @@ function getTerminalWidth() {
 function canDetectTerminalWidth() {
   return probeTerminalWidth() !== null;
 }
-var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.5.0", MIN_RELIABLE_TERMINAL_WIDTH = 40;
+var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.5.1", MIN_RELIABLE_TERMINAL_WIDTH = 40;
 var init_terminal = () => {};
 
 // src/utils/renderer.ts
@@ -77993,6 +77993,7 @@ function handleHookInput(input) {
 await init_jsonl();
 
 // src/utils/onboard.ts
+init_source();
 import { execFileSync as execFileSync7 } from "child_process";
 import * as fs18 from "fs";
 import * as https3 from "https";
@@ -78452,17 +78453,82 @@ var barocco_default = {
 };
 
 // src/utils/onboard.ts
+init_colors();
+init_gradient();
 await __promiseAll([
   init_claude_settings(),
-  init_config()
+  init_config(),
+  init_renderer2()
 ]);
 var PRESETS = { akkaz: akkaz_default, barocco: barocco_default };
 var DEFAULT_PRESET = "akkaz";
 var NERD_FONT_URL = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip";
 var FONT_MATCH = "JetBrainsMonoNerdFont-*.ttf";
+var AKKAZ_BANNER = [
+  " █████╗ ██╗  ██╗██╗  ██╗ █████╗ ███████╗",
+  "██╔══██╗██║ ██╔╝██║ ██╔╝██╔══██╗╚══███╔╝",
+  "███████║█████╔╝ █████╔╝ ███████║  ███╔╝ ",
+  "██╔══██║██╔═██╗ ██╔═██╗ ██╔══██║ ███╔╝  ",
+  "██║  ██║██║  ██╗██║  ██╗██║  ██║███████╗",
+  "╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝"
+];
+var RETRO_STOPS = parseGradientSpec("gradient:retro");
+var RESET_FG = "\x1B[39m";
 function log2(msg) {
   process.stdout.write(`${msg}
 `);
+}
+function colorLevelString(level) {
+  if (level >= 3) {
+    return "truecolor";
+  }
+  if (level === 2) {
+    return "ansi256";
+  }
+  return "ansi16";
+}
+function renderBanner(level) {
+  if (level === "ansi16" || !RETRO_STOPS) {
+    return AKKAZ_BANNER.join(`
+`);
+  }
+  const last2 = Math.max(1, AKKAZ_BANNER.length - 1);
+  return AKKAZ_BANNER.map((row, i) => gradientCodeAt(RETRO_STOPS, i / last2, level) + row + RESET_FG).join(`
+`);
+}
+function gradientText(text, level) {
+  if (level === "ansi16" || !RETRO_STOPS) {
+    return text;
+  }
+  return applyGradientToText(text, RETRO_STOPS, level) + RESET_FG;
+}
+function renderPreviewLines(preset) {
+  const terminalWidth = process.stdout.columns && process.stdout.columns > 0 ? process.stdout.columns : 100;
+  const lines = preset.lines;
+  const baseContext = {
+    terminalWidth,
+    isPreview: true,
+    minimalist: preset.minimalistMode,
+    gitCacheTtlSeconds: preset.gitCacheTtlSeconds
+  };
+  const preRendered = preRenderAllWidgets(lines, preset, baseContext);
+  const maxWidths = calculateMaxWidthsFromPreRendered(preRendered, preset);
+  const out = [];
+  let separatorIndex = 0;
+  for (let i = 0;i < lines.length; i++) {
+    const items = lines[i];
+    if (items && items.length > 0) {
+      const line = renderStatusLine(items, preset, {
+        ...baseContext,
+        lineIndex: i,
+        globalSeparatorIndex: separatorIndex,
+        globalPowerlineThemeIndex: 0
+      }, preRendered[i] ?? [], maxWidths);
+      out.push(line);
+      separatorIndex = advanceGlobalSeparatorIndex(separatorIndex, items);
+    }
+  }
+  return out;
 }
 function download(url2, dest, redirects = 0) {
   return new Promise((resolve6, reject2) => {
@@ -78539,9 +78605,16 @@ async function runOnboard(options = {}) {
     log2(`  ⚠ Unknown preset "${presetName}". Available: ${Object.keys(PRESETS).join(", ")}.`);
     return;
   }
-  log2(`ccstatusline-gradient — onboarding (preset: ${presetName})
+  const presetSettings = preset;
+  const level = colorLevelString(presetSettings.colorLevel);
+  source_default.level = presetSettings.colorLevel;
+  updateColorMap();
+  log2("");
+  log2(renderBanner(level));
+  log2(`   ${gradientText("ccstatusline · gradient edition", level)}`);
+  log2(`   ${source_default.dim(`onboarding · preset: ${presetName}`)}
 `);
-  await saveSettings(preset);
+  await saveSettings(presetSettings);
   log2(`  ✓ Wrote status line config → ${getConfigPath()}`);
   let claudeSettings;
   try {
@@ -78561,9 +78634,20 @@ async function runOnboard(options = {}) {
   } else {
     await installNerdFont();
   }
+  try {
+    const previewLines = renderPreviewLines(presetSettings);
+    if (previewLines.length > 0) {
+      log2(`
+  ${source_default.dim("Your status line, live:")}`);
+      for (const line of previewLines) {
+        log2(`  ${line}`);
+      }
+    }
+  } catch {}
   log2(`
-Done! Restart Claude Code to see your status line.`);
-  log2('Tip: run "npx -y ccstatusline-gradient@latest" anytime to tweak it in the TUI.');
+  ${gradientText("All set! Restart Claude Code to see it in action.", level)}`);
+  log2(`  ${source_default.dim("Tip: rerun")} npx -y ccstatusline-gradient@latest ${source_default.dim("anytime to tweak it in the TUI.")}`);
+  log2(`  ${gradientText("— forged with ❤ by akkaz", level)}`);
 }
 
 // src/ccstatusline.ts
