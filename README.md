@@ -18,6 +18,8 @@ On a fresh machine or SSH box, this sets up **everything** in four guided steps 
 npx -y ccstatusline-gradient@latest --onboard
 ```
 
+![The 4-step onboarding wizard](./assets/onboard-wizard.png)
+
 1. **Terminal icons** — it shows you three test glyphs and asks what you see. Boxes or `?` marks? Pick **universal symbols** (plain Unicode, works with any font — no install) or have it download the **JetBrainsMono Nerd Font** for the real icons.
 2. **Pick your style** — **↑/↓** through every built-in preset with a **live preview** of each (rendered with the icons you chose in step 1). None fit? Pick **Full configurator** to jump straight into the TUI.
 3. **Hook into Claude Code** — choose `npx` or `bunx` for the `statusLine` command, or skip and wire it yourself.
