@@ -37,6 +37,10 @@ export function isCustomConfigPath(): boolean {
     return settingsPath !== DEFAULT_SETTINGS_PATH;
 }
 
+export function settingsFileExists(): boolean {
+    return fs.existsSync(settingsPath);
+}
+
 interface SettingsPaths {
     configDir: string;
     settingsPath: string;

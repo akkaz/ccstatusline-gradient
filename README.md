@@ -12,18 +12,24 @@ Shows your model, thinking effort, context usage, session/weekly limits, reset t
 
 ## Install — one command
 
-On a fresh machine or SSH box, this sets up **everything**: writes a ready-made config, wires it into Claude Code, and installs the JetBrainsMono Nerd Font for the icons.
+On a fresh machine or SSH box, this sets up **everything** in four guided steps — one choice at a time, arrow keys, live previews:
 
 ```bash
 npx -y ccstatusline-gradient@latest --onboard
 ```
 
+1. **Terminal icons** — it shows you three test glyphs and asks what you see. Boxes or `?` marks? Pick **universal symbols** (plain Unicode, works with any font — no install) or have it download the **JetBrainsMono Nerd Font** for the real icons.
+2. **Pick your style** — **↑/↓** through every built-in preset with a **live preview** of each (rendered with the icons you chose in step 1). None fit? Pick **Full configurator** to jump straight into the TUI.
+3. **Hook into Claude Code** — choose `npx` or `bunx` for the `statusLine` command, or skip and wire it yourself.
+4. **Apply & preview** — config written, your actual status line rendered on the spot.
+
 Then **restart Claude Code**. That's it.
 
-- Run it **without `--preset`** and you get an arrow-key picker — **↑/↓** through every built-in style with a **live preview** of each, **Enter** to apply. None fit? Pick **Full configurator** to jump straight into the TUI.
-- Know what you want? Skip the picker: `--onboard --preset ferro`.
-- On a remote server where the font lives in your local terminal, add `--no-font`.
-- Set your terminal font to **JetBrainsMono Nerd Font** to see the icons.
+- First time running plain `npx -y ccstatusline-gradient@latest` with no config yet? The same wizard starts automatically.
+- Know what you want? Skip the style picker: `--onboard --preset ferro`.
+- Piped/scripted runs (no TTY) skip all questions: default preset, `npx` wiring, best-effort font install (`--no-font` to skip).
+- **Esc** at any step quits without changing anything.
+- If you install the Nerd Font, remember the one manual step it can't do for you: **select "JetBrainsMono Nerd Font" in your terminal's settings** (the wizard prints the exact menu path for your terminal).
 - Your existing `~/.claude/settings.json` keys are preserved; the previous ccstatusline config is backed up.
 
 ## Configure it (interactive TUI)
@@ -40,6 +46,8 @@ In the color menu, press **`g`** for a gradient or **`d`** for a dynamic (value-
 > ```jsonc
 > { "statusLine": { "type": "command", "command": "npx -y ccstatusline-gradient@latest" } }
 > ```
+
+> No Nerd Font in your terminal? Set `"iconMode": "unicode"` in `~/.config/ccstatusline/settings.json` and every Nerd Font glyph (preset badges, powerline arrows, widget icons) is swapped for a plain-Unicode equivalent at render time — no more ⍰ boxes.
 
 ## The colors
 

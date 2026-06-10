@@ -53065,6 +53065,7 @@ var init_Settings = __esm(() => {
     globalBold: exports_external.boolean().default(false),
     gitCacheTtlSeconds: exports_external.number().min(0).max(60).default(5),
     minimalistMode: exports_external.boolean().default(false),
+    iconMode: exports_external.enum(["nerd", "unicode"]).default("nerd"),
     powerline: PowerlineConfigSchema.default({
       enabled: false,
       separators: [""],
@@ -57224,6 +57225,53 @@ function calculateContextPercentage(context) {
 }
 var init_context_percentage = () => {};
 
+// src/utils/nerd-icons.ts
+function isPrivateUse(codePoint) {
+  return codePoint >= 57344 && codePoint <= 63743 || codePoint >= 983040;
+}
+function sanitizeNerdGlyphs(text) {
+  let needsWork = false;
+  for (const ch of text) {
+    if (isPrivateUse(ch.codePointAt(0) ?? 0)) {
+      needsWork = true;
+      break;
+    }
+  }
+  if (!needsWork) {
+    return text;
+  }
+  let out = "";
+  for (const ch of text) {
+    out += isPrivateUse(ch.codePointAt(0) ?? 0) ? NERD_GLYPH_FALLBACKS[ch] ?? GENERIC_FALLBACK : ch;
+  }
+  return out;
+}
+var NERD_GLYPH_FALLBACKS, GENERIC_FALLBACK = "•";
+var init_nerd_icons = __esm(() => {
+  NERD_GLYPH_FALLBACKS = {
+    "": "▶",
+    "": "❯",
+    "": "◀",
+    "": "❮",
+    "": "▶",
+    "": "❯",
+    "": "◀",
+    "": "❮",
+    "": "↯",
+    "": "↻",
+    "": "↻",
+    "": "♣",
+    "": "Ψ",
+    "": "⚙",
+    "": "✎",
+    "": "♪",
+    "": "♪",
+    "": "⌁",
+    "": "⌁",
+    "": "◈"
+  };
+});
+
 // src/utils/terminal.ts
 import { execSync } from "child_process";
 import * as fs3 from "fs";
@@ -57355,7 +57403,7 @@ function getTerminalWidth() {
 function canDetectTerminalWidth() {
   return probeTerminalWidth() !== null;
 }
-var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.7.0", MIN_RELIABLE_TERMINAL_WIDTH = 40;
+var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.8.0", MIN_RELIABLE_TERMINAL_WIDTH = 40;
 var init_terminal = () => {};
 
 // src/utils/renderer.ts
@@ -57735,6 +57783,10 @@ function renderStatusLineWithInfo(widgets, settings, context, preRenderedWidgets
   return { line, wasTruncated };
 }
 function renderStatusLine(widgets, settings, context, preRenderedWidgets, preCalculatedMaxWidths) {
+  const line = renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, preCalculatedMaxWidths);
+  return settings.iconMode === "unicode" ? sanitizeNerdGlyphs(line) : line;
+}
+function renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, preCalculatedMaxWidths) {
   const colorLevel = getColorLevelString(settings.colorLevel);
   const powerlineSettings = settings.powerline;
   const isPowerlineMode = Boolean(powerlineSettings?.enabled);
@@ -57954,6 +58006,7 @@ var init_renderer2 = __esm(async () => {
   init_colors();
   init_context_percentage();
   init_gradient();
+  init_nerd_icons();
   init_terminal();
   await init_widgets2();
 });
@@ -69176,6 +69229,9 @@ function getConfigPath() {
 function isCustomConfigPath() {
   return settingsPath !== DEFAULT_SETTINGS_PATH;
 }
+function settingsFileExists() {
+  return fs11.existsSync(settingsPath);
+}
 function getSettingsPaths() {
   const configDir = path8.dirname(settingsPath);
   const parsedPath = path8.parse(settingsPath);
@@ -79539,6 +79595,7 @@ var vapor_default = {
 init_ansi();
 init_colors();
 init_gradient();
+init_nerd_icons();
 await __promiseAll([
   init_claude_settings(),
   init_config(),
@@ -79549,14 +79606,16 @@ var PRESET_LIST = [
   { name: "barocco", settings: barocco_default, blurb: "Italian tricolore · green→white→red gradient" },
   { name: "vapor", settings: vapor_default, blurb: "Synthwave · cyan→magenta neon gradient" },
   { name: "inchiostro", settings: inchiostro_default, blurb: "Ink on paper ✎ · solid monochrome, cyan accent" },
-  { name: "carbonara", settings: carbonara_default, blurb: "Warm & cozy  · egg-yellow + pancetta" },
-  { name: "ferro", settings: ferro_default, blurb: "Brushed steel  · cool gray-blue, calm and pro" },
-  { name: "bosco", settings: bosco_default, blurb: "Forest  · solid greens, quiet and natural" }
+  { name: "carbonara", settings: carbonara_default, blurb: "Warm & cozy · egg-yellow + pancetta" },
+  { name: "ferro", settings: ferro_default, blurb: "Brushed steel · cool gray-blue, calm and pro" },
+  { name: "bosco", settings: bosco_default, blurb: "Forest · solid greens, quiet and natural" }
 ];
 var PRESETS = Object.fromEntries(PRESET_LIST.map((p) => [p.name, p.settings]));
 var DEFAULT_PRESET = "akkaz";
-var OPEN_TUI = "\x00open-tui";
-var CANCEL = "\x00cancel";
+var OPEN_TUI = " open-tui";
+var SKIP_WIRING = " skip-wiring";
+var GLYPH_TEST = "      ";
+var TOTAL_STEPS = 4;
 var NERD_FONT_URL = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip";
 var FONT_MATCH = "JetBrainsMonoNerdFont-*.ttf";
 var AKKAZ_BANNER = [
@@ -79597,6 +79656,13 @@ function gradientText(text, level) {
   }
   return applyGradientToText(text, RETRO_STOPS, level) + RESET_FG;
 }
+function logStepHeader(step, title, level) {
+  const label = ` ${step}/${TOTAL_STEPS} · ${title} `;
+  const fill2 = Math.max(4, 58 - 4 - label.length);
+  log2(`
+  ${gradientText("────", level)}${source_default.bold(label)}${source_default.dim("─".repeat(fill2))}
+`);
+}
 function renderPreviewLines(preset) {
   const terminalWidth = process.stdout.columns && process.stdout.columns > 0 ? process.stdout.columns : 100;
   const lines = preset.lines;
@@ -79625,49 +79691,49 @@ function renderPreviewLines(preset) {
   }
   return out;
 }
+function withIconMode(preset, iconMode) {
+  return { ...preset, iconMode };
+}
 function isInteractive() {
   return process.stdin.isTTY && process.stdout.isTTY;
 }
-function buildPickerRegion(entries, selected, level, width) {
+function buildSelectRegion(entries, selected, level, width, question) {
   const fit = (s) => truncateStyledText(s, Math.max(0, width - 1), { ellipsis: true });
   const lines = [];
+  if (question) {
+    lines.push(fit(`  ${source_default.bold(question)}`));
+    lines.push("");
+  }
   entries.forEach((e, i) => {
     const on = i === selected;
     const marker = on ? gradientText("❯", level) : " ";
     const num = source_default.bold(String(i + 1));
     const name = on ? source_default.bold(gradientText(e.label, level)) : source_default.bold(e.label);
-    lines.push(fit(`  ${marker} ${num}. ${name}  ${source_default.dim(e.blurb)}`));
-    lines.push(fit(`     ${e.preview}`));
+    const blurb = e.blurb ? `  ${source_default.dim(e.blurb)}` : "";
+    lines.push(fit(`  ${marker} ${num}. ${name}${blurb}`));
+    if (e.preview !== undefined) {
+      lines.push(fit(`     ${e.preview}`));
+    }
   });
   lines.push("");
-  lines.push(`  ${source_default.dim("↑/↓ move · 1-9 jump · Enter confirm · q quit")}`);
+  lines.push(`  ${source_default.dim("↑/↓ move · 1-9 jump · Enter confirm · Esc cancel")}`);
   return lines;
 }
-async function pickPreset(level) {
+async function select(entries, level, options = {}) {
   const width = process.stdout.columns && process.stdout.columns > 0 ? process.stdout.columns : 100;
-  const entries = PRESET_LIST.map((p) => ({
-    label: p.name,
-    blurb: p.blurb,
-    preview: renderPreviewLines(p.settings)[0] ?? "",
-    value: p.name
-  }));
-  entries.push({
-    label: "Full configurator",
-    blurb: "none of these — build your own in the TUI",
-    preview: source_default.dim("     ↳ opens the interactive editor"),
-    value: OPEN_TUI
-  });
-  log2(`  ${source_default.dim("Pick a style — live preview of each:")}
-`);
-  let selected = 0;
-  const regionLines = entries.length * 2 + 2;
-  let drawn = false;
+  let selected = options.initial ?? 0;
+  let drawnLines = 0;
   const draw = () => {
-    const body = buildPickerRegion(entries, selected, level, width).join(`
+    const body = buildSelectRegion(entries, selected, level, width, options.question);
+    process.stdout.write(`${drawnLines ? `\x1B[${drawnLines}A` : ""}\x1B[0J${body.join(`
+`)}
 `);
-    process.stdout.write(`${drawn ? `\x1B[${regionLines}A` : ""}\x1B[0J${body}
-`);
-    drawn = true;
+    drawnLines = body.length;
+  };
+  const erase = () => {
+    if (drawnLines) {
+      process.stdout.write(`\x1B[${drawnLines}A\x1B[0J`);
+    }
   };
   readline.emitKeypressEvents(process.stdin);
   const wasRaw = process.stdin.isRaw;
@@ -79682,8 +79748,7 @@ async function pickPreset(level) {
         process.stdin.setRawMode(wasRaw);
       }
       process.stdin.pause();
-      process.stdout.write(`
-`);
+      erase();
     };
     const finish = (value) => {
       cleanup();
@@ -79700,9 +79765,9 @@ async function pickPreset(level) {
         selected = Number(str) - 1;
         draw();
       } else if (key.name === "return" || key.name === "enter") {
-        finish(entries[selected]?.value ?? DEFAULT_PRESET);
+        finish(entries[selected]?.value ?? null);
       } else if (key.name === "escape" || str === "q") {
-        finish(CANCEL);
+        finish(null);
       } else if (key.ctrl && key.name === "c") {
         cleanup();
         process.exit(130);
@@ -79749,15 +79814,40 @@ function nerdFontAlreadyInstalled() {
     return false;
   }
 }
+function terminalFontHint() {
+  const termProgram = process.env.TERM_PROGRAM ?? "";
+  if (termProgram === "Apple_Terminal") {
+    return "Terminal → Settings → Profiles → Text → Font";
+  }
+  if (termProgram === "iTerm.app") {
+    return "iTerm2 → Settings → Profiles → Text → Font";
+  }
+  if (termProgram === "vscode") {
+    return 'VS Code settings → "terminal.integrated.fontFamily": "JetBrainsMono Nerd Font"';
+  }
+  if (termProgram === "WezTerm") {
+    return "~/.wezterm.lua → font = wezterm.font('JetBrainsMono Nerd Font')";
+  }
+  if (termProgram === "ghostty") {
+    return "Ghostty config → font-family = JetBrainsMono Nerd Font";
+  }
+  if (process.env.KITTY_WINDOW_ID) {
+    return "kitty.conf → font_family JetBrainsMono Nerd Font";
+  }
+  if (process.env.ALACRITTY_WINDOW_ID ?? process.env.ALACRITTY_SOCKET) {
+    return 'alacritty.toml → [font] normal = { family = "JetBrainsMono Nerd Font" }';
+  }
+  return 'your terminal settings → font → "JetBrainsMono Nerd Font"';
+}
 async function installNerdFont() {
   const platform5 = process.platform;
   if (platform5 !== "linux" && platform5 !== "darwin") {
     log2('  ⚠ Skipping font install on this OS. Install "JetBrainsMono Nerd Font" manually and select it in your terminal.');
-    return;
+    return false;
   }
   if (nerdFontAlreadyInstalled()) {
     log2("  ✓ A JetBrainsMono Nerd Font is already installed.");
-    return;
+    return true;
   }
   const fontsDir = platform5 === "darwin" ? path15.join(os16.homedir(), "Library", "Fonts") : path15.join(os16.homedir(), ".local", "share", "fonts", "ccstatusline-gradient");
   const tmpZip = path15.join(os16.tmpdir(), "ccstatusline-gradient-JetBrainsMono.zip");
@@ -79770,15 +79860,86 @@ async function installNerdFont() {
       execFileSync7("fc-cache", ["-f", fontsDir], { stdio: "ignore" });
     }
     log2(`  ✓ Installed JetBrainsMono Nerd Font to ${fontsDir}`);
-    log2('    → Set your terminal font to "JetBrainsMono Nerd Font" to see the icons.');
+    return true;
   } catch (err) {
     log2(`  ⚠ Could not auto-install the font (${err instanceof Error ? err.message : String(err)}).`);
     log2('    Install "JetBrainsMono Nerd Font" manually: https://github.com/ryanoasis/nerd-fonts/releases/latest');
+    return false;
   } finally {
     try {
       fs18.unlinkSync(tmpZip);
     } catch {}
   }
+}
+function logFontReminderBox() {
+  const lines = [
+    "One manual step left — installing the font is not enough:",
+    'set your terminal font to "JetBrainsMono Nerd Font".',
+    terminalFontHint(),
+    "Then restart the terminal. Icons show as ⍰ until you do."
+  ];
+  const inner = Math.max(...lines.map((l) => l.length)) + 2;
+  log2("");
+  log2(`  ${source_default.yellow(`╭${"─".repeat(inner)}╮`)}`);
+  lines.forEach((l, i) => {
+    const body = i === 0 ? source_default.bold(l.padEnd(inner - 2)) : l.padEnd(inner - 2);
+    log2(`  ${source_default.yellow("│")} ${body} ${source_default.yellow("│")}`);
+  });
+  log2(`  ${source_default.yellow(`╰${"─".repeat(inner)}╯`)}`);
+}
+async function wireClaudeCode(command) {
+  let claudeSettings;
+  try {
+    claudeSettings = await loadClaudeSettings({ logErrors: false });
+  } catch {
+    claudeSettings = {};
+  }
+  claudeSettings.statusLine = {
+    type: "command",
+    command,
+    padding: 0
+  };
+  await saveClaudeSettings(claudeSettings);
+}
+function logLivePreview(preset) {
+  try {
+    const previewLines = renderPreviewLines(preset);
+    if (previewLines.length > 0) {
+      log2(`
+  ${source_default.dim("Your status line, live:")}`);
+      for (const line of previewLines) {
+        log2(`  ${line}`);
+      }
+    }
+  } catch {}
+}
+function logSignOff(level) {
+  log2(`
+  ${gradientText("All set! Restart Claude Code to see it in action.", level)}`);
+  log2(`  ${source_default.dim("Tip: rerun")} npx -y ccstatusline-gradient@latest ${source_default.dim("anytime to tweak it in the TUI.")}`);
+  log2(`  ${gradientText("— forged with ❤ by akkaz", level)}`);
+}
+function cancelled() {
+  log2(`  ${source_default.dim("Cancelled — nothing was changed.")}`);
+  return { openTui: false };
+}
+async function runQuickOnboard(options, level) {
+  const presetName = options.preset ?? DEFAULT_PRESET;
+  const presetSettings = PRESETS[presetName];
+  log2(`  ${source_default.dim(`Style: ${presetName}`)}
+`);
+  await saveSettings(presetSettings);
+  log2(`  ✓ Wrote status line config → ${getConfigPath()}`);
+  await wireClaudeCode(CCSTATUSLINE_COMMANDS.AUTO_NPX);
+  log2(`  ✓ Set Claude Code statusLine → "${CCSTATUSLINE_COMMANDS.AUTO_NPX}" (${getClaudeSettingsPath()})`);
+  if (options.skipFont) {
+    log2("  • Skipped font install (--no-font).");
+  } else if (await installNerdFont()) {
+    log2(`    → Set your terminal font to "JetBrainsMono Nerd Font" to see the icons (${terminalFontHint()}).`);
+  }
+  logLivePreview(presetSettings);
+  logSignOff(level);
+  return { openTui: false };
 }
 async function runOnboard(options = {}) {
   if (options.preset && !PRESETS[options.preset]) {
@@ -79792,51 +79953,101 @@ async function runOnboard(options = {}) {
   log2(renderBanner(level));
   log2(`   ${gradientText("ccstatusline · gradient edition", level)}
 `);
-  const presetName = options.preset ?? (isInteractive() ? await pickPreset(level) : DEFAULT_PRESET);
-  if (presetName === OPEN_TUI) {
-    return { openTui: true };
+  if (!isInteractive()) {
+    return runQuickOnboard(options, level);
   }
-  if (presetName === CANCEL) {
-    log2(`  ${source_default.dim("Cancelled — nothing was changed.")}`);
-    return { openTui: false };
+  if (options.firstRun) {
+    log2(`  ${source_default.dim("No status line config found yet — let's set one up.")}`);
+    log2(`  ${source_default.dim("Four quick steps, one choice at a time. Esc quits without changes.")}`);
   }
-  const presetSettings = PRESETS[presetName];
-  log2(`  ${source_default.dim(`Style: ${presetName}`)}
+  logStepHeader(1, "Terminal icons", level);
+  log2(`      ${GLYPH_TEST}
 `);
-  await saveSettings(presetSettings);
-  log2(`  ✓ Wrote status line config → ${getConfigPath()}`);
-  let claudeSettings;
-  try {
-    claudeSettings = await loadClaudeSettings({ logErrors: false });
-  } catch {
-    claudeSettings = {};
+  const seen = await select([
+    { label: "Three crisp symbols", blurb: "a lightning bolt, a clock and a solid arrow", value: "icons" },
+    { label: 'Boxes, "?" or blank gaps', blurb: "your terminal font has no Nerd Font glyphs", value: "boxes" }
+  ], level, { question: "Right above this menu there are three test symbols — what do you see?" });
+  if (seen === null) {
+    return cancelled();
   }
-  claudeSettings.statusLine = {
-    type: "command",
-    command: CCSTATUSLINE_COMMANDS.AUTO_NPX,
-    padding: 0
-  };
-  await saveClaudeSettings(claudeSettings);
-  log2(`  ✓ Set Claude Code statusLine → "${CCSTATUSLINE_COMMANDS.AUTO_NPX}" (${getClaudeSettingsPath()})`);
-  if (options.skipFont) {
-    log2("  • Skipped font install (--no-font).");
-  } else {
-    await installNerdFont();
-  }
-  try {
-    const previewLines = renderPreviewLines(presetSettings);
-    if (previewLines.length > 0) {
-      log2(`
-  ${source_default.dim("Your status line, live:")}`);
-      for (const line of previewLines) {
-        log2(`  ${line}`);
-      }
+  let iconMode = "nerd";
+  let needsFontSwitch = false;
+  if (seen === "boxes") {
+    const fix = await select([
+      { label: "Universal symbols (recommended)", blurb: `plain-Unicode icons (${sanitizeNerdGlyphs(GLYPH_TEST)}) — work with any font, nothing to install`, value: "unicode" },
+      { label: "Install JetBrainsMono Nerd Font", blurb: "real icons — downloads the font, then you select it in your terminal", value: "nerd" }
+    ], level, { question: 'Those icons need a patched "Nerd Font". How do you want to handle it?' });
+    if (fix === null) {
+      return cancelled();
     }
-  } catch {}
-  log2(`
-  ${gradientText("All set! Restart Claude Code to see it in action.", level)}`);
-  log2(`  ${source_default.dim("Tip: rerun")} npx -y ccstatusline-gradient@latest ${source_default.dim("anytime to tweak it in the TUI.")}`);
-  log2(`  ${gradientText("— forged with ❤ by akkaz", level)}`);
+    iconMode = fix;
+    if (iconMode === "unicode") {
+      log2(`  ✓ Icons: universal symbols ${source_default.dim(`(${sanitizeNerdGlyphs(GLYPH_TEST)})`)}`);
+    } else {
+      needsFontSwitch = await installNerdFont();
+    }
+  } else {
+    log2(`  ✓ Icons: Nerd Font glyphs ${source_default.dim("(your font already renders them)")}`);
+  }
+  logStepHeader(2, "Pick your style", level);
+  let presetName;
+  if (options.preset) {
+    presetName = options.preset;
+    log2(`  ✓ Style: ${source_default.bold(presetName)} ${source_default.dim("(from --preset)")}`);
+  } else {
+    const entries = PRESET_LIST.map((p) => ({
+      label: p.name,
+      blurb: p.blurb,
+      preview: renderPreviewLines(withIconMode(p.settings, iconMode))[0] ?? "",
+      value: p.name
+    }));
+    entries.push({
+      label: "Full configurator",
+      blurb: "none of these — build your own in the TUI",
+      preview: source_default.dim("↳ opens the interactive editor"),
+      value: OPEN_TUI
+    });
+    const picked = await select(entries, level, { question: "Pick a style — live preview of each:" });
+    if (picked === null) {
+      return cancelled();
+    }
+    if (picked === OPEN_TUI) {
+      return { openTui: true };
+    }
+    presetName = picked;
+    log2(`  ✓ Style: ${source_default.bold(presetName)}`);
+  }
+  logStepHeader(3, "Hook into Claude Code", level);
+  const runner = await select([
+    { label: "npx (recommended)", blurb: `"${CCSTATUSLINE_COMMANDS.AUTO_NPX}" — auto-updates via npm`, value: CCSTATUSLINE_COMMANDS.AUTO_NPX },
+    { label: "bunx", blurb: `"${CCSTATUSLINE_COMMANDS.AUTO_BUNX}" — auto-updates via Bun`, value: CCSTATUSLINE_COMMANDS.AUTO_BUNX },
+    { label: "Skip", blurb: "I'll wire Claude Code's settings.json myself", value: SKIP_WIRING }
+  ], level, { question: `How should Claude Code launch the status line? (writes ${getClaudeSettingsPath()})` });
+  if (runner === null) {
+    return cancelled();
+  }
+  if (runner === SKIP_WIRING) {
+    log2(`  • Claude Code hook: skipped ${source_default.dim("(wire it later, see below)")}`);
+  } else {
+    log2(`  ✓ Claude Code hook: ${source_default.bold(runner === CCSTATUSLINE_COMMANDS.AUTO_BUNX ? "bunx" : "npx")}`);
+  }
+  logStepHeader(4, "Apply & preview", level);
+  const presetSettings = withIconMode(PRESETS[presetName], iconMode);
+  await saveSettings(presetSettings);
+  log2(`  ✓ Status line config → ${getConfigPath()}`);
+  if (runner === SKIP_WIRING) {
+    log2(`  • To wire it manually, add this to ${getClaudeSettingsPath()}:`);
+    log2(`    ${source_default.dim(`"statusLine": { "type": "command", "command": "${CCSTATUSLINE_COMMANDS.AUTO_NPX}", "padding": 0 }`)}`);
+  } else {
+    await wireClaudeCode(runner);
+    log2(`  ✓ Claude Code statusLine → "${runner}" (${getClaudeSettingsPath()})`);
+  }
+  log2(`  ✓ Icons → ${iconMode === "nerd" ? "Nerd Font glyphs" : "universal symbols (no special font needed)"}`);
+  logLivePreview(presetSettings);
+  if (needsFontSwitch) {
+    logFontReminderBox();
+  }
+  logSignOff(level);
   return { openTui: false };
 }
 
@@ -80198,6 +80409,12 @@ async function main() {
       process.exit(1);
     }
   } else {
+    if (!settingsFileExists() && process.stdout.isTTY) {
+      const result2 = await runOnboard({ firstRun: true });
+      if (!result2.openTui) {
+        return;
+      }
+    }
     const settings = await loadSettings();
     if (settings.updatemessage) {
       const { updatemessage, ...newSettings } = settings;

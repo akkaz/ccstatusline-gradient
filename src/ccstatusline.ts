@@ -20,7 +20,8 @@ import {
 import {
     initConfigPath,
     loadSettings,
-    saveSettings
+    saveSettings,
+    settingsFileExists
 } from './utils/config';
 import { calculateContextPercentageMetrics } from './utils/context-percentage';
 import { handleHookInput } from './utils/hook-handler';
@@ -314,7 +315,16 @@ async function main() {
             process.exit(1);
         }
     } else {
-        // Interactive mode - run TUI
+        // Interactive mode. First run (no config file yet, real terminal):
+        // start the guided onboarding wizard instead of dropping the user
+        // straight into the full TUI — the wizard offers the TUI as an option.
+        if (!settingsFileExists() && process.stdout.isTTY) {
+            const result = await runOnboard({ firstRun: true });
+            if (!result.openTui) {
+                return;
+            }
+        }
+
         // Remove updatemessage before running TUI
         const settings = await loadSettings();
         if (settings.updatemessage) {

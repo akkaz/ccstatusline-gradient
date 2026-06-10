@@ -25,6 +25,7 @@ import {
     isGradientSpec,
     parseGradientSpec
 } from './gradient';
+import { sanitizeNerdGlyphs } from './nerd-icons';
 import { getTerminalWidth } from './terminal';
 import { getWidget } from './widgets';
 
@@ -625,6 +626,18 @@ export function renderStatusLineWithInfo(
 }
 
 export function renderStatusLine(
+    widgets: WidgetItem[],
+    settings: Settings,
+    context: RenderContext,
+    preRenderedWidgets: PreRenderedWidget[],
+    preCalculatedMaxWidths: number[]
+): string {
+    const line = renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, preCalculatedMaxWidths);
+    // Fallbacks are single-width so this swap never changes the visible width.
+    return settings.iconMode === 'unicode' ? sanitizeNerdGlyphs(line) : line;
+}
+
+function renderStatusLineImpl(
     widgets: WidgetItem[],
     settings: Settings,
     context: RenderContext,

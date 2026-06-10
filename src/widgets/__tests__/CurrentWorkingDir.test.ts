@@ -43,6 +43,7 @@ describe('CurrentWorkingDirWidget', () => {
         globalBold: false,
         gitCacheTtlSeconds: 5,
         minimalistMode: false,
+        iconMode: 'nerd',
         powerline: {
             enabled: false,
             separators: [],

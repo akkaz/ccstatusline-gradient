@@ -70,6 +70,10 @@ export const SettingsSchema = z.object({
     globalBold: z.boolean().default(false),
     gitCacheTtlSeconds: z.number().min(0).max(60).default(5),
     minimalistMode: z.boolean().default(false),
+    // 'nerd' renders Nerd Font glyphs as-is; 'unicode' swaps every private-use
+    // glyph for a font-independent fallback at render time (terminals without
+    // a patched font would otherwise show ⍰ boxes).
+    iconMode: z.enum(['nerd', 'unicode']).default('nerd'),
     powerline: PowerlineConfigSchema.default({
         enabled: false,
         separators: ['\uE0B0'],
