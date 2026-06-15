@@ -7,7 +7,7 @@
         "type": "model",
         "rawValue": true,
         "bold": true,
-        "color": "gradient:3f51b1-5a55ae-7b5fac-8f6aae-a86aa4-cc6b8e"
+        "color": "gradient:00d4ff-7b2ff7-ff2e97"
       },
       {
         "id": "spM",
@@ -18,7 +18,7 @@
         "id": "lbl-think",
         "type": "custom-text",
         "customText": "",
-        "color": "hex:cc6b8e"
+        "color": "hex:ffe9a8"
       },
       {
         "id": "spT",
@@ -29,18 +29,18 @@
         "id": "think",
         "type": "thinking-effort",
         "rawValue": true,
-        "color": "gradient:cc6b8e-f18271-f3a469-f7c978"
+        "color": "gradient:ff2e97-7b2ff7-00d4ff"
       },
       {
         "id": "s0",
         "type": "separator",
-        "color": "hex:475569"
+        "color": "hex:3b2f63"
       },
       {
         "id": "lbl-ctx",
         "type": "custom-text",
-        "customText": "Context",
-        "color": "hex:8f6aae"
+        "customText": "󰧑",
+        "color": "hex:9d7bff"
       },
       {
         "id": "sp1",
@@ -51,7 +51,7 @@
         "id": "ctx-bar",
         "type": "context-bar",
         "rawValue": true,
-        "color": "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "gradient:00d4ff-7b2ff7-ff2e97",
         "metadata": {
           "display": "slider-only"
         },
@@ -66,8 +66,20 @@
         "id": "ctx-pct",
         "type": "context-percentage",
         "rawValue": true,
-        "color": "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "gradient:00d4ff-7b2ff7-ff2e97",
         "dynamic": true
+      },
+      {
+        "id": "sp-ctxlen",
+        "type": "separator",
+        "character": " · ",
+        "color": "hex:3b2f63"
+      },
+      {
+        "id": "ctxlen",
+        "type": "context-length",
+        "rawValue": true,
+        "color": "hex:00d4ff"
       }
     ],
     [
@@ -75,7 +87,7 @@
         "id": "lbl-ses",
         "type": "custom-text",
         "customText": "Session",
-        "color": "hex:8f6aae"
+        "color": "hex:9d7bff"
       },
       {
         "id": "sp3",
@@ -86,7 +98,7 @@
         "id": "ses-bar",
         "type": "session-usage",
         "rawValue": true,
-        "color": "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "gradient:00d4ff-7b2ff7-ff2e97",
         "metadata": {
           "display": "slider-only"
         },
@@ -101,7 +113,7 @@
         "id": "ses",
         "type": "session-usage",
         "rawValue": true,
-        "color": "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "gradient:00d4ff-7b2ff7-ff2e97",
         "dynamic": true
       },
       {
@@ -113,7 +125,7 @@
         "id": "lbl-r1",
         "type": "custom-text",
         "customText": "",
-        "color": "hex:8f6aae"
+        "color": "hex:9d7bff"
       },
       {
         "id": "sp4",
@@ -124,19 +136,19 @@
         "id": "reset",
         "type": "reset-timer",
         "rawValue": true,
-        "color": "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "gradient:00d4ff-7b2ff7-ff2e97",
         "dynamic": true
       },
       {
         "id": "s3",
         "type": "separator",
-        "color": "hex:475569"
+        "color": "hex:3b2f63"
       },
       {
         "id": "lbl-wk",
         "type": "custom-text",
         "customText": "Week",
-        "color": "hex:8f6aae"
+        "color": "hex:9d7bff"
       },
       {
         "id": "sp5",
@@ -147,7 +159,7 @@
         "id": "wk-bar",
         "type": "weekly-usage",
         "rawValue": true,
-        "color": "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "gradient:00d4ff-7b2ff7-ff2e97",
         "metadata": {
           "display": "slider-only"
         },
@@ -162,7 +174,7 @@
         "id": "wk",
         "type": "weekly-usage",
         "rawValue": true,
-        "color": "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "gradient:00d4ff-7b2ff7-ff2e97",
         "dynamic": true
       },
       {
@@ -174,7 +186,7 @@
         "id": "lbl-r2",
         "type": "custom-text",
         "customText": "",
-        "color": "hex:8f6aae"
+        "color": "hex:9d7bff"
       },
       {
         "id": "sp6",
@@ -185,19 +197,68 @@
         "id": "wk-reset",
         "type": "weekly-reset-timer",
         "rawValue": true,
-        "color": "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        "color": "gradient:00d4ff-7b2ff7-ff2e97",
         "dynamic": true
       }
     ],
     [
       {
-        "id": "compactions",
-        "type": "compaction-counter",
-        "color": "hex:cc6b8e",
+        "id": "lbl-clock",
+        "type": "custom-text",
+        "customText": "",
+        "color": "hex:9d7bff"
+      },
+      {
+        "id": "sp-clock",
+        "type": "separator",
+        "character": " "
+      },
+      {
+        "id": "clock",
+        "type": "session-clock",
+        "rawValue": true,
+        "color": "hex:00d4ff"
+      },
+      {
+        "id": "clock-div",
+        "type": "separator",
+        "character": "  "
+      },
+      {
+        "id": "lbl-cache",
+        "type": "custom-text",
+        "customText": "",
+        "color": "hex:9d7bff"
+      },
+      {
+        "id": "sp-cache",
+        "type": "separator",
+        "character": " "
+      },
+      {
+        "id": "cache-hit",
+        "type": "cache-hit-rate",
+        "rawValue": true,
+        "color": "hex:7b2ff7",
         "metadata": {
-          "hideZero": "true",
+          "cacheScopeSession": "true",
+          "hideWhenEmpty": "true"
+        }
+      },
+      {
+        "id": "cache-div",
+        "type": "separator",
+        "character": "  "
+      },
+      {
+        "id": "compact",
+        "type": "compaction-counter",
+        "color": "hex:ff2e97",
+        "metadata": {
           "format": "icon-text-number",
-          "nerdFont": "true"
+          "nerdFont": "true",
+          "showTriggers": "true",
+          "showReclaimed": "true"
         }
       }
     ]
@@ -221,5 +282,6 @@
     "endCaps": [],
     "autoAlign": false,
     "continueThemeAcrossLines": false
-  }
+  },
+  "iconMode": "nerd"
 }

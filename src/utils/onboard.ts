@@ -47,7 +47,7 @@ import { advanceGlobalSeparatorIndex } from './separator-index';
 interface PresetInfo { name: string; settings: unknown; blurb: string }
 const PRESET_LIST: PresetInfo[] = [
     // Gradient signatures
-    { name: 'akkaz', settings: akkazPreset, blurb: 'Retro indigo→amber gradient · full telemetry · dynamic bars' },
+    { name: 'akkaz', settings: akkazPreset, blurb: 'Neon cyan→viola→magenta · brain/clock/cache telemetry · dynamic value-colored bars' },
     { name: 'barocco', settings: baroccoPreset, blurb: 'Italian tricolore · green→white→red gradient' },
     { name: 'vapor', settings: vaporPreset, blurb: 'Synthwave · cyan→magenta neon gradient' },
     // Sober, solid-color looks — each with a thematic Nerd Font badge

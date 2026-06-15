@@ -78750,7 +78750,7 @@ var akkaz_default = {
         type: "model",
         rawValue: true,
         bold: true,
-        color: "gradient:3f51b1-5a55ae-7b5fac-8f6aae-a86aa4-cc6b8e"
+        color: "gradient:00d4ff-7b2ff7-ff2e97"
       },
       {
         id: "spM",
@@ -78761,7 +78761,7 @@ var akkaz_default = {
         id: "lbl-think",
         type: "custom-text",
         customText: "",
-        color: "hex:cc6b8e"
+        color: "hex:ffe9a8"
       },
       {
         id: "spT",
@@ -78772,18 +78772,18 @@ var akkaz_default = {
         id: "think",
         type: "thinking-effort",
         rawValue: true,
-        color: "gradient:cc6b8e-f18271-f3a469-f7c978"
+        color: "gradient:ff2e97-7b2ff7-00d4ff"
       },
       {
         id: "s0",
         type: "separator",
-        color: "hex:475569"
+        color: "hex:3b2f63"
       },
       {
         id: "lbl-ctx",
         type: "custom-text",
-        customText: "Context",
-        color: "hex:8f6aae"
+        customText: "󰧑",
+        color: "hex:9d7bff"
       },
       {
         id: "sp1",
@@ -78794,7 +78794,7 @@ var akkaz_default = {
         id: "ctx-bar",
         type: "context-bar",
         rawValue: true,
-        color: "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
         metadata: {
           display: "slider-only"
         },
@@ -78809,8 +78809,20 @@ var akkaz_default = {
         id: "ctx-pct",
         type: "context-percentage",
         rawValue: true,
-        color: "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
         dynamic: true
+      },
+      {
+        id: "sp-ctxlen",
+        type: "separator",
+        character: " · ",
+        color: "hex:3b2f63"
+      },
+      {
+        id: "ctxlen",
+        type: "context-length",
+        rawValue: true,
+        color: "hex:00d4ff"
       }
     ],
     [
@@ -78818,7 +78830,7 @@ var akkaz_default = {
         id: "lbl-ses",
         type: "custom-text",
         customText: "Session",
-        color: "hex:8f6aae"
+        color: "hex:9d7bff"
       },
       {
         id: "sp3",
@@ -78829,7 +78841,7 @@ var akkaz_default = {
         id: "ses-bar",
         type: "session-usage",
         rawValue: true,
-        color: "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
         metadata: {
           display: "slider-only"
         },
@@ -78844,7 +78856,7 @@ var akkaz_default = {
         id: "ses",
         type: "session-usage",
         rawValue: true,
-        color: "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
         dynamic: true
       },
       {
@@ -78856,7 +78868,7 @@ var akkaz_default = {
         id: "lbl-r1",
         type: "custom-text",
         customText: "",
-        color: "hex:8f6aae"
+        color: "hex:9d7bff"
       },
       {
         id: "sp4",
@@ -78867,19 +78879,19 @@ var akkaz_default = {
         id: "reset",
         type: "reset-timer",
         rawValue: true,
-        color: "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
         dynamic: true
       },
       {
         id: "s3",
         type: "separator",
-        color: "hex:475569"
+        color: "hex:3b2f63"
       },
       {
         id: "lbl-wk",
         type: "custom-text",
         customText: "Week",
-        color: "hex:8f6aae"
+        color: "hex:9d7bff"
       },
       {
         id: "sp5",
@@ -78890,7 +78902,7 @@ var akkaz_default = {
         id: "wk-bar",
         type: "weekly-usage",
         rawValue: true,
-        color: "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
         metadata: {
           display: "slider-only"
         },
@@ -78905,7 +78917,7 @@ var akkaz_default = {
         id: "wk",
         type: "weekly-usage",
         rawValue: true,
-        color: "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
         dynamic: true
       },
       {
@@ -78917,7 +78929,7 @@ var akkaz_default = {
         id: "lbl-r2",
         type: "custom-text",
         customText: "",
-        color: "hex:8f6aae"
+        color: "hex:9d7bff"
       },
       {
         id: "sp6",
@@ -78928,19 +78940,68 @@ var akkaz_default = {
         id: "wk-reset",
         type: "weekly-reset-timer",
         rawValue: true,
-        color: "gradient:7b5fac-a86aa4-cc6b8e-f18271",
+        color: "gradient:00d4ff-7b2ff7-ff2e97",
         dynamic: true
       }
     ],
     [
       {
-        id: "compactions",
-        type: "compaction-counter",
-        color: "hex:cc6b8e",
+        id: "lbl-clock",
+        type: "custom-text",
+        customText: "",
+        color: "hex:9d7bff"
+      },
+      {
+        id: "sp-clock",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "clock",
+        type: "session-clock",
+        rawValue: true,
+        color: "hex:00d4ff"
+      },
+      {
+        id: "clock-div",
+        type: "separator",
+        character: "  "
+      },
+      {
+        id: "lbl-cache",
+        type: "custom-text",
+        customText: "",
+        color: "hex:9d7bff"
+      },
+      {
+        id: "sp-cache",
+        type: "separator",
+        character: " "
+      },
+      {
+        id: "cache-hit",
+        type: "cache-hit-rate",
+        rawValue: true,
+        color: "hex:7b2ff7",
         metadata: {
-          hideZero: "true",
+          cacheScopeSession: "true",
+          hideWhenEmpty: "true"
+        }
+      },
+      {
+        id: "cache-div",
+        type: "separator",
+        character: "  "
+      },
+      {
+        id: "compact",
+        type: "compaction-counter",
+        color: "hex:ff2e97",
+        metadata: {
           format: "icon-text-number",
-          nerdFont: "true"
+          nerdFont: "true",
+          showTriggers: "true",
+          showReclaimed: "true"
         }
       }
     ]
@@ -78964,7 +79025,8 @@ var akkaz_default = {
     endCaps: [],
     autoAlign: false,
     continueThemeAcrossLines: false
-  }
+  },
+  iconMode: "nerd"
 };
 // src/presets/barocco.json
 var barocco_default = {
@@ -80286,7 +80348,7 @@ await __promiseAll([
   init_renderer2()
 ]);
 var PRESET_LIST = [
-  { name: "akkaz", settings: akkaz_default, blurb: "Retro indigo→amber gradient · full telemetry · dynamic bars" },
+  { name: "akkaz", settings: akkaz_default, blurb: "Neon cyan→viola→magenta · brain/clock/cache telemetry · dynamic value-colored bars" },
   { name: "barocco", settings: barocco_default, blurb: "Italian tricolore · green→white→red gradient" },
   { name: "vapor", settings: vapor_default, blurb: "Synthwave · cyan→magenta neon gradient" },
   { name: "inchiostro", settings: inchiostro_default, blurb: "Ink on paper ✎ · solid monochrome, cyan accent" },
