@@ -12,6 +12,7 @@ import {
 import type { WidgetItem } from '../../types/Widget';
 import {
     applyLineGradient,
+    getVisibleText,
     getVisibleWidth
 } from '../ansi';
 import {
@@ -26,7 +27,8 @@ import {
 import {
     calculateMaxWidthsFromPreRendered,
     preRenderAllWidgets,
-    renderStatusLine
+    renderStatusLine,
+    renderStatusLineWithInfo
 } from '../renderer';
 
 const TRUECOLOR_CODE = /\x1b\[38;2;\d+;\d+;\d+m/g;
@@ -125,6 +127,19 @@ describe('applyGradientToText', () => {
         expect(applyGradientToText('abc', stops, 'ansi16')).toBe('abc');
         expect(applyGradientToText('', stops, 'truecolor')).toBe('');
         expect(applyGradientToText('   ', stops, 'truecolor')).toBe('   ');
+    });
+
+    it('passes ANSI and OSC 8 escape sequences through untouched', () => {
+        const openLink = '\x1b]8;;https://example.com\x1b\\';
+        const closeLink = '\x1b]8;;\x1b\\';
+        const styledLink = `\x1b[1m${openLink}branch${closeLink}\x1b[22m`;
+        const out = applyGradientToText(styledLink, stops, 'truecolor');
+
+        expect(out).toContain('\x1b[1m');
+        expect(out).toContain(openLink);
+        expect(out).toContain(closeLink);
+        expect(out).toContain('\x1b[22m');
+        expect(countMatches(out, TRUECOLOR_CODE)).toBe('branch'.length);
     });
 });
 
@@ -263,6 +278,14 @@ describe('renderStatusLine with a gradient override', () => {
         return renderStatusLine(widgets, settings, context, preRenderedLines[0] ?? [], preCalculatedMaxWidths);
     }
 
+    function renderLineWithInfo(widgets: WidgetItem[], settingsOverrides: Partial<Settings> = {}, terminalWidth = 200) {
+        const settings = createSettings(settingsOverrides);
+        const context: RenderContext = { isPreview: false, terminalWidth };
+        const preRenderedLines = preRenderAllWidgets([widgets], settings, context);
+        const preCalculatedMaxWidths = calculateMaxWidthsFromPreRendered(preRenderedLines, settings);
+        return renderStatusLineWithInfo(widgets, settings, context, preRenderedLines[0] ?? [], preCalculatedMaxWidths);
+    }
+
     const widgets: WidgetItem[] = [
         { id: 'a', type: 'custom-text', customText: 'model', color: 'hex:A89278' },
         { id: 'b', type: 'custom-text', customText: ' branch', color: 'hex:A89278' }
@@ -295,5 +318,35 @@ describe('renderStatusLine with a gradient override', () => {
         expect(getVisibleWidth(truncated)).toBeLessThan(getVisibleWidth(full));
         // and the gradient's trailing reset survived
         expect(truncated.endsWith('\x1b[39m')).toBe(true);
+    });
+
+    it('reports truncation after the gradient colors the ellipsis', () => {
+        const gradient = 'gradient:hex:dbbb6f,hex:c4808a,hex:9070d0,hex:b8cad4,hex:4a8a5e';
+        const result = renderLineWithInfo(widgets, { overrideForegroundColor: gradient }, 9);
+
+        expect(result.wasTruncated).toBe(true);
+        expect(result.line.includes('...')).toBe(false);
+        expect(getVisibleText(result.line)).toContain('...');
+    });
+
+    it('applies global foreground gradients to widget text in powerline mode', () => {
+        const gradient = 'gradient:FF0000-0000FF';
+        const powerlineWidgets: WidgetItem[] = [
+            { id: 'a', type: 'custom-text', customText: 'abc' },
+            { id: 'b', type: 'custom-text', customText: 'def' }
+        ];
+        const line = renderLine(powerlineWidgets, {
+            overrideForegroundColor: gradient,
+            powerline: {
+                ...DEFAULT_SETTINGS.powerline,
+                enabled: true
+            }
+        });
+        const codes = line.match(TRUECOLOR_CODE) ?? [];
+
+        expect(getVisibleText(line)).toContain('abc');
+        expect(getVisibleText(line)).toContain('def');
+        expect(codes).toHaveLength(6);
+        expect(codes[0]).not.toBe(codes[3]);
     });
 });

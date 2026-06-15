@@ -9,6 +9,8 @@ import type { Settings } from '../types/Settings';
 
 import {
     applyLineGradient,
+    applyLineGradientSegment,
+    getVisibleText,
     getVisibleWidth,
     stripSgrCodes,
     truncateStyledText
@@ -29,14 +31,7 @@ import { sanitizeNerdGlyphs } from './nerd-icons';
 import { getTerminalWidth } from './terminal';
 import { getWidget } from './widgets';
 
-// Helper function to format token counts
-export function formatTokens(count: number): string {
-    if (count >= 1000000)
-        return `${(count / 1000000).toFixed(1)}M`;
-    if (count >= 1000)
-        return `${(count / 1000).toFixed(1)}k`;
-    return count.toString();
-}
+export { formatTokens } from './format-tokens';
 
 // Paint a foreground gradient across a finished line when overrideForegroundColor
 // is a gradient spec (e.g. "gradient:hex:FF0000,hex:0000FF"); a no-op otherwise.
@@ -134,6 +129,7 @@ function renderPowerlineStatusLine(
 
     // Get color level from settings
     const colorLevel = getColorLevelString(settings.colorLevel);
+    const overrideForegroundGradientStops = parseGradientSpec(settings.overrideForegroundColor);
 
     // Filter out separator and flex-separator widgets in powerline mode
     const filteredWidgets = widgets.filter(widget => widget.type !== 'separator' && widget.type !== 'flex-separator'
@@ -229,8 +225,9 @@ function renderPowerlineStatusLine(
                 }
             }
 
-            // Apply override FG color if set (overrides theme). A gradient: spec is a
-            // standard-mode whole-line gradient, not a solid color — ignore it in powerline.
+            // Apply solid override FG color if set (overrides theme). Gradient
+            // overrides are applied to widget text during rendering below so
+            // powerline separators keep their foreground/background contrast.
             if (settings.overrideForegroundColor && settings.overrideForegroundColor !== 'none'
                 && !isGradientSpec(settings.overrideForegroundColor)) {
                 fgColor = settings.overrideForegroundColor;
@@ -294,6 +291,14 @@ function renderPowerlineStatusLine(
         }
     }
 
+    const powerlineGradientWidth = overrideForegroundGradientStops && colorLevel !== 'ansi16'
+        ? widgetElements.reduce((sum, element) => {
+            const isPreserveColors = element.widget.type === 'custom-command' && element.widget.preserveColors;
+            return isPreserveColors ? sum : sum + getVisibleWidth(element.content);
+        }, 0)
+        : 0;
+    let powerlineGradientColumn = 0;
+
     // Build the final powerline string
     let result = '';
 
@@ -333,14 +338,30 @@ function renderPowerlineStatusLine(
         if (shouldBold && !isPreserveColors) {
             widgetContent += '\x1b[1m';
         }
-        if (widget.fgColor && !isPreserveColors) {
+        const textGradientStops = !isPreserveColors && powerlineGradientWidth > 1
+            ? overrideForegroundGradientStops
+            : null;
+
+        if (widget.fgColor && !isPreserveColors && !textGradientStops) {
             widgetContent += getColorAnsiCode(widget.fgColor, colorLevel, false);
         }
         // Always apply background for consistency in powerline mode
         if (widget.bgColor) {
             widgetContent += getColorAnsiCode(widget.bgColor, colorLevel, true);
         }
-        widgetContent += widget.content;
+        if (textGradientStops) {
+            const gradientResult = applyLineGradientSegment(
+                widget.content,
+                textGradientStops,
+                colorLevel,
+                powerlineGradientColumn,
+                powerlineGradientWidth
+            );
+            widgetContent += gradientResult.text;
+            powerlineGradientColumn = gradientResult.nextColumn;
+        } else {
+            widgetContent += widget.content;
+        }
         // Reset colors after content
         // For custom commands with preserveColors, also reset text attributes like dim
         if (isPreserveColors) {
@@ -621,7 +642,7 @@ export function renderStatusLineWithInfo(
 ): RenderResult {
     const line = renderStatusLine(widgets, settings, context, preRenderedWidgets, preCalculatedMaxWidths);
     // Check if line contains the truncation ellipsis
-    const wasTruncated = line.includes('...');
+    const wasTruncated = getVisibleText(line).includes('...');
     return { line, wasTruncated };
 }
 
