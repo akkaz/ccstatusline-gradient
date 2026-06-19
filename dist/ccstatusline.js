@@ -53504,10 +53504,21 @@ class ModelWidget {
     const model = context.data?.model;
     const modelDisplayName = typeof model === "string" ? model : model?.display_name ?? model?.id;
     if (modelDisplayName) {
-      const shortName = modelDisplayName.replace(/\s*\(.*\)$/, "");
-      return item.rawValue ? shortName : `Model: ${shortName}`;
+      const shortName = modelDisplayName.replace(/\s*(?:\(.*\)|\[.*\])$/, "");
+      const contextTag = this.getContextTag(model, modelDisplayName);
+      const name = contextTag ? `${shortName} (${contextTag})` : shortName;
+      return item.rawValue ? name : `Model: ${name}`;
     }
     return null;
+  }
+  getContextTag(model, displayName) {
+    const modelId = typeof model === "string" ? model : model?.id;
+    const source = `${modelId ?? ""} ${displayName}`;
+    const match = /(?:\(|\[)\s*(\d+(?:[.,]\d+)?)\s*([km])\s*(?:\)|\])/i.exec(source);
+    if (!match?.[1] || !match[2]) {
+      return null;
+    }
+    return `${match[1]}${match[2].toUpperCase()}`;
   }
   supportsRawValue() {
     return true;
@@ -58026,7 +58037,7 @@ function getTerminalWidth() {
 function canDetectTerminalWidth() {
   return probeTerminalWidth() !== null;
 }
-var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.9.0", MIN_RELIABLE_TERMINAL_WIDTH = 40;
+var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.10.1", MIN_RELIABLE_TERMINAL_WIDTH = 40;
 var init_terminal = () => {};
 
 // src/utils/format-tokens.ts
@@ -78640,7 +78651,10 @@ var StatusJSONSchema = exports_external.looseObject({
 init_ansi();
 init_colors();
 init_compaction();
-await init_config();
+await __promiseAll([
+  init_claude_settings(),
+  init_config()
+]);
 
 // src/utils/hook-handler.ts
 import * as fs17 from "fs";
@@ -80360,7 +80374,7 @@ var PRESETS = Object.fromEntries(PRESET_LIST.map((p) => [p.name, p.settings]));
 var DEFAULT_PRESET = "akkaz";
 var OPEN_TUI = " open-tui";
 var SKIP_WIRING = " skip-wiring";
-var GLYPH_TEST = "      ";
+var GLYPH_TEST = "         \uDB82\uDDD1";
 var TOTAL_STEPS = 4;
 var NERD_FONT_URL = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip";
 var FONT_MATCH = "JetBrainsMonoNerdFont-*.ttf";
@@ -80583,7 +80597,54 @@ function terminalFontHint() {
   if (process.env.ALACRITTY_WINDOW_ID ?? process.env.ALACRITTY_SOCKET) {
     return 'alacritty.toml → [font] normal = { family = "JetBrainsMono Nerd Font" }';
   }
+  if (gnomeTerminalDetected()) {
+    return `p=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'"); ` + 'gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$p/" use-system-font false; ' + 'gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$p/" font "JetBrainsMono Nerd Font 12"';
+  }
   return 'your terminal settings → font → "JetBrainsMono Nerd Font"';
+}
+function gnomeTerminalDetected() {
+  return Boolean(process.env.GNOME_TERMINAL_SERVICE ?? process.env.GNOME_TERMINAL_SCREEN);
+}
+function configureGnomeTerminalFont() {
+  const gsettings = (args) => execFileSync7("gsettings", args, {
+    encoding: "utf-8",
+    stdio: ["ignore", "pipe", "ignore"]
+  });
+  try {
+    const uuid3 = gsettings(["get", "org.gnome.Terminal.ProfilesList", "default"]).trim().replace(/^['"]|['"]$/g, "");
+    if (!uuid3) {
+      return false;
+    }
+    const schemaPath = `org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:${uuid3}/`;
+    let size2 = 12;
+    try {
+      const parsed = /(\d+)\s*['"]?\s*$/.exec(gsettings(["get", schemaPath, "font"]).trim());
+      if (parsed?.[1]) {
+        size2 = Number(parsed[1]);
+      }
+    } catch {}
+    gsettings(["set", schemaPath, "use-system-font", "false"]);
+    gsettings(["set", schemaPath, "font", `JetBrainsMono Nerd Font ${size2}`]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+async function offerGnomeTerminalFontFix(level) {
+  const choice = await select([
+    { label: "Yes, set it for me (recommended)", blurb: "updates your GNOME Terminal default profile font now", value: "yes" },
+    { label: "No, I'll do it myself", blurb: "we'll print the exact command instead", value: "no" }
+  ], level, { question: 'Set your GNOME Terminal font to "JetBrainsMono Nerd Font" automatically?' });
+  if (choice !== "yes") {
+    return false;
+  }
+  if (configureGnomeTerminalFont()) {
+    log2("  ✓ Set GNOME Terminal default profile font → JetBrainsMono Nerd Font");
+    log2(`    ${source_default.dim("Open a new tab/window to apply.")}`);
+    return true;
+  }
+  log2("  ⚠ Could not set the GNOME Terminal font automatically — use the command below.");
+  return false;
 }
 async function installNerdFont() {
   const platform5 = process.platform;
@@ -80681,7 +80742,11 @@ async function runQuickOnboard(options, level) {
   if (options.skipFont) {
     log2("  • Skipped font install (--no-font).");
   } else if (await installNerdFont()) {
-    log2(`    → Set your terminal font to "JetBrainsMono Nerd Font" to see the icons (${terminalFontHint()}).`);
+    if (gnomeTerminalDetected() && configureGnomeTerminalFont()) {
+      log2("    → Set GNOME Terminal's default profile font → JetBrainsMono Nerd Font (open a new tab to apply).");
+    } else {
+      log2(`    → Set your terminal font to "JetBrainsMono Nerd Font" to see the icons (${terminalFontHint()}).`);
+    }
   }
   logLivePreview(presetSettings);
   logSignOff(level);
@@ -80710,14 +80775,15 @@ async function runOnboard(options = {}) {
   log2(`      ${GLYPH_TEST}
 `);
   const seen = await select([
-    { label: "Three crisp symbols", blurb: "a lightning bolt, a clock and a solid arrow", value: "icons" },
-    { label: 'Boxes, "?" or blank gaps', blurb: "your terminal font has no Nerd Font glyphs", value: "boxes" }
-  ], level, { question: "Right above this menu there are three test symbols — what do you see?" });
+    { label: "Four crisp symbols", blurb: "a bolt, a clock, a solid arrow and a brain", value: "icons" },
+    { label: 'A box, "?" or blank gap', blurb: "even one missing means your font lacks (or is too old for) some glyphs", value: "boxes" }
+  ], level, { question: "Right above this menu there are four test symbols — do you see all four crisply?" });
   if (seen === null) {
     return cancelled();
   }
   let iconMode = "nerd";
   let needsFontSwitch = false;
+  let fontAutoSet = false;
   if (seen === "boxes") {
     const fix = await select([
       { label: "Universal symbols (recommended)", blurb: `plain-Unicode icons (${sanitizeNerdGlyphs(GLYPH_TEST)}) — work with any font, nothing to install`, value: "unicode" },
@@ -80731,6 +80797,9 @@ async function runOnboard(options = {}) {
       log2(`  ✓ Icons: universal symbols ${source_default.dim(`(${sanitizeNerdGlyphs(GLYPH_TEST)})`)}`);
     } else {
       needsFontSwitch = await installNerdFont();
+      if (needsFontSwitch && gnomeTerminalDetected()) {
+        fontAutoSet = await offerGnomeTerminalFontFix(level);
+      }
     }
   } else {
     log2(`  ✓ Icons: Nerd Font glyphs ${source_default.dim("(your font already renders them)")}`);
@@ -80790,7 +80859,7 @@ async function runOnboard(options = {}) {
   }
   log2(`  ✓ Icons → ${iconMode === "nerd" ? "Nerd Font glyphs" : "universal symbols (no special font needed)"}`);
   logLivePreview(presetSettings);
-  if (needsFontSwitch) {
+  if (needsFontSwitch && !fontAutoSet) {
     logFontReminderBox();
   }
   logSignOff(level);
@@ -81131,6 +81200,11 @@ async function main() {
     if (result2.openTui) {
       runTUI();
     }
+    return;
+  }
+  if (process.argv.includes("--uninstall") || process.argv.includes("--offboard")) {
+    await uninstallStatusLine();
+    console.log("ccstatusline unwired from Claude Code (settings.json cleaned up).");
     return;
   }
   if (!process.stdin.isTTY) {

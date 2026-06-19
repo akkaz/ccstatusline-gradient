@@ -20,9 +20,9 @@ function makeContext(overrides: Partial<RenderContext> = {}): RenderContext {
 
 describe('ModelWidget', () => {
     describe('render()', () => {
-        it('strips parenthetical suffix from display_name', () => {
+        it('strips the verbose parenthetical but re-adds a compact context tag for 1M models', () => {
             const ctx = makeContext({ data: { model: { id: 'claude-opus-4-6[1m]', display_name: 'Opus 4.6 (1M context)' } } });
-            expect(new ModelWidget().render(RAW_ITEM, ctx, DEFAULT_SETTINGS)).toBe('Opus 4.6');
+            expect(new ModelWidget().render(RAW_ITEM, ctx, DEFAULT_SETTINGS)).toBe('Opus 4.6 (1M)');
         });
 
         it('strips parenthetical from Sonnet display_name', () => {
@@ -42,7 +42,7 @@ describe('ModelWidget', () => {
 
         it('includes Model: prefix when rawValue is false', () => {
             const ctx = makeContext({ data: { model: { id: 'claude-opus-4-6[1m]', display_name: 'Opus 4.6 (1M context)' } } });
-            expect(new ModelWidget().render(ITEM, ctx, DEFAULT_SETTINGS)).toBe('Model: Opus 4.6');
+            expect(new ModelWidget().render(ITEM, ctx, DEFAULT_SETTINGS)).toBe('Model: Opus 4.6 (1M)');
         });
 
         it('returns null when model is absent', () => {
@@ -61,9 +61,9 @@ describe('ModelWidget', () => {
             expect(new ModelWidget().render(RAW_ITEM, ctx, DEFAULT_SETTINGS)).toBe('Claude');
         });
 
-        it('falls back to model id when display_name is absent', () => {
+        it('falls back to model id when display_name is absent, stripping the bracket token and tagging context', () => {
             const ctx = makeContext({ data: { model: { id: 'claude-opus-4-6[1m]' } } });
-            expect(new ModelWidget().render(RAW_ITEM, ctx, DEFAULT_SETTINGS)).toBe('claude-opus-4-6[1m]');
+            expect(new ModelWidget().render(RAW_ITEM, ctx, DEFAULT_SETTINGS)).toBe('claude-opus-4-6 (1M)');
         });
     });
 });

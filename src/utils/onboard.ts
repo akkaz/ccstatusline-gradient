@@ -63,10 +63,14 @@ const DEFAULT_PRESET = 'akkaz';
 const OPEN_TUI = ' open-tui';
 const SKIP_WIRING = ' skip-wiring';
 
-// Glyph probe shown in step 1: bolt + history clock (the icons our presets
-// actually use) + a powerline arrow. All three are Nerd Font private-use-area
-// codepoints — on a non-patched font they show up as boxes or blanks.
-const GLYPH_TEST = '      ';
+// Glyph probe shown in step 1: bolt + history clock + a powerline arrow, plus
+// the supplementary-plane "brain" icon (Material Design Icons, Nerd Fonts v3+)
+// the default preset uses for the context label. The first three live in nearly
+// every Nerd Font — even old v2 ones — so on their own they wrongly certify a v2
+// font as fine; the brain only renders on a v3 font, catching the common "most
+// icons work but one shows a box" case. All are private-use-area codepoints — on
+// a missing or too-old font they show up as boxes or blanks.
+const GLYPH_TEST = '         󰧑';
 
 const TOTAL_STEPS = 4;
 
@@ -348,7 +352,77 @@ function terminalFontHint(): string {
     if (process.env.ALACRITTY_WINDOW_ID ?? process.env.ALACRITTY_SOCKET) {
         return 'alacritty.toml → [font] normal = { family = "JetBrainsMono Nerd Font" }';
     }
+    if (gnomeTerminalDetected()) {
+        // A copy-pasteable one-liner that resolves the default profile UUID inline.
+        return 'p=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "\'"); '
+            + 'gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$p/" use-system-font false; '
+            + 'gsettings set "org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$p/" font "JetBrainsMono Nerd Font 12"';
+    }
     return 'your terminal settings → font → "JetBrainsMono Nerd Font"';
+}
+
+// GNOME Terminal sets these in every child shell; either is a reliable signal
+// that the live terminal is GNOME Terminal (VTE).
+function gnomeTerminalDetected(): boolean {
+    return Boolean(process.env.GNOME_TERMINAL_SERVICE ?? process.env.GNOME_TERMINAL_SCREEN);
+}
+
+// Force GNOME Terminal's *default* profile to render the Nerd Font. Installing
+// the .ttf is not enough — the profile must point at it — and GNOME's fontconfig
+// fallback is unreliable for private-use-area glyphs (especially the v3 material
+// icons in the supplementary plane). Applies live, no restart. Returns true only
+// when the font was actually set; best-effort, never throws.
+function configureGnomeTerminalFont(): boolean {
+    const gsettings = (args: string[]): string => execFileSync('gsettings', args, {
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'ignore']
+    });
+    try {
+        const uuid = gsettings(['get', 'org.gnome.Terminal.ProfilesList', 'default'])
+            .trim()
+            .replace(/^['"]|['"]$/g, '');
+        if (!uuid) {
+            return false;
+        }
+        const schemaPath = `org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:${uuid}/`;
+
+        // Preserve the profile's current point size if we can read it; else 12.
+        let size = 12;
+        try {
+            const parsed = /(\d+)\s*['"]?\s*$/.exec(gsettings(['get', schemaPath, 'font']).trim());
+            if (parsed?.[1]) {
+                size = Number(parsed[1]);
+            }
+        } catch {
+            // no readable current font — fall back to the default size
+        }
+
+        gsettings(['set', schemaPath, 'use-system-font', 'false']);
+        gsettings(['set', schemaPath, 'font', `JetBrainsMono Nerd Font ${size}`]);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+// Offer to set the GNOME Terminal font for the user (the install-but-still-tofu
+// case). Returns true only when we actually set it, so the caller can skip the
+// generic "set your font manually" reminder.
+async function offerGnomeTerminalFontFix(level: ColorLevel): Promise<boolean> {
+    const choice = await select([
+        { label: 'Yes, set it for me (recommended)', blurb: 'updates your GNOME Terminal default profile font now', value: 'yes' },
+        { label: 'No, I\'ll do it myself', blurb: 'we\'ll print the exact command instead', value: 'no' }
+    ], level, { question: 'Set your GNOME Terminal font to "JetBrainsMono Nerd Font" automatically?' });
+    if (choice !== 'yes') {
+        return false;
+    }
+    if (configureGnomeTerminalFont()) {
+        log('  ✓ Set GNOME Terminal default profile font → JetBrainsMono Nerd Font');
+        log(`    ${chalk.dim('Open a new tab/window to apply.')}`);
+        return true;
+    }
+    log('  ⚠ Could not set the GNOME Terminal font automatically — use the command below.');
+    return false;
 }
 
 // Returns true when a JetBrainsMono Nerd Font is on disk afterwards (already
@@ -471,7 +545,11 @@ async function runQuickOnboard(options: OnboardOptions, level: ColorLevel): Prom
     if (options.skipFont) {
         log('  • Skipped font install (--no-font).');
     } else if (await installNerdFont()) {
-        log(`    → Set your terminal font to "JetBrainsMono Nerd Font" to see the icons (${terminalFontHint()}).`);
+        if (gnomeTerminalDetected() && configureGnomeTerminalFont()) {
+            log('    → Set GNOME Terminal\'s default profile font → JetBrainsMono Nerd Font (open a new tab to apply).');
+        } else {
+            log(`    → Set your terminal font to "JetBrainsMono Nerd Font" to see the icons (${terminalFontHint()}).`);
+        }
     }
 
     logLivePreview(presetSettings);
@@ -514,15 +592,16 @@ export async function runOnboard(options: OnboardOptions = {}): Promise<OnboardR
     logStepHeader(1, 'Terminal icons', level);
     log(`      ${GLYPH_TEST}\n`);
     const seen = await select([
-        { label: 'Three crisp symbols', blurb: 'a lightning bolt, a clock and a solid arrow', value: 'icons' },
-        { label: 'Boxes, "?" or blank gaps', blurb: 'your terminal font has no Nerd Font glyphs', value: 'boxes' }
-    ], level, { question: 'Right above this menu there are three test symbols — what do you see?' });
+        { label: 'Four crisp symbols', blurb: 'a bolt, a clock, a solid arrow and a brain', value: 'icons' },
+        { label: 'A box, "?" or blank gap', blurb: 'even one missing means your font lacks (or is too old for) some glyphs', value: 'boxes' }
+    ], level, { question: 'Right above this menu there are four test symbols — do you see all four crisply?' });
     if (seen === null) {
         return cancelled();
     }
 
     let iconMode: IconMode = 'nerd';
     let needsFontSwitch = false;
+    let fontAutoSet = false;
     if (seen === 'boxes') {
         const fix = await select([
             { label: 'Universal symbols (recommended)', blurb: `plain-Unicode icons (${sanitizeNerdGlyphs(GLYPH_TEST)}) — work with any font, nothing to install`, value: 'unicode' },
@@ -536,6 +615,9 @@ export async function runOnboard(options: OnboardOptions = {}): Promise<OnboardR
             log(`  ✓ Icons: universal symbols ${chalk.dim(`(${sanitizeNerdGlyphs(GLYPH_TEST)})`)}`);
         } else {
             needsFontSwitch = await installNerdFont();
+            if (needsFontSwitch && gnomeTerminalDetected()) {
+                fontAutoSet = await offerGnomeTerminalFontFix(level);
+            }
         }
     } else {
         log(`  ✓ Icons: Nerd Font glyphs ${chalk.dim('(your font already renders them)')}`);
@@ -604,7 +686,7 @@ export async function runOnboard(options: OnboardOptions = {}): Promise<OnboardR
 
     logLivePreview(presetSettings);
 
-    if (needsFontSwitch) {
+    if (needsFontSwitch && !fontAutoSet) {
         logFontReminderBox();
     }
 

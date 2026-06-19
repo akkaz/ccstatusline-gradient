@@ -11,6 +11,7 @@ import type { RenderContext } from './types/RenderContext';
 import type { StatusJSON } from './types/StatusJSON';
 import { StatusJSONSchema } from './types/StatusJSON';
 import { getVisibleText } from './utils/ansi';
+import { uninstallStatusLine } from './utils/claude-settings';
 import { updateColorMap } from './utils/colors';
 import {
     ZERO_COMPACTION_STATS,
@@ -273,6 +274,15 @@ async function main() {
         if (result.openTui) {
             runTUI();
         }
+        return;
+    }
+
+    // Handle --uninstall mode: the CLI counterpart to --onboard. Unwires the
+    // status line from Claude Code's settings.json and removes managed hooks.
+    // Does not touch the npm package itself (use `npm uninstall ccstatusline`).
+    if (process.argv.includes('--uninstall') || process.argv.includes('--offboard')) {
+        await uninstallStatusLine();
+        console.log('ccstatusline unwired from Claude Code (settings.json cleaned up).');
         return;
     }
 
