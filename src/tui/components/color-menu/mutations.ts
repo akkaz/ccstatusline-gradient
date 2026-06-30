@@ -44,6 +44,29 @@ export function toggleWidgetDynamic(widgets: WidgetItem[], widgetId: string): Wi
     }));
 }
 
+export function cycleWidgetDim(widgets: WidgetItem[], widgetId: string): WidgetItem[] {
+    return updateWidgetById(widgets, widgetId, (widget) => {
+        // Cycle: off -> whole widget -> (...) spans only -> off
+        if (widget.dim === true) {
+            return {
+                ...widget,
+                dim: 'parens' as const
+            };
+        }
+
+        if (widget.dim === 'parens') {
+            const { dim, ...restWidget } = widget;
+            void dim; // Intentionally unused
+            return restWidget;
+        }
+
+        return {
+            ...widget,
+            dim: true
+        };
+    });
+}
+
 export function resetWidgetStyling(widgets: WidgetItem[], widgetId: string): WidgetItem[] {
     return updateWidgetById(widgets, widgetId, (widget) => {
         const {
@@ -51,12 +74,14 @@ export function resetWidgetStyling(widgets: WidgetItem[], widgetId: string): Wid
             backgroundColor,
             bold,
             dynamic,
+            dim,
             ...restWidget
         } = widget;
         void color; // Intentionally unused
         void backgroundColor; // Intentionally unused
         void bold; // Intentionally unused
         void dynamic; // Intentionally unused
+        void dim; // Intentionally unused
         return restWidget;
     });
 }
@@ -68,12 +93,14 @@ export function clearAllWidgetStyling(widgets: WidgetItem[]): WidgetItem[] {
             backgroundColor,
             bold,
             dynamic,
+            dim,
             ...restWidget
         } = widget;
         void color; // Intentionally unused
         void backgroundColor; // Intentionally unused
         void bold; // Intentionally unused
         void dynamic; // Intentionally unused
+        void dim; // Intentionally unused
         return restWidget;
     });
 }

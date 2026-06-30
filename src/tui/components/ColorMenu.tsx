@@ -23,6 +23,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 import {
     clearAllWidgetStyling,
     cycleWidgetColor,
+    cycleWidgetDim,
     resetWidgetStyling,
     setWidgetColor,
     toggleWidgetBold,
@@ -271,6 +272,15 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
             }
         } else if (input === 'd' || input === 'D') {
             if (highlightedItemId && highlightedItemId !== 'back') {
+                // Cycle dim for the highlighted item: off -> whole -> parens -> off
+                const selectedWidget = colorableWidgets.find(widget => widget.id === highlightedItemId);
+                if (selectedWidget) {
+                    const newItems = cycleWidgetDim(widgets, selectedWidget.id);
+                    onUpdate(newItems);
+                }
+            }
+        } else if (input === 'y' || input === 'Y') {
+            if (highlightedItemId && highlightedItemId !== 'back') {
                 // Toggle dynamic (value-driven) coloring for the highlighted item,
                 // but only for widgets that expose a fill ratio to sample.
                 const selectedWidget = colorableWidgets.find(widget => widget.id === highlightedItemId);
@@ -358,7 +368,7 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
                 defaultColor = widgetImpl.getDefaultColor();
             }
         }
-        const styledLabel = applyColors(label, widget.color ?? defaultColor, widget.backgroundColor, widget.bold, level);
+        const styledLabel = applyColors(label, widget.color ?? defaultColor, widget.backgroundColor, widget.bold, level, widget.dim);
         const dynamicMarker = widget.dynamic ? chalk.dim(' [dyn]') : '';
         return {
             label: styledLabel + dynamicMarker,
@@ -443,6 +453,12 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
             colorDisplay = applyColors(displayName, currentColor, undefined, false, level);
         }
     }
+    const styleIndicators = [
+        selectedWidget?.bold ? '[BOLD]' : null,
+        selectedWidget?.dim === true ? '[DIM]' : null,
+        selectedWidget?.dim === 'parens' ? '[DIM ()]' : null,
+        selectedWidget?.dynamic ? '[DYN]' : null
+    ].filter(indicator => indicator !== null).join(' ');
 
     // Gradient selection mode takes over the whole view
     if (gradientMode) {
@@ -585,10 +601,10 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
                         ↑↓ to select, ←→ to cycle
                         {' '}
                         {editingBackground ? 'background' : 'foreground'}
-                        , (f) to toggle bg/fg, (b)old,
+                        , (f) to toggle bg/fg, (b)old, (d)im,
                         {settings.colorLevel === 3 ? ' (h)ex,' : settings.colorLevel === 2 ? ' (a)nsi256,' : ''}
                         {!editingBackground && settings.colorLevel >= 2 ? ' (g)radient,' : ''}
-                        {!editingBackground && selectedWidget && getWidget(selectedWidget.type)?.getFillRatio ? ' (d)ynamic,' : ''}
+                        {!editingBackground && selectedWidget && getWidget(selectedWidget.type)?.getFillRatio ? ' (y) dynamic,' : ''}
                         {' '}
                         (r)eset, (c)lear all, ESC to go back
                     </Text>
@@ -610,8 +626,7 @@ export const ColorMenu: React.FC<ColorMenuProps> = ({ widgets, lineIndex, settin
                                 ):
                                 {' '}
                                 {colorDisplay}
-                                {selectedWidget.bold && chalk.bold(' [BOLD]')}
-                                {selectedWidget.dynamic && chalk.dim(' [DYN]')}
+                                {styleIndicators && ` ${styleIndicators}`}
                             </Text>
                         </Box>
                     ) : (

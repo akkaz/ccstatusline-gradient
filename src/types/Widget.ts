@@ -11,6 +11,7 @@ export const WidgetItemSchema = z.object({
     backgroundColor: z.string().optional(),
     bold: z.boolean().optional(),
     dynamic: z.boolean().optional(),
+    dim: z.union([z.boolean(), z.literal('parens')]).optional(),
     character: z.string().optional(),
     rawValue: z.boolean().optional(),
     customText: z.string().optional(),
@@ -21,6 +22,7 @@ export const WidgetItemSchema = z.object({
     timeout: z.number().optional(),
     merge: z.union([z.boolean(), z.literal('no-padding')]).optional(),
     hide: z.boolean().optional(),
+    excludeFromAutoAlign: z.boolean().optional(),
     metadata: z.record(z.string(), z.string()).optional()
 });
 

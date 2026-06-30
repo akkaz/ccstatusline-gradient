@@ -42,7 +42,7 @@ Run the same command **without** `--onboard` to open the configuration UI — ad
 npx -y ccstatusline-gradient@latest
 ```
 
-In the color menu, press **`g`** for a gradient or **`d`** for a dynamic (value-based) color.
+In the color menu, press **`g`** for a gradient or **`y`** for a dynamic (value-based) color.
 
 > Want to point Claude Code at it manually? Add to `~/.claude/settings.json`:
 > ```jsonc
