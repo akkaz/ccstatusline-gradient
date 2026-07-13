@@ -52987,6 +52987,7 @@ var init_Widget = __esm(() => {
     backgroundColor: exports_external.string().optional(),
     bold: exports_external.boolean().optional(),
     dynamic: exports_external.boolean().optional(),
+    dim: exports_external.union([exports_external.boolean(), exports_external.literal("parens")]).optional(),
     character: exports_external.string().optional(),
     rawValue: exports_external.boolean().optional(),
     customText: exports_external.string().optional(),
@@ -52997,6 +52998,7 @@ var init_Widget = __esm(() => {
     timeout: exports_external.number().optional(),
     merge: exports_external.union([exports_external.boolean(), exports_external.literal("no-padding")]).optional(),
     hide: exports_external.boolean().optional(),
+    excludeFromAutoAlign: exports_external.boolean().optional(),
     metadata: exports_external.record(exports_external.string(), exports_external.string()).optional()
   });
 });
@@ -55021,6 +55023,78 @@ var require_jsx_dev_runtime = __commonJS((exports, module) => {
   }
 });
 
+// src/widgets/shared/max-width.tsx
+function getMaxWidthKeybind() {
+  return MAX_WIDTH_KEYBIND;
+}
+function getMaxWidthModifier(item) {
+  return item.maxWidth ? `max:${item.maxWidth}` : null;
+}
+function applyMaxWidth(text, maxWidth) {
+  return maxWidth && maxWidth > 0 ? truncateStyledText(text, maxWidth, { ellipsis: true }) : text;
+}
+function renderMaxWidthEditor(props) {
+  return /* @__PURE__ */ jsx_dev_runtime.jsxDEV(MaxWidthEditor, {
+    ...props
+  }, undefined, false, undefined, this);
+}
+var import_react27, jsx_dev_runtime, MAX_WIDTH_ACTION = "edit-max-width", MAX_WIDTH_KEYBIND, MaxWidthEditor = ({ widget, onComplete, onCancel }) => {
+  const [widthInput, setWidthInput] = import_react27.useState(widget.maxWidth?.toString() ?? "");
+  use_input_default((input, key) => {
+    if (key.return) {
+      const width = parseInt(widthInput, 10);
+      if (!isNaN(width) && width > 0) {
+        onComplete({ ...widget, maxWidth: width });
+      } else {
+        const { maxWidth, ...rest2 } = widget;
+        onComplete(rest2);
+      }
+    } else if (key.escape) {
+      onCancel();
+    } else if (key.backspace) {
+      setWidthInput(widthInput.slice(0, -1));
+    } else if (shouldInsertInput(input, key) && /\d/.test(input)) {
+      setWidthInput(widthInput + input);
+    }
+  });
+  return /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Box_default, {
+    flexDirection: "column",
+    children: [
+      /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Box_default, {
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+            children: "Enter max width (blank for no limit): "
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+            children: widthInput
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+            backgroundColor: "gray",
+            color: "black",
+            children: " "
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+        dimColor: true,
+        children: "Press Enter to save, ESC to cancel"
+      }, undefined, false, undefined, this)
+    ]
+  }, undefined, true, undefined, this);
+};
+var init_max_width = __esm(async () => {
+  init_ansi();
+  init_input_guards();
+  await init_build2();
+  import_react27 = __toESM(require_react(), 1);
+  jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
+  MAX_WIDTH_KEYBIND = {
+    key: "w",
+    label: "(w)idth",
+    action: MAX_WIDTH_ACTION
+  };
+});
+
 // src/widgets/shared/symbol-override.tsx
 function getSymbolKeybind() {
   return SYMBOL_KEYBIND;
@@ -55061,7 +55135,7 @@ function renderSymbolOverrideEditor(props, defaultSymbol) {
   return renderSymbolSlotsEditor(props, [{ id: "character", label: "Glyph", defaultSymbol }]);
 }
 function renderSymbolSlotsEditor(props, slots) {
-  return /* @__PURE__ */ jsx_dev_runtime.jsxDEV(SymbolSlotsEditor, {
+  return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(SymbolSlotsEditor, {
     ...props,
     slots
   }, undefined, false, undefined, this);
@@ -55077,9 +55151,9 @@ function getFirstGrapheme(str) {
   }
   return Array.from(str)[0] ?? "";
 }
-var import_react27, jsx_dev_runtime, SYMBOL_OVERRIDE_ACTION = "edit-symbol-override", SYMBOL_KEYBIND, SymbolSlotsEditor = ({ widget, slots, onComplete, onCancel }) => {
-  const [values2, setValues] = import_react27.useState(() => slots.map((slot) => getSlotSymbol(widget, slot)));
-  const [selectedIndex, setSelectedIndex] = import_react27.useState(0);
+var import_react28, jsx_dev_runtime2, SYMBOL_OVERRIDE_ACTION = "edit-symbol-override", SYMBOL_KEYBIND, SymbolSlotsEditor = ({ widget, slots, onComplete, onCancel }) => {
+  const [values2, setValues] = import_react28.useState(() => slots.map((slot) => getSlotSymbol(widget, slot)));
+  const [selectedIndex, setSelectedIndex] = import_react28.useState(0);
   const labelWidth = Math.max(...slots.map((slot) => getVisibleWidth(slot.label)), 0);
   use_input_default((input, key) => {
     if (key.return) {
@@ -55099,48 +55173,48 @@ var import_react27, jsx_dev_runtime, SYMBOL_OVERRIDE_ACTION = "edit-symbol-overr
       setValues(values2.map((value, index) => index === selectedIndex ? grapheme : value));
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Text, {
         bold: true,
         children: "Glyphs"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Text, {
         dimColor: true,
         children: slots.length > 1 ? "↑↓ row, type to set, Tab default, Backspace none, Enter save, ESC cancel" : "Type any character or emoji, Tab default, Backspace none, Enter save, ESC cancel"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
         children: slots.map((slot, index) => {
           const isSelected = index === selectedIndex;
           const value = values2[index] ?? "";
           const labelPadding = " ".repeat(Math.max(labelWidth - getVisibleWidth(slot.label), 0));
-          return /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Box_default, {
+          return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Box_default, {
             flexDirection: "row",
             flexWrap: "nowrap",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Box_default, {
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Box_default, {
                 width: 4,
-                children: /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+                children: /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Text, {
                   color: isSelected ? "green" : undefined,
                   children: isSelected ? "▶ " : "  "
                 }, undefined, false, undefined, this)
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Text, {
                 color: isSelected ? "green" : undefined,
                 children: `${labelPadding}${slot.label}: `
               }, undefined, false, undefined, this),
-              value ? /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+              value ? /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Text, {
                 inverse: true,
                 children: value
-              }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+              }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Text, {
                 inverse: true,
                 dimColor: true,
                 children: "(none)"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Text, {
                 dimColor: true,
                 children: ` (default: ${slot.defaultSymbol})`
               }, undefined, false, undefined, this)
@@ -55155,8 +55229,8 @@ var init_symbol_override = __esm(async () => {
   init_ansi();
   init_input_guards();
   await init_build2();
-  import_react27 = __toESM(require_react(), 1);
-  jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
+  import_react28 = __toESM(require_react(), 1);
+  jsx_dev_runtime2 = __toESM(require_jsx_dev_runtime(), 1);
   SYMBOL_KEYBIND = {
     key: "g",
     label: "(g)lyph",
@@ -55203,6 +55277,9 @@ class GitBranchWidget {
       modifiers.push("hide 'no git'");
     if (isLink)
       modifiers.push("repo link");
+    const maxWidthText = getMaxWidthModifier(item);
+    if (maxWidthText)
+      modifiers.push(maxWidthText);
     return {
       displayText: this.getDisplayName(),
       modifierText: makeModifierText(modifiers)
@@ -55229,7 +55306,7 @@ class GitBranchWidget {
     if (!branch) {
       return hideNoGit ? null : `${prefix}no git`;
     }
-    const displayText = item.rawValue ? branch : `${prefix}${branch}`;
+    const displayText = applyMaxWidth(item.rawValue ? branch : `${prefix}${branch}`, item.maxWidth);
     if (isLink) {
       const origin = getRemoteInfo("origin", context);
       if (origin) {
@@ -55245,10 +55322,14 @@ class GitBranchWidget {
     return [
       ...getHideNoGitKeybinds(),
       { key: "l", label: "(l)ink to repo", action: TOGGLE_LINK_ACTION },
+      getMaxWidthKeybind(),
       getSymbolKeybind()
     ];
   }
   renderEditor(props) {
+    if (props.action === MAX_WIDTH_ACTION) {
+      return renderMaxWidthEditor(props);
+    }
     return renderSymbolOverrideEditor(props, DEFAULT_SYMBOL);
   }
   supportsRawValue() {
@@ -55264,7 +55345,10 @@ var init_GitBranch = __esm(async () => {
   init_git_remote();
   init_hyperlink();
   init_git_no_git();
-  await init_symbol_override();
+  await __promiseAll([
+    init_max_width(),
+    init_symbol_override()
+  ]);
 });
 
 // src/widgets/GitChanges.ts
@@ -55654,6 +55738,9 @@ class GitRootDirWidget {
       modifiers.push("hide 'no git'");
     if (ideLinkMode)
       modifiers.push(IDE_LINK_LABELS[ideLinkMode]);
+    const maxWidthText = getMaxWidthModifier(item);
+    if (maxWidthText)
+      modifiers.push(maxWidthText);
     return {
       displayText: this.getDisplayName(),
       modifierText: makeModifierText(modifiers)
@@ -55679,7 +55766,7 @@ class GitRootDirWidget {
     if (!rootDir) {
       return hideNoGit ? null : "no git";
     }
-    const name = this.getRootDirName(rootDir);
+    const name = applyMaxWidth(this.getRootDirName(rootDir), item.maxWidth);
     if (ideLinkMode) {
       return renderOsc8Link(buildIdeFileUrl(rootDir, ideLinkMode), name);
     }
@@ -55698,8 +55785,15 @@ class GitRootDirWidget {
   getCustomKeybinds() {
     return [
       ...getHideNoGitKeybinds(),
-      { key: "l", label: "(l)ink to IDE", action: TOGGLE_LINK_ACTION2 }
+      { key: "l", label: "(l)ink to IDE", action: TOGGLE_LINK_ACTION2 },
+      getMaxWidthKeybind()
     ];
+  }
+  renderEditor(props) {
+    if (props.action === MAX_WIDTH_ACTION) {
+      return renderMaxWidthEditor(props);
+    }
+    return null;
   }
   supportsRawValue() {
     return false;
@@ -55736,10 +55830,11 @@ class GitRootDirWidget {
   }
 }
 var IDE_LINK_KEY = "linkToIDE", LEGACY_CURSOR_LINK_KEY = "linkToCursor", TOGGLE_LINK_ACTION2 = "toggle-link", IDE_LINK_LABELS;
-var init_GitRootDir = __esm(() => {
+var init_GitRootDir = __esm(async () => {
   init_git();
   init_hyperlink();
   init_git_no_git();
+  await init_max_width();
   IDE_LINK_LABELS = {
     vscode: "link-vscode",
     cursor: "link-cursor"
@@ -57420,14 +57515,24 @@ function getChalkColor(colorName, colorLevel = "ansi16", isBackground = false) {
       return colorEntry.ansi16;
   }
 }
-function applyColors(text, foregroundColor, backgroundColor, bold, colorLevel = "ansi16") {
-  if (!foregroundColor && !backgroundColor && !bold) {
-    return text;
+function applyParensDim(text, bold) {
+  const intensityReset = bold ? "\x1B[22;1m" : "\x1B[22m";
+  return text.replace(/\([^()]*\)/g, (span) => `\x1B[2m${span}${intensityReset}`);
+}
+function applyColors(text, foregroundColor, backgroundColor, bold, colorLevel = "ansi16", dim) {
+  const styledText = dim === "parens" ? applyParensDim(text, bold) : text;
+  if (!foregroundColor && !backgroundColor && !bold && dim !== true) {
+    return styledText;
   }
   let prefix = "";
   let suffix = "";
   if (bold) {
     prefix += "\x1B[1m";
+  }
+  if (dim === true) {
+    prefix += "\x1B[2m";
+  }
+  if (bold || dim === true) {
     suffix = "\x1B[22m" + suffix;
   }
   if (backgroundColor) {
@@ -57440,7 +57545,7 @@ function applyColors(text, foregroundColor, backgroundColor, bold, colorLevel = 
   if (foregroundColor) {
     const gradientStops = parseGradientSpec(foregroundColor);
     if (gradientStops && colorLevel !== "ansi16") {
-      return prefix + applyGradientToText(text, gradientStops, colorLevel) + "\x1B[39m" + suffix;
+      return prefix + applyGradientToText(styledText, gradientStops, colorLevel) + "\x1B[39m" + suffix;
     }
     const fgCode = getColorAnsiCode(foregroundColor, colorLevel, false);
     if (fgCode) {
@@ -57448,7 +57553,7 @@ function applyColors(text, foregroundColor, backgroundColor, bold, colorLevel = 
       suffix = "\x1B[39m" + suffix;
     }
   }
-  return prefix + text + suffix;
+  return prefix + styledText + suffix;
 }
 function getColorAnsiCode(colorName, colorLevel = "ansi16", isBackground = false) {
   if (!colorName)
@@ -57760,6 +57865,16 @@ var init_colors = __esm(() => {
 });
 
 // src/utils/model-context.ts
+function getFallbackContextWindowSize() {
+  const raw = process.env[CONTEXT_SIZE_FALLBACK_ENV_VAR];
+  if (raw) {
+    const parsed = Number.parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return DEFAULT_CONTEXT_WINDOW_SIZE;
+}
 function toValidWindowSize(value) {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
     return null;
@@ -57817,9 +57932,10 @@ function getContextConfig(modelIdentifier, contextWindowSize) {
       usableTokens: Math.floor(statusWindowSize * USABLE_CONTEXT_RATIO)
     };
   }
+  const fallbackWindowSize = getFallbackContextWindowSize();
   const defaultConfig = {
-    maxTokens: DEFAULT_CONTEXT_WINDOW_SIZE,
-    usableTokens: Math.floor(DEFAULT_CONTEXT_WINDOW_SIZE * USABLE_CONTEXT_RATIO)
+    maxTokens: fallbackWindowSize,
+    usableTokens: Math.floor(fallbackWindowSize * USABLE_CONTEXT_RATIO)
   };
   if (!modelIdentifier) {
     return defaultConfig;
@@ -57833,7 +57949,7 @@ function getContextConfig(modelIdentifier, contextWindowSize) {
   }
   return defaultConfig;
 }
-var DEFAULT_CONTEXT_WINDOW_SIZE = 200000, USABLE_CONTEXT_RATIO = 0.8;
+var DEFAULT_CONTEXT_WINDOW_SIZE = 200000, USABLE_CONTEXT_RATIO = 0.8, CONTEXT_SIZE_FALLBACK_ENV_VAR = "CCSTATUSLINE_CONTEXT_SIZE_FALLBACK";
 
 // src/utils/context-percentage.ts
 function calculateContextPercentageMetrics(context) {
@@ -58037,19 +58153,22 @@ function getTerminalWidth() {
 function canDetectTerminalWidth() {
   return probeTerminalWidth() !== null;
 }
-var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.10.1", MIN_RELIABLE_TERMINAL_WIDTH = 40;
+var __dirname = "/home/akkaz/dev/ccstatusline/src/utils", PACKAGE_VERSION = "2.11.0", MIN_RELIABLE_TERMINAL_WIDTH = 40;
 var init_terminal = () => {};
 
 // src/utils/format-tokens.ts
-function formatTokens(count) {
-  if (count >= 999950)
+function formatTokens(count, decimals = 1) {
+  if (count >= 1e6 - 500 / 10 ** decimals)
     return `${(count / 1e6).toFixed(1)}M`;
   if (count >= 1000)
-    return `${(count / 1000).toFixed(1)}k`;
+    return `${(count / 1000).toFixed(decimals)}k`;
   return count.toString();
 }
 
 // src/utils/renderer.ts
+function buildConfigWarningBadge(colorLevel) {
+  return applyColors("⚠ invalid config", "red", undefined, false, getColorLevelString(colorLevel));
+}
 function maybeApplyForegroundGradient(line, settings, colorLevel) {
   const stops = parseGradientSpec(settings.overrideForegroundColor);
   return stops ? applyLineGradient(line, stops, colorLevel) : line;
@@ -58093,8 +58212,9 @@ function renderPowerlineStatusLine(widgets, settings, context, lineIndex = 0, gl
   const startCaps = config2.startCaps ?? [];
   const endCaps = config2.endCaps ?? [];
   const capLineIndex = context.lineIndex ?? lineIndex;
-  const startCap = startCaps.length > 0 ? startCaps[capLineIndex % startCaps.length] : "";
-  const endCap = endCaps.length > 0 ? endCaps[capLineIndex % endCaps.length] : "";
+  const startCapIndex = context.globalPowerlineStartCapIndex ?? capLineIndex;
+  const getStartCap = (segmentOffset2) => startCaps.length > 0 ? startCaps[(startCapIndex + segmentOffset2) % startCaps.length] ?? "" : "";
+  const getEndCap = (segmentOffset2) => endCaps.length > 0 ? endCaps[(startCapIndex + segmentOffset2) % endCaps.length] ?? "" : "";
   const themeName = config2.theme;
   let themeColors;
   if (themeName && themeName !== "custom") {
@@ -58107,13 +58227,45 @@ function renderPowerlineStatusLine(widgets, settings, context, lineIndex = 0, gl
   }
   const colorLevel = getColorLevelString(settings.colorLevel);
   const overrideForegroundGradientStops = parseGradientSpec(settings.overrideForegroundColor);
+  const isSeparatorBoundary = (widget) => widget?.type === "separator" || widget?.type === "flex-separator";
   const filteredWidgets = widgets.filter((widget) => widget.type !== "separator" && widget.type !== "flex-separator");
+  const FLEX_SENTINEL = "\x01FLEX_SEP\x01";
   if (filteredWidgets.length === 0)
     return "";
   const detectedWidth = context.terminalWidth ?? getTerminalWidth();
   const terminalWidth = resolveEffectiveTerminalWidth(detectedWidth, settings, context);
   const widgetElements = [];
   let widgetColorIndex = continueThemeAcrossLines ? globalThemeColorOffset : 0;
+  const hasNextRenderedWidgetBeforeSeparator = (originalIndex) => {
+    for (let j = originalIndex + 1;j < widgets.length; j++) {
+      const nextWidget = widgets[j];
+      if (!nextWidget)
+        continue;
+      if (isSeparatorBoundary(nextWidget))
+        return false;
+      if (preRenderedWidgets[j]?.content)
+        return true;
+    }
+    return false;
+  };
+  const canMergeWithNextRenderedWidget = (originalIndex) => {
+    if (originalIndex === undefined)
+      return false;
+    const widget = widgets[originalIndex];
+    return Boolean(widget?.merge && hasNextRenderedWidgetBeforeSeparator(originalIndex));
+  };
+  const findPreviousRenderedWidgetIndexBeforeSeparator = (originalIndex) => {
+    for (let j = originalIndex - 1;j >= 0; j--) {
+      const previousWidget = widgets[j];
+      if (!previousWidget)
+        continue;
+      if (isSeparatorBoundary(previousWidget))
+        return null;
+      if (preRenderedWidgets[j]?.content)
+        return j;
+    }
+    return null;
+  };
   const preRenderedIndices = [];
   for (let i = 0;i < widgets.length; i++) {
     const widget = widgets[i];
@@ -58144,10 +58296,11 @@ function renderPowerlineStatusLine(widgets, settings, context, lineIndex = 0, gl
       if (settings.overrideForegroundColor && settings.overrideForegroundColor !== "none" && widget.type === "custom-command" && widget.preserveColors) {
         widgetText = stripSgrCodes(widgetText);
       }
-      const prevItem = i > 0 ? filteredWidgets[i - 1] : null;
-      const nextItem = i < filteredWidgets.length - 1 ? filteredWidgets[i + 1] : null;
-      const omitLeadingPadding = prevItem?.merge === "no-padding";
-      const omitTrailingPadding = widget.merge === "no-padding" && nextItem;
+      const previousRenderedIndex = actualPreRenderedIndex !== undefined ? findPreviousRenderedWidgetIndexBeforeSeparator(actualPreRenderedIndex) : null;
+      const previousRenderedWidget = previousRenderedIndex !== null ? widgets[previousRenderedIndex] : undefined;
+      const mergesWithNext = canMergeWithNextRenderedWidget(actualPreRenderedIndex);
+      const omitLeadingPadding = previousRenderedWidget?.merge === "no-padding" && canMergeWithNextRenderedWidget(previousRenderedIndex ?? undefined);
+      const omitTrailingPadding = widget.merge === "no-padding" && mergesWithNext;
       const leadingPadding = omitLeadingPadding ? "" : padding;
       const trailingPadding = omitTrailingPadding ? "" : padding;
       const paddedText = `${leadingPadding}${widgetText}${trailingPadding}`;
@@ -58159,7 +58312,7 @@ function renderPowerlineStatusLine(widgets, settings, context, lineIndex = 0, gl
           fgColor = themeColors.fg[widgetColorIndex % themeColors.fg.length] ?? fgColor;
         }
         bgColor = themeColors.bg[widgetColorIndex % themeColors.bg.length] ?? bgColor;
-        if (!widget.merge) {
+        if (!mergesWithNext) {
           widgetColorIndex++;
         }
       }
@@ -58170,12 +58323,56 @@ function renderPowerlineStatusLine(widgets, settings, context, lineIndex = 0, gl
         content: paddedText,
         bgColor: bgColor ?? undefined,
         fgColor,
+        mergesWithNext,
+        originalIndex: actualPreRenderedIndex ?? -1,
         widget
       });
     }
   }
   if (widgetElements.length === 0)
     return "";
+  const renderedElementIndexByOriginalIndex = new Map;
+  widgetElements.forEach((element, index) => {
+    renderedElementIndexByOriginalIndex.set(element.originalIndex, index);
+  });
+  const flexAfterIndex = new Map;
+  const startCapBeforeIndex = new Map;
+  const segmentOffsetByRenderedIndex = new Map;
+  let leadingFlexCount = 0;
+  let totalFlexCount = 0;
+  let lastRenderedIndex = null;
+  let pendingFlexCount = 0;
+  let segmentOffset = 0;
+  let hasRenderedSegment = false;
+  for (let i = 0;i < widgets.length; i++) {
+    const widget = widgets[i];
+    if (!widget || widget.type === "separator")
+      continue;
+    if (widget.type === "flex-separator") {
+      totalFlexCount++;
+      if (lastRenderedIndex === null) {
+        leadingFlexCount++;
+      } else {
+        pendingFlexCount++;
+        flexAfterIndex.set(lastRenderedIndex, (flexAfterIndex.get(lastRenderedIndex) ?? 0) + 1);
+      }
+      continue;
+    }
+    const renderedIndex = renderedElementIndexByOriginalIndex.get(i);
+    if (renderedIndex !== undefined) {
+      if (!hasRenderedSegment) {
+        startCapBeforeIndex.set(renderedIndex, segmentOffset);
+        pendingFlexCount = 0;
+        hasRenderedSegment = true;
+      } else if (pendingFlexCount > 0) {
+        segmentOffset++;
+        startCapBeforeIndex.set(renderedIndex, segmentOffset);
+        pendingFlexCount = 0;
+      }
+      segmentOffsetByRenderedIndex.set(renderedIndex, segmentOffset);
+      lastRenderedIndex = renderedIndex;
+    }
+  }
   const autoAlign = config2.autoAlign;
   if (autoAlign) {
     let alignmentPos = 0;
@@ -58183,14 +58380,16 @@ function renderPowerlineStatusLine(widgets, settings, context, lineIndex = 0, gl
       const element = widgetElements[i];
       if (!element)
         continue;
+      if (element.widget.excludeFromAutoAlign)
+        break;
       const prevWidget = i > 0 ? widgetElements[i - 1] : null;
-      const isPreviousMerged = prevWidget?.widget.merge;
+      const isPreviousMerged = prevWidget?.mergesWithNext;
       if (!isPreviousMerged) {
         const maxWidth = preCalculatedMaxWidths[alignmentPos];
         if (maxWidth !== undefined) {
           let combinedLength = getVisibleWidth(element.content);
           let j = i;
-          while (j < widgetElements.length - 1 && widgetElements[j]?.widget.merge) {
+          while (j < widgetElements.length - 1 && widgetElements[j]?.mergesWithNext) {
             j++;
             const nextElement = widgetElements[j];
             if (nextElement) {
@@ -58216,29 +58415,45 @@ function renderPowerlineStatusLine(widgets, settings, context, lineIndex = 0, gl
   }, 0) : 0;
   let powerlineGradientColumn = 0;
   let result2 = "";
-  if (startCap && widgetElements.length > 0) {
-    const firstWidget = widgetElements[0];
-    if (firstWidget?.bgColor) {
-      const capFg = bgToFg(firstWidget.bgColor);
-      const fgCode = getColorAnsiCode(capFg, colorLevel, false);
-      result2 += fgCode + startCap + "\x1B[39m";
-    } else {
-      result2 += startCap;
-    }
+  if (leadingFlexCount > 0) {
+    result2 += FLEX_SENTINEL.repeat(leadingFlexCount);
   }
+  let localSeparatorIndex = 0;
   for (let i = 0;i < widgetElements.length; i++) {
     const widget = widgetElements[i];
     const nextWidget = widgetElements[i + 1];
     if (!widget)
       continue;
     const shouldBold = settings.globalBold || widget.widget.bold;
-    const needsSeparator = i < widgetElements.length - 1 && separators.length > 0 && nextWidget && !widget.widget.merge;
+    const shouldDim = widget.widget.dim === true;
+    const needsSeparator = i < widgetElements.length - 1 && separators.length > 0 && nextWidget !== undefined && !widget.mergesWithNext;
+    const flexCountAfter = flexAfterIndex.get(i) ?? 0;
+    const currentSegmentOffset = segmentOffsetByRenderedIndex.get(i) ?? 0;
+    const isLastWidget = i === widgetElements.length - 1;
+    const hasEndCapAfterWidget = Boolean(getEndCap(currentSegmentOffset)) && (flexCountAfter > 0 || isLastWidget);
+    const startCapSegmentOffset = startCapBeforeIndex.get(i);
+    if (startCapSegmentOffset !== undefined) {
+      const segmentStartCap = getStartCap(startCapSegmentOffset);
+      if (segmentStartCap) {
+        if (widget.bgColor) {
+          const capFg = bgToFg(widget.bgColor);
+          const fgCode = getColorAnsiCode(capFg, colorLevel, false);
+          result2 += fgCode + segmentStartCap + "\x1B[39m";
+        } else {
+          result2 += segmentStartCap;
+        }
+      }
+    }
     let widgetContent = "";
     const isPreserveColors = widget.widget.type === "custom-command" && widget.widget.preserveColors;
     if (shouldBold && !isPreserveColors) {
       widgetContent += "\x1B[1m";
     }
+    if (shouldDim && !isPreserveColors) {
+      widgetContent += "\x1B[2m";
+    }
     const textGradientStops = !isPreserveColors && powerlineGradientWidth > 1 ? overrideForegroundGradientStops : null;
+    const styledContent = widget.widget.dim === "parens" && !isPreserveColors ? applyParensDim(widget.content, shouldBold) : widget.content;
     if (widget.fgColor && !isPreserveColors && !textGradientStops) {
       widgetContent += getColorAnsiCode(widget.fgColor, colorLevel, false);
     }
@@ -58246,26 +58461,44 @@ function renderPowerlineStatusLine(widgets, settings, context, lineIndex = 0, gl
       widgetContent += getColorAnsiCode(widget.bgColor, colorLevel, true);
     }
     if (textGradientStops) {
-      const gradientResult = applyLineGradientSegment(widget.content, textGradientStops, colorLevel, powerlineGradientColumn, powerlineGradientWidth);
+      const gradientResult = applyLineGradientSegment(styledContent, textGradientStops, colorLevel, powerlineGradientColumn, powerlineGradientWidth);
       widgetContent += gradientResult.text;
       powerlineGradientColumn = gradientResult.nextColumn;
     } else {
-      widgetContent += widget.content;
+      widgetContent += styledContent;
     }
     if (isPreserveColors) {
       widgetContent += "\x1B[0m";
     } else {
       widgetContent += "\x1B[49m\x1B[39m";
-      const isLastWidget = i === widgetElements.length - 1;
-      const hasEndCap = endCaps.length > 0 && endCaps[capLineIndex % endCaps.length];
-      if (shouldBold && !needsSeparator && !(isLastWidget && hasEndCap)) {
+      const shouldRestoreBoldForBoundary = shouldDim && shouldBold && (needsSeparator || hasEndCapAfterWidget);
+      if (shouldRestoreBoldForBoundary) {
+        widgetContent += "\x1B[22;1m";
+      } else if (shouldDim || shouldBold && !needsSeparator && !hasEndCapAfterWidget) {
         widgetContent += "\x1B[22m";
       }
     }
     result2 += widgetContent;
+    if (flexCountAfter > 0) {
+      const segmentEndCap = getEndCap(currentSegmentOffset);
+      if (segmentEndCap) {
+        if (widget.bgColor) {
+          const capFg = bgToFg(widget.bgColor);
+          const fgCode = getColorAnsiCode(capFg, colorLevel, false);
+          result2 += fgCode + segmentEndCap + "\x1B[39m";
+        } else {
+          result2 += segmentEndCap;
+        }
+      }
+      if (shouldBold) {
+        result2 += "\x1B[22m";
+      }
+      result2 += FLEX_SENTINEL.repeat(flexCountAfter);
+      continue;
+    }
     if (needsSeparator) {
-      const globalIndex = globalSeparatorOffset + i;
-      const separatorIndex = Math.min(globalIndex, separators.length - 1);
+      const globalIndex = globalSeparatorOffset + localSeparatorIndex;
+      const separatorIndex = globalIndex % separators.length;
       const separator = separators[separatorIndex] ?? "";
       const shouldInvert = invertBgs[separatorIndex] ?? false;
       let separatorOutput;
@@ -58320,23 +58553,49 @@ function renderPowerlineStatusLine(widgets, settings, context, lineIndex = 0, gl
         }
       }
       result2 += separatorOutput;
-      if (shouldBold) {
+      if (shouldBold || shouldDim) {
+        result2 += "\x1B[22m";
+      }
+      localSeparatorIndex++;
+    }
+  }
+  if (widgetElements.length > 0) {
+    const lastWidgetIndex = widgetElements.length - 1;
+    const lastWidget = widgetElements[lastWidgetIndex];
+    const lastWidgetBold = settings.globalBold || lastWidget?.widget.bold;
+    const lastWidgetDim = lastWidget?.widget.dim === true;
+    const lastSegmentOffset = segmentOffsetByRenderedIndex.get(lastWidgetIndex) ?? 0;
+    const lastWidgetHasFlexAfter = (flexAfterIndex.get(lastWidgetIndex) ?? 0) > 0;
+    const segmentEndCap = getEndCap(lastSegmentOffset);
+    if (segmentEndCap && !lastWidgetHasFlexAfter) {
+      if (lastWidget?.bgColor) {
+        const capFg = bgToFg(lastWidget.bgColor);
+        const fgCode = getColorAnsiCode(capFg, colorLevel, false);
+        result2 += fgCode + segmentEndCap + "\x1B[39m";
+      } else {
+        result2 += segmentEndCap;
+      }
+      if (lastWidgetBold || lastWidgetDim) {
         result2 += "\x1B[22m";
       }
     }
   }
-  if (endCap && widgetElements.length > 0) {
-    const lastWidget = widgetElements[widgetElements.length - 1];
-    if (lastWidget?.bgColor) {
-      const capFg = bgToFg(lastWidget.bgColor);
-      const fgCode = getColorAnsiCode(capFg, colorLevel, false);
-      result2 += fgCode + endCap + "\x1B[39m";
+  if (totalFlexCount > 0) {
+    if (terminalWidth && terminalWidth > 0) {
+      const parts = result2.split(FLEX_SENTINEL);
+      const totalContentWidth = parts.reduce((sum2, p) => sum2 + getVisibleWidth(p), 0);
+      const flexCount = parts.length - 1;
+      const totalSpace = Math.max(0, terminalWidth - totalContentWidth);
+      const spacePerFlex = flexCount > 0 ? Math.floor(totalSpace / flexCount) : 0;
+      const extraSpace = flexCount > 0 ? totalSpace % flexCount : 0;
+      let newResult = parts[0] ?? "";
+      for (let i = 1;i < parts.length; i++) {
+        const flexSize = spacePerFlex + (i - 1 < extraSpace ? 1 : 0);
+        newResult += " ".repeat(flexSize) + (parts[i] ?? "");
+      }
+      result2 = newResult;
     } else {
-      result2 += endCap;
-    }
-    const lastWidgetBold = settings.globalBold || lastWidget?.widget.bold;
-    if (lastWidgetBold) {
-      result2 += "\x1B[22m";
+      result2 = result2.split(FLEX_SENTINEL).join(" ");
     }
   }
   result2 += source_default.reset("");
@@ -58360,6 +58619,32 @@ function formatSeparator(sep) {
   }
   return sep;
 }
+function countPowerlineStartCapSlots(widgets, preRenderedWidgets) {
+  let pendingFlexAfterRenderedSegment = false;
+  let hasRenderedSegment = false;
+  let renderedSegmentCount = 0;
+  for (let i = 0;i < widgets.length; i++) {
+    const widget = widgets[i];
+    if (!widget || widget.type === "separator")
+      continue;
+    if (widget.type === "flex-separator") {
+      if (hasRenderedSegment) {
+        pendingFlexAfterRenderedSegment = true;
+      }
+      continue;
+    }
+    if (!preRenderedWidgets[i]?.content)
+      continue;
+    if (!hasRenderedSegment) {
+      hasRenderedSegment = true;
+      renderedSegmentCount = 1;
+    } else if (pendingFlexAfterRenderedSegment) {
+      renderedSegmentCount++;
+      pendingFlexAfterRenderedSegment = false;
+    }
+  }
+  return renderedSegmentCount;
+}
 function preRenderAllWidgets(allLinesWidgets, settings, context) {
   const preRenderedLines = [];
   for (const lineWidgets of allLinesWidgets) {
@@ -58375,6 +58660,11 @@ function preRenderAllWidgets(allLinesWidgets, settings, context) {
       }
       const widgetImpl = getWidget(widget.type);
       if (!widgetImpl) {
+        preRenderedLine.push({
+          content: "",
+          plainLength: 0,
+          widget
+        });
         continue;
       }
       const effectiveWidget = context.minimalist ? { ...widget, rawValue: true } : widget;
@@ -58395,19 +58685,37 @@ function calculateMaxWidthsFromPreRendered(preRenderedLines, settings) {
   const defaultPadding = settings.defaultPadding ?? "";
   const paddingLength = defaultPadding.length;
   for (const preRenderedLine of preRenderedLines) {
-    const filteredWidgets = preRenderedLine.filter((w) => w.widget.type !== "separator" && w.widget.type !== "flex-separator" && w.content);
+    const isSeparatorBoundary = (entry) => entry?.widget.type === "separator" || entry?.widget.type === "flex-separator";
+    const hasNextRenderedWidgetBeforeSeparator = (originalIndex) => {
+      for (let j = originalIndex + 1;j < preRenderedLine.length; j++) {
+        const nextEntry = preRenderedLine[j];
+        if (!nextEntry)
+          continue;
+        if (isSeparatorBoundary(nextEntry))
+          return false;
+        if (nextEntry.content)
+          return true;
+      }
+      return false;
+    };
+    const renderedWidgets = preRenderedLine.map((entry, originalIndex) => ({
+      ...entry,
+      mergesWithNext: Boolean(entry.widget.merge && hasNextRenderedWidgetBeforeSeparator(originalIndex))
+    })).filter((entry) => !isSeparatorBoundary(entry) && entry.content);
     let alignmentPos = 0;
-    for (let i = 0;i < filteredWidgets.length; i++) {
-      const widget = filteredWidgets[i];
+    for (let i = 0;i < renderedWidgets.length; i++) {
+      const widget = renderedWidgets[i];
       if (!widget)
         continue;
+      if (widget.widget.excludeFromAutoAlign)
+        break;
       let totalWidth = widget.plainLength + paddingLength * 2;
       let j = i;
-      while (j < filteredWidgets.length - 1 && filteredWidgets[j]?.widget.merge) {
+      while (j < renderedWidgets.length - 1 && renderedWidgets[j]?.mergesWithNext) {
         j++;
-        const nextWidget = filteredWidgets[j];
+        const nextWidget = renderedWidgets[j];
         if (nextWidget) {
-          if (filteredWidgets[j - 1]?.widget.merge === "no-padding") {
+          if (renderedWidgets[j - 1]?.widget.merge === "no-padding") {
             totalWidth += nextWidget.plainLength;
           } else {
             totalWidth += nextWidget.plainLength + paddingLength * 2;
@@ -58441,7 +58749,7 @@ function renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, pr
   const isPowerlineMode = Boolean(powerlineSettings?.enabled);
   if (isPowerlineMode)
     return renderPowerlineStatusLine(widgets, settings, context, context.lineIndex ?? 0, context.globalSeparatorIndex ?? 0, context.globalPowerlineThemeIndex ?? 0, preRenderedWidgets, preCalculatedMaxWidths);
-  const applyColorsWithOverride = (text, foregroundColor, backgroundColor, bold) => {
+  const applyColorsWithOverride = (text, foregroundColor, backgroundColor, bold, dim) => {
     let fgColor = foregroundColor;
     const fgOverride = settings.overrideForegroundColor;
     if (fgOverride && fgOverride !== "none") {
@@ -58456,7 +58764,7 @@ function renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, pr
       bgColor = settings.overrideBackgroundColor;
     }
     const shouldBold = settings.globalBold || bold;
-    return applyColors(text, fgColor, bgColor, shouldBold, colorLevel);
+    return applyColors(text, fgColor, bgColor, shouldBold, colorLevel, dim);
   };
   const detectedWidth = context.terminalWidth ?? getTerminalWidth();
   const terminalWidth = resolveEffectiveTerminalWidth(detectedWidth, settings, context);
@@ -58484,6 +58792,7 @@ function renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, pr
       let separatorColor = widget.color ?? "gray";
       let separatorBg = widget.backgroundColor;
       let separatorBold = widget.bold;
+      let separatorDim = widget.dim;
       if (settings.inheritSeparatorColors && i > 0 && !widget.color && !widget.backgroundColor) {
         const prevWidget = widgets[i - 1];
         if (prevWidget && prevWidget.type !== "separator" && prevWidget.type !== "flex-separator") {
@@ -58495,9 +58804,10 @@ function renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, pr
           separatorColor = widgetColor;
           separatorBg = prevWidget.backgroundColor;
           separatorBold = prevWidget.bold;
+          separatorDim = prevWidget.dim;
         }
       }
-      elements.push({ content: applyColorsWithOverride(formattedSep, separatorColor, separatorBg, separatorBold), type: "separator", widget });
+      elements.push({ content: applyColorsWithOverride(formattedSep, separatorColor, separatorBg, separatorBold, separatorDim), type: "separator", widget });
       continue;
     }
     if (widget.type === "flex-separator") {
@@ -58535,7 +58845,7 @@ function renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, pr
             }
           }
           elements.push({
-            content: applyColorsWithOverride(widgetText, effectiveColor, widget.backgroundColor, widget.bold),
+            content: applyColorsWithOverride(widgetText, effectiveColor, widget.backgroundColor, widget.bold, widget.dim),
             type: widget.type,
             widget
           });
@@ -58565,7 +58875,7 @@ function renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, pr
             const widgetImpl = getWidget(prevElem2.widget.type);
             widgetColor = widgetImpl ? widgetImpl.getDefaultColor() : "white";
           }
-          const coloredSep = applyColorsWithOverride(defaultSep, widgetColor, prevElem2.widget.backgroundColor, prevElem2.widget.bold);
+          const coloredSep = applyColorsWithOverride(defaultSep, widgetColor, prevElem2.widget.backgroundColor, prevElem2.widget.bold, prevElem2.widget.dim);
           finalElements.push(coloredSep);
         } else {
           finalElements.push(defaultSep);
@@ -58582,7 +58892,7 @@ function renderStatusLineImpl(widgets, settings, context, preRenderedWidgets, pr
     } else {
       const nextElem = index < elements.length - 1 ? elements[index + 1] : null;
       const omitLeadingPadding = prevElem?.widget?.merge === "no-padding";
-      const omitTrailingPadding = elem.widget?.merge === "no-padding" && nextElem;
+      const omitTrailingPadding = elem.widget?.merge === "no-padding" && nextElem && nextElem.type !== "separator" && nextElem.type !== "flex-separator";
       const hasColorOverride = Boolean(settings.overrideBackgroundColor && settings.overrideBackgroundColor !== "none") || Boolean(settings.overrideForegroundColor && settings.overrideForegroundColor !== "none");
       if (padding && (elem.widget?.backgroundColor || hasColorOverride)) {
         const leadingPadding = omitLeadingPadding ? "" : applyColorsWithOverride(padding, undefined, elem.widget?.backgroundColor);
@@ -59398,7 +59708,9 @@ function getUsageDisplayModifierText(item, options = {}) {
   } else if (mode === "slider-only") {
     modifiers.push("short bar only");
   }
-  if (isUsageInverted(item)) {
+  if (options.showUsageDirection) {
+    modifiers.push(isUsageInverted(item) ? "remaining" : "used");
+  } else if (isUsageInverted(item)) {
     modifiers.push("inverted");
   }
   if (isUsageCursorEnabled(item) && (isUsageProgressMode(mode) || isUsageSliderMode(mode))) {
@@ -59423,7 +59735,7 @@ function getUsageDisplayModifierText(item, options = {}) {
   }
   return makeModifierText(modifiers);
 }
-function cycleUsageDisplayMode(item, disabledInProgressKeys = [], includeSlider = false) {
+function cycleUsageDisplayMode(item, disabledInProgressKeys = [], includeSlider = false, preserveInvertInTime = false) {
   const currentMode = getUsageDisplayMode(item);
   let nextMode;
   if (includeSlider) {
@@ -59431,7 +59743,7 @@ function cycleUsageDisplayMode(item, disabledInProgressKeys = [], includeSlider 
   } else {
     nextMode = currentMode === "time" ? "progress" : currentMode === "progress" ? "progress-short" : "time";
   }
-  const keysToRemove = nextMode === "time" ? ["invert", "cursor"] : disabledInProgressKeys;
+  const keysToRemove = nextMode === "time" ? preserveInvertInTime ? ["cursor"] : ["invert", "cursor"] : disabledInProgressKeys;
   const nextItem = removeMetadataKeys(item, keysToRemove);
   const nextMetadata = {
     ...nextItem.metadata ?? {},
@@ -59445,13 +59757,14 @@ function cycleUsageDisplayMode(item, disabledInProgressKeys = [], includeSlider 
 function toggleUsageInverted(item) {
   return toggleMetadataFlag(item, "invert");
 }
-function getUsagePercentCustomKeybinds(item) {
-  const keybinds = [PROGRESS_TOGGLE_KEYBIND];
-  if (item) {
+function getUsagePercentCustomKeybinds(item, includeCursor = true) {
+  const nextDirection = item && isUsageInverted(item) ? "used" : "remaining";
+  const keybinds = [
+    PROGRESS_TOGGLE_KEYBIND,
+    { key: "u", label: `(u) show ${nextDirection}`, action: "toggle-invert" }
+  ];
+  if (item && includeCursor) {
     const mode = getUsageDisplayMode(item);
-    if (isUsageProgressMode(mode) || isUsageSliderMode(mode)) {
-      keybinds.push(INVERT_TOGGLE_KEYBIND);
-    }
     if (isUsageProgressMode(mode) || isUsageSliderMode(mode)) {
       keybinds.push(CURSOR_TOGGLE_KEYBIND);
     }
@@ -59893,7 +60206,7 @@ class CustomTextWidget {
     }];
   }
   renderEditor(props) {
-    return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(CustomTextEditor, {
+    return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(CustomTextEditor, {
       ...props
     }, undefined, false, undefined, this);
   }
@@ -59904,9 +60217,9 @@ class CustomTextWidget {
     return true;
   }
 }
-var import_react28, jsx_dev_runtime2, CustomTextEditor = ({ widget, onComplete, onCancel }) => {
-  const [text, setText] = import_react28.useState(widget.customText ?? "");
-  const [cursorPos, setCursorPos] = import_react28.useState(text.length);
+var import_react29, jsx_dev_runtime3, CustomTextEditor = ({ widget, onComplete, onCancel }) => {
+  const [text, setText] = import_react29.useState(widget.customText ?? "");
+  const [cursorPos, setCursorPos] = import_react29.useState(text.length);
   const getGraphemes = (str) => {
     if ("Segmenter" in Intl) {
       const segmenter2 = new Intl.Segmenter(undefined, { granularity: "grapheme" });
@@ -60002,13 +60315,13 @@ var import_react28, jsx_dev_runtime2, CustomTextEditor = ({ widget, onComplete, 
   if (currentGraphemeIndex >= graphemes.length) {
     display += "\x1B[7m \x1B[0m";
   }
-  return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Text, {
         children: display
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Text, {
         dimColor: true,
         children: "←→ move cursor, Ctrl+←→ jump to start/end, Enter save, ESC cancel"
       }, undefined, false, undefined, this)
@@ -60018,8 +60331,8 @@ var import_react28, jsx_dev_runtime2, CustomTextEditor = ({ widget, onComplete, 
 var init_CustomText = __esm(async () => {
   init_input_guards();
   await init_build2();
-  import_react28 = __toESM(require_react(), 1);
-  jsx_dev_runtime2 = __toESM(require_jsx_dev_runtime(), 1);
+  import_react29 = __toESM(require_react(), 1);
+  jsx_dev_runtime3 = __toESM(require_jsx_dev_runtime(), 1);
 });
 
 // src/widgets/CustomSymbol.tsx
@@ -60051,7 +60364,7 @@ class CustomSymbolWidget {
     }];
   }
   renderEditor(props) {
-    return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(CustomSymbolEditor, {
+    return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(CustomSymbolEditor, {
       ...props
     }, undefined, false, undefined, this);
   }
@@ -60062,8 +60375,8 @@ class CustomSymbolWidget {
     return true;
   }
 }
-var import_react29, jsx_dev_runtime3, CustomSymbolEditor = ({ widget, onComplete, onCancel }) => {
-  const [symbol2, setSymbol] = import_react29.useState(widget.customSymbol ?? "");
+var import_react30, jsx_dev_runtime4, CustomSymbolEditor = ({ widget, onComplete, onCancel }) => {
+  const [symbol2, setSymbol] = import_react30.useState(widget.customSymbol ?? "");
   const getFirstGrapheme2 = (str) => {
     if (str.length === 0) {
       return "";
@@ -60087,24 +60400,24 @@ var import_react29, jsx_dev_runtime3, CustomSymbolEditor = ({ widget, onComplete
       setSymbol(firstGrapheme);
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
         children: [
           "Enter custom symbol:",
           " ",
-          symbol2 ? /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Text, {
+          symbol2 ? /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
             inverse: true,
             children: symbol2
-          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Text, {
+          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
             inverse: true,
             dimColor: true,
             children: "(empty)"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
         dimColor: true,
         children: "Type any character or emoji, Backspace clear, Enter save, ESC cancel"
       }, undefined, false, undefined, this)
@@ -60114,8 +60427,8 @@ var import_react29, jsx_dev_runtime3, CustomSymbolEditor = ({ widget, onComplete
 var init_CustomSymbol = __esm(async () => {
   init_input_guards();
   await init_build2();
-  import_react29 = __toESM(require_react(), 1);
-  jsx_dev_runtime3 = __toESM(require_jsx_dev_runtime(), 1);
+  import_react30 = __toESM(require_react(), 1);
+  jsx_dev_runtime4 = __toESM(require_jsx_dev_runtime(), 1);
 });
 
 // src/widgets/CustomCommand.tsx
@@ -60210,7 +60523,7 @@ class CustomCommandWidget {
     ];
   }
   renderEditor(props) {
-    return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(CustomCommandEditor, {
+    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(CustomCommandEditor, {
       ...props
     }, undefined, false, undefined, this);
   }
@@ -60221,7 +60534,7 @@ class CustomCommandWidget {
     return !item.preserveColors;
   }
 }
-var import_react30, jsx_dev_runtime4, CustomCommandEditor = ({ widget, onComplete, onCancel, action }) => {
+var import_react31, jsx_dev_runtime5, CustomCommandEditor = ({ widget, onComplete, onCancel, action }) => {
   const getMode = () => {
     switch (action) {
       case "edit-command":
@@ -60235,10 +60548,10 @@ var import_react30, jsx_dev_runtime4, CustomCommandEditor = ({ widget, onComplet
     }
   };
   const mode = getMode();
-  const [commandInput, setCommandInput] = import_react30.useState(widget.commandPath ?? "");
-  const [commandCursorPos, setCommandCursorPos] = import_react30.useState(commandInput.length);
-  const [widthInput, setWidthInput] = import_react30.useState(widget.maxWidth?.toString() ?? "");
-  const [timeoutInput, setTimeoutInput] = import_react30.useState(widget.timeout?.toString() ?? "1000");
+  const [commandInput, setCommandInput] = import_react31.useState(widget.commandPath ?? "");
+  const [commandCursorPos, setCommandCursorPos] = import_react31.useState(commandInput.length);
+  const [widthInput, setWidthInput] = import_react31.useState(widget.maxWidth?.toString() ?? "");
+  const [timeoutInput, setTimeoutInput] = import_react31.useState(widget.timeout?.toString() ?? "1000");
   use_input_default((input, key) => {
     if (mode === "command") {
       if (key.return) {
@@ -60297,15 +60610,15 @@ var import_react30, jsx_dev_runtime4, CustomCommandEditor = ({ widget, onComplet
     }
   });
   if (mode === "command") {
-    return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
           children: [
             "Enter command path:",
             " ",
             commandInput.slice(0, commandCursorPos),
-            /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
               backgroundColor: "gray",
               color: "black",
               children: commandInput[commandCursorPos] ?? " "
@@ -60313,64 +60626,64 @@ var import_react30, jsx_dev_runtime4, CustomCommandEditor = ({ widget, onComplet
             commandInput.slice(commandCursorPos + 1)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
           dimColor: true,
           children: "←→ move cursor, Enter save, ESC cancel"
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   } else if (mode === "width") {
-    return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Box_default, {
           children: [
-            /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
               children: "Enter max width (blank for no limit): "
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
               children: widthInput
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
               backgroundColor: "gray",
               color: "black",
               children: " "
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
           dimColor: true,
           children: "Press Enter to save, ESC to cancel"
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   } else if (mode === "timeout") {
-    return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Box_default, {
           children: [
-            /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
               children: "Enter timeout in milliseconds (default 1000): "
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
               children: timeoutInput
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
               backgroundColor: "gray",
               color: "black",
               children: " "
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
           dimColor: true,
           children: "Press Enter to save, ESC to cancel"
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Text, {
+  return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
     children: "Unknown editor mode"
   }, undefined, false, undefined, this);
 };
@@ -60378,8 +60691,8 @@ var init_CustomCommand = __esm(async () => {
   init_ansi();
   init_input_guards();
   await init_build2();
-  import_react30 = __toESM(require_react(), 1);
-  jsx_dev_runtime4 = __toESM(require_jsx_dev_runtime(), 1);
+  import_react31 = __toESM(require_react(), 1);
+  jsx_dev_runtime5 = __toESM(require_jsx_dev_runtime(), 1);
 });
 
 // node_modules/ms/index.js
@@ -61453,6 +61766,7 @@ var init_usage_types = __esm(() => {
 
 // src/utils/usage-fetch.ts
 import { execFileSync as execFileSync3 } from "child_process";
+import { createHash as createHash3 } from "crypto";
 import * as fs4 from "fs";
 import * as https from "https";
 import * as os5 from "os";
@@ -61494,6 +61808,18 @@ function parseCachedUsageData(rawJson) {
     extraUsageCurrency: parsed.extraUsageCurrency ?? undefined,
     error: parsedError.success ? parsedError.data : undefined
   };
+}
+function fingerprintUsageToken(token) {
+  return createHash3("sha256").update(token).digest("hex").slice(0, 16);
+}
+function readCachedTokenHash(rawJson) {
+  return parseJsonWithSchema(rawJson, CachedTokenHashSchema)?.tokenHash;
+}
+function tokenHashMatches(cachedHash, currentHash) {
+  if (currentHash === null) {
+    return true;
+  }
+  return cachedHash === currentHash;
 }
 function parseUsageApiResponse(rawJson) {
   const parsed = parseJsonWithSchema(rawJson, UsageApiResponseSchema);
@@ -61538,13 +61864,17 @@ function hasRequiredUsageField(data, field) {
   if (data[field] !== undefined) {
     return true;
   }
+  const windowSentinel = WINDOW_RESET_FIELD_SENTINELS[field];
+  if (windowSentinel !== undefined && data[windowSentinel] !== undefined) {
+    return true;
+  }
   return data.extraUsageEnabled !== undefined && EXTRA_USAGE_DETAIL_FIELDS.has(field);
 }
 function hasRequiredUsageFields(data, requiredFields = []) {
   return requiredFields.every((field) => hasRequiredUsageField(data, field));
 }
-function getStaleUsageOrError(error51, now2, errorCacheMaxAge = LOCK_MAX_AGE, requiredFields = []) {
-  const stale = readStaleUsageCache();
+function getStaleUsageOrError(error51, now2, currentTokenHash, errorCacheMaxAge = LOCK_MAX_AGE, requiredFields = []) {
+  const stale = readStaleUsageCache(currentTokenHash);
   if (stale && !stale.error && hasRequiredUsageFields(stale, requiredFields)) {
     return cacheUsageData(stale, now2);
   }
@@ -61666,9 +61996,13 @@ function getUsageToken() {
   }
   return readUsageTokenFromMacKeychainService(MACOS_USAGE_CREDENTIALS_SERVICE) ?? readUsageTokenFromMacKeychainCandidates() ?? readUsageTokenFromCredentialsFile();
 }
-function readStaleUsageCache() {
+function readStaleUsageCache(currentTokenHash) {
   try {
-    return parseCachedUsageData(fs4.readFileSync(CACHE_FILE, "utf8"));
+    const rawCache = fs4.readFileSync(CACHE_FILE, "utf8");
+    if (!tokenHashMatches(readCachedTokenHash(rawCache), currentTokenHash)) {
+      return null;
+    }
+    return parseCachedUsageData(rawCache);
   } catch {
     return null;
   }
@@ -61677,6 +62011,11 @@ function writeUsageLock(blockedUntil, error51) {
   try {
     ensureCacheDirExists();
     fs4.writeFileSync(LOCK_FILE, JSON.stringify({ blockedUntil, error: error51 }));
+  } catch {}
+}
+function clearUsageLock() {
+  try {
+    fs4.rmSync(LOCK_FILE, { force: true });
   } catch {}
 }
 function readActiveUsageLock(now2) {
@@ -61810,54 +62149,59 @@ async function fetchUsageData(options = {}) {
       return cachedUsageData;
     }
   }
+  const token = getUsageToken();
+  const currentTokenHash = token ? fingerprintUsageToken(token) : null;
   try {
     const stat = fs4.statSync(CACHE_FILE);
     const fileAge = now2 - Math.floor(stat.mtimeMs / 1000);
     if (fileAge < CACHE_MAX_AGE) {
-      const fileData = parseCachedUsageData(fs4.readFileSync(CACHE_FILE, "utf8"));
-      if (fileData && !fileData.error && hasRequiredUsageFields(fileData, requiredFields)) {
+      const rawCache = fs4.readFileSync(CACHE_FILE, "utf8");
+      const fileData = parseCachedUsageData(rawCache);
+      if (fileData && !fileData.error && tokenHashMatches(readCachedTokenHash(rawCache), currentTokenHash) && hasRequiredUsageFields(fileData, requiredFields)) {
         return cacheUsageData(fileData, now2);
       }
     }
   } catch {}
-  const token = getUsageToken();
   if (!token) {
-    return getStaleUsageOrError("no-credentials", now2, LOCK_MAX_AGE, requiredFields);
+    return getStaleUsageOrError("no-credentials", now2, currentTokenHash, LOCK_MAX_AGE, requiredFields);
   }
   const activeLock = readActiveUsageLock(now2);
   if (activeLock) {
-    return getStaleUsageOrError(activeLock.error, now2, Math.max(1, activeLock.blockedUntil - now2), requiredFields);
+    return getStaleUsageOrError(activeLock.error, now2, currentTokenHash, Math.max(1, activeLock.blockedUntil - now2), requiredFields);
   }
   writeUsageLock(now2 + LOCK_MAX_AGE, "timeout");
   try {
     const response = await fetchFromUsageApi(token);
     if (response.kind === "rate-limited") {
       writeUsageLock(now2 + response.retryAfterSeconds, "rate-limited");
-      return getStaleUsageOrError("rate-limited", now2, response.retryAfterSeconds, requiredFields);
+      return getStaleUsageOrError("rate-limited", now2, currentTokenHash, response.retryAfterSeconds, requiredFields);
     }
     if (response.kind === "error") {
-      return getStaleUsageOrError("api-error", now2, LOCK_MAX_AGE, requiredFields);
+      return getStaleUsageOrError("api-error", now2, currentTokenHash, LOCK_MAX_AGE, requiredFields);
     }
     const usageData = parseUsageApiResponse(response.body);
     if (!usageData) {
       writeUsageLock(now2 + LOCK_MAX_AGE, "parse-error");
-      return getStaleUsageOrError("parse-error", now2, LOCK_MAX_AGE, requiredFields);
+      return getStaleUsageOrError("parse-error", now2, currentTokenHash, LOCK_MAX_AGE, requiredFields);
     }
     if (usageData.sessionUsage === undefined && usageData.weeklyUsage === undefined) {
       writeUsageLock(now2 + LOCK_MAX_AGE, "parse-error");
-      return getStaleUsageOrError("parse-error", now2, LOCK_MAX_AGE, requiredFields);
+      return getStaleUsageOrError("parse-error", now2, currentTokenHash, LOCK_MAX_AGE, requiredFields);
     }
     try {
       ensureCacheDirExists();
-      fs4.writeFileSync(CACHE_FILE, JSON.stringify(usageData));
+      fs4.writeFileSync(CACHE_FILE, JSON.stringify({ ...usageData, tokenHash: currentTokenHash ?? undefined }));
     } catch {}
+    if (hasRequiredUsageFields(usageData, requiredFields)) {
+      clearUsageLock();
+    }
     return cacheUsageData(usageData, now2);
   } catch {
     writeUsageLock(now2 + LOCK_MAX_AGE, "parse-error");
-    return getStaleUsageOrError("parse-error", now2, LOCK_MAX_AGE, requiredFields);
+    return getStaleUsageOrError("parse-error", now2, currentTokenHash, LOCK_MAX_AGE, requiredFields);
   }
 }
-var CACHE_DIR, CACHE_FILE, LOCK_FILE, CACHE_MAX_AGE = 180, LOCK_MAX_AGE = 30, DEFAULT_RATE_LIMIT_BACKOFF = 300, MACOS_USAGE_CREDENTIALS_SERVICE = "Claude Code-credentials", MACOS_SECURITY_DUMP_MAX_BUFFER, EXTRA_USAGE_DETAIL_FIELDS, UsageCredentialsSchema, UsageLockErrorSchema, UsageLockSchema, CachedUsageDataSchema, UsageApiBucketSchema, UsageApiResponseSchema, cachedUsageData = null, usageCacheTime = 0, usageErrorCacheMaxAge, USAGE_API_HOST = "api.anthropic.com", USAGE_API_PATH = "/api/oauth/usage", USAGE_API_TIMEOUT_MS = 5000;
+var CACHE_DIR, CACHE_FILE, LOCK_FILE, CACHE_MAX_AGE = 180, LOCK_MAX_AGE = 30, DEFAULT_RATE_LIMIT_BACKOFF = 300, MACOS_USAGE_CREDENTIALS_SERVICE = "Claude Code-credentials", MACOS_SECURITY_DUMP_MAX_BUFFER, EXTRA_USAGE_DETAIL_FIELDS, WINDOW_RESET_FIELD_SENTINELS, UsageCredentialsSchema, UsageLockErrorSchema, UsageLockSchema, CachedUsageDataSchema, CachedTokenHashSchema, UsageApiBucketSchema, UsageApiResponseSchema, cachedUsageData = null, usageCacheTime = 0, usageErrorCacheMaxAge, USAGE_API_HOST = "api.anthropic.com", USAGE_API_PATH = "/api/oauth/usage", USAGE_API_TIMEOUT_MS = 5000;
 var init_usage_fetch = __esm(async () => {
   init_dist5();
   init_zod();
@@ -61872,6 +62216,12 @@ var init_usage_fetch = __esm(async () => {
     "extraUsageUsed",
     "extraUsageUtilization"
   ]);
+  WINDOW_RESET_FIELD_SENTINELS = {
+    sessionResetAt: "sessionUsage",
+    weeklyResetAt: "weeklyUsage",
+    weeklySonnetResetAt: "weeklySonnetUsage",
+    weeklyOpusResetAt: "weeklyOpusUsage"
+  };
   UsageCredentialsSchema = exports_external.object({ claudeAiOauth: exports_external.object({ accessToken: exports_external.string().nullable().optional() }).optional() });
   UsageLockErrorSchema = exports_external.enum(["timeout", "rate-limited", "parse-error"]);
   UsageLockSchema = exports_external.object({
@@ -61894,6 +62244,7 @@ var init_usage_fetch = __esm(async () => {
     extraUsageCurrency: exports_external.string().nullable().optional(),
     error: exports_external.string().nullable().optional()
   });
+  CachedTokenHashSchema = exports_external.object({ tokenHash: exports_external.string().optional() });
   UsageApiBucketSchema = exports_external.looseObject({
     utilization: exports_external.number().nullable().optional(),
     resets_at: exports_external.string().nullable().optional()
@@ -62419,10 +62770,11 @@ var init_dist6 = __esm(() => {
   } catch {}
 });
 
-// node_modules/picomatch/lib/constants.js
+// node_modules/tinyglobby/node_modules/picomatch/lib/constants.js
 var require_constants3 = __commonJS((exports, module) => {
   var WIN_SLASH = "\\\\/";
   var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
+  var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
   var DOT_LITERAL = "\\.";
   var PLUS_LITERAL = "\\+";
   var QMARK_LITERAL = "\\?";
@@ -62473,6 +62825,7 @@ var require_constants3 = __commonJS((exports, module) => {
     SEP: "\\"
   };
   var POSIX_REGEX_SOURCE = {
+    __proto__: null,
     alnum: "a-zA-Z0-9",
     alpha: "a-zA-Z",
     ascii: "\\x00-\\x7F",
@@ -62489,6 +62842,7 @@ var require_constants3 = __commonJS((exports, module) => {
     xdigit: "A-Fa-f0-9"
   };
   module.exports = {
+    DEFAULT_MAX_EXTGLOB_RECURSION,
     MAX_LENGTH: 1024 * 64,
     POSIX_REGEX_SOURCE,
     REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
@@ -62561,7 +62915,7 @@ var require_constants3 = __commonJS((exports, module) => {
   };
 });
 
-// node_modules/picomatch/lib/utils.js
+// node_modules/tinyglobby/node_modules/picomatch/lib/utils.js
 var require_utils = __commonJS((exports) => {
   var {
     REGEX_BACKSLASH,
@@ -62624,7 +62978,7 @@ var require_utils = __commonJS((exports) => {
   };
 });
 
-// node_modules/picomatch/lib/scan.js
+// node_modules/tinyglobby/node_modules/picomatch/lib/scan.js
 var require_scan = __commonJS((exports, module) => {
   var utils = require_utils();
   var {
@@ -62939,7 +63293,7 @@ var require_scan = __commonJS((exports, module) => {
   module.exports = scan;
 });
 
-// node_modules/picomatch/lib/parse.js
+// node_modules/tinyglobby/node_modules/picomatch/lib/parse.js
 var require_parse = __commonJS((exports, module) => {
   var constants2 = require_constants3();
   var utils = require_utils();
@@ -62965,6 +63319,213 @@ var require_parse = __commonJS((exports, module) => {
   };
   var syntaxError = (type, char) => {
     return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
+  };
+  var splitTopLevel = (input) => {
+    const parts = [];
+    let bracket = 0;
+    let paren = 0;
+    let quote = 0;
+    let value = "";
+    let escaped = false;
+    for (const ch of input) {
+      if (escaped === true) {
+        value += ch;
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        value += ch;
+        escaped = true;
+        continue;
+      }
+      if (ch === '"') {
+        quote = quote === 1 ? 0 : 1;
+        value += ch;
+        continue;
+      }
+      if (quote === 0) {
+        if (ch === "[") {
+          bracket++;
+        } else if (ch === "]" && bracket > 0) {
+          bracket--;
+        } else if (bracket === 0) {
+          if (ch === "(") {
+            paren++;
+          } else if (ch === ")" && paren > 0) {
+            paren--;
+          } else if (ch === "|" && paren === 0) {
+            parts.push(value);
+            value = "";
+            continue;
+          }
+        }
+      }
+      value += ch;
+    }
+    parts.push(value);
+    return parts;
+  };
+  var isPlainBranch = (branch) => {
+    let escaped = false;
+    for (const ch of branch) {
+      if (escaped === true) {
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (/[?*+@!()[\]{}]/.test(ch)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  var normalizeSimpleBranch = (branch) => {
+    let value = branch.trim();
+    let changed = true;
+    while (changed === true) {
+      changed = false;
+      if (/^@\([^\\()[\]{}|]+\)$/.test(value)) {
+        value = value.slice(2, -1);
+        changed = true;
+      }
+    }
+    if (!isPlainBranch(value)) {
+      return;
+    }
+    return value.replace(/\\(.)/g, "$1");
+  };
+  var hasRepeatedCharPrefixOverlap = (branches) => {
+    const values2 = branches.map(normalizeSimpleBranch).filter(Boolean);
+    for (let i = 0;i < values2.length; i++) {
+      for (let j = i + 1;j < values2.length; j++) {
+        const a = values2[i];
+        const b = values2[j];
+        const char = a[0];
+        if (!char || a !== char.repeat(a.length) || b !== char.repeat(b.length)) {
+          continue;
+        }
+        if (a === b || a.startsWith(b) || b.startsWith(a)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+  var parseRepeatedExtglob = (pattern, requireEnd = true) => {
+    if (pattern[0] !== "+" && pattern[0] !== "*" || pattern[1] !== "(") {
+      return;
+    }
+    let bracket = 0;
+    let paren = 0;
+    let quote = 0;
+    let escaped = false;
+    for (let i = 1;i < pattern.length; i++) {
+      const ch = pattern[i];
+      if (escaped === true) {
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (ch === '"') {
+        quote = quote === 1 ? 0 : 1;
+        continue;
+      }
+      if (quote === 1) {
+        continue;
+      }
+      if (ch === "[") {
+        bracket++;
+        continue;
+      }
+      if (ch === "]" && bracket > 0) {
+        bracket--;
+        continue;
+      }
+      if (bracket > 0) {
+        continue;
+      }
+      if (ch === "(") {
+        paren++;
+        continue;
+      }
+      if (ch === ")") {
+        paren--;
+        if (paren === 0) {
+          if (requireEnd === true && i !== pattern.length - 1) {
+            return;
+          }
+          return {
+            type: pattern[0],
+            body: pattern.slice(2, i),
+            end: i
+          };
+        }
+      }
+    }
+  };
+  var getStarExtglobSequenceOutput = (pattern) => {
+    let index = 0;
+    const chars = [];
+    while (index < pattern.length) {
+      const match = parseRepeatedExtglob(pattern.slice(index), false);
+      if (!match || match.type !== "*") {
+        return;
+      }
+      const branches = splitTopLevel(match.body).map((branch2) => branch2.trim());
+      if (branches.length !== 1) {
+        return;
+      }
+      const branch = normalizeSimpleBranch(branches[0]);
+      if (!branch || branch.length !== 1) {
+        return;
+      }
+      chars.push(branch);
+      index += match.end + 1;
+    }
+    if (chars.length < 1) {
+      return;
+    }
+    const source = chars.length === 1 ? utils.escapeRegex(chars[0]) : `[${chars.map((ch) => utils.escapeRegex(ch)).join("")}]`;
+    return `${source}*`;
+  };
+  var repeatedExtglobRecursion = (pattern) => {
+    let depth = 0;
+    let value = pattern.trim();
+    let match = parseRepeatedExtglob(value);
+    while (match) {
+      depth++;
+      value = match.body.trim();
+      match = parseRepeatedExtglob(value);
+    }
+    return depth;
+  };
+  var analyzeRepeatedExtglob = (body, options) => {
+    if (options.maxExtglobRecursion === false) {
+      return { risky: false };
+    }
+    const max2 = typeof options.maxExtglobRecursion === "number" ? options.maxExtglobRecursion : constants2.DEFAULT_MAX_EXTGLOB_RECURSION;
+    const branches = splitTopLevel(body).map((branch) => branch.trim());
+    if (branches.length > 1) {
+      if (branches.some((branch) => branch === "") || branches.some((branch) => /^[*?]+$/.test(branch)) || hasRepeatedCharPrefixOverlap(branches)) {
+        return { risky: true };
+      }
+    }
+    for (const branch of branches) {
+      const safeOutput = getStarExtglobSequenceOutput(branch);
+      if (safeOutput) {
+        return { risky: true, safeOutput };
+      }
+      if (repeatedExtglobRecursion(branch) > max2) {
+        return { risky: true };
+      }
+    }
+    return { risky: false };
   };
   var parse5 = (input, options) => {
     if (typeof input !== "string") {
@@ -63097,6 +63658,8 @@ var require_parse = __commonJS((exports, module) => {
       token.prev = prev;
       token.parens = state.parens;
       token.output = state.output;
+      token.startIndex = state.index;
+      token.tokensIndex = tokens.length;
       const output = (opts.capture ? "(" : "") + token.open;
       increment("parens");
       push({ type, value: value2, output: state.output ? "" : ONE_CHAR });
@@ -63104,6 +63667,26 @@ var require_parse = __commonJS((exports, module) => {
       extglobs.push(token);
     };
     const extglobClose = (token) => {
+      const literal2 = input.slice(token.startIndex, state.index + 1);
+      const body = input.slice(token.startIndex + 2, state.index);
+      const analysis = analyzeRepeatedExtglob(body, opts);
+      if ((token.type === "plus" || token.type === "star") && analysis.risky) {
+        const safeOutput = analysis.safeOutput ? (token.output ? "" : ONE_CHAR) + (opts.capture ? `(${analysis.safeOutput})` : analysis.safeOutput) : undefined;
+        const open = tokens[token.tokensIndex];
+        open.type = "text";
+        open.value = literal2;
+        open.output = safeOutput || utils.escapeRegex(literal2);
+        for (let i = token.tokensIndex + 1;i < tokens.length; i++) {
+          tokens[i].value = "";
+          tokens[i].output = "";
+          delete tokens[i].suffix;
+        }
+        state.output = token.output + open.output;
+        state.backtrack = true;
+        push({ type: "paren", extglob: true, value, output: "" });
+        decrement("parens");
+        return;
+      }
       let output = token.close + (opts.capture ? ")" : "");
       let rest2;
       if (token.type === "negate") {
@@ -63712,7 +64295,7 @@ var require_parse = __commonJS((exports, module) => {
   module.exports = parse5;
 });
 
-// node_modules/picomatch/lib/picomatch.js
+// node_modules/tinyglobby/node_modules/picomatch/lib/picomatch.js
 var require_picomatch = __commonJS((exports, module) => {
   var scan = require_scan();
   var parse5 = require_parse();
@@ -63852,7 +64435,7 @@ var require_picomatch = __commonJS((exports, module) => {
   module.exports = picomatch;
 });
 
-// node_modules/picomatch/index.js
+// node_modules/tinyglobby/node_modules/picomatch/index.js
 var require_picomatch2 = __commonJS((exports, module) => {
   var pico = require_picomatch();
   var utils = require_utils();
@@ -64339,7 +64922,7 @@ var init_jsonl_blocks = __esm(async () => {
 
 // src/utils/jsonl-cache.ts
 import * as fs7 from "fs";
-import { createHash as createHash3 } from "node:crypto";
+import { createHash as createHash4 } from "node:crypto";
 import os6 from "node:os";
 import path6 from "node:path";
 function normalizeConfigDir(configDir) {
@@ -64347,7 +64930,7 @@ function normalizeConfigDir(configDir) {
 }
 function getBlockCachePath(configDir = getClaudeConfigDir()) {
   const normalizedConfigDir = normalizeConfigDir(configDir);
-  const configHash = createHash3("sha256").update(normalizedConfigDir).digest("hex").slice(0, 16);
+  const configHash = createHash4("sha256").update(normalizedConfigDir).digest("hex").slice(0, 16);
   return path6.join(os6.homedir(), ".cache", "ccstatusline", `block-cache-${configHash}.json`);
 }
 function readBlockCache(expectedConfigDir) {
@@ -65289,6 +65872,7 @@ class CurrentWorkingDirWidget {
     const segments = item.metadata?.segments ? parseInt(item.metadata.segments, 10) : undefined;
     const fishStyle = item.metadata?.fishStyle === "true";
     const abbreviateHome = item.metadata?.abbreviateHome === "true";
+    const symbolPrefix = formatSymbolPrefix(item, "");
     if (context.isPreview) {
       let previewPath;
       if (fishStyle) {
@@ -65310,7 +65894,7 @@ class CurrentWorkingDirWidget {
       } else {
         previewPath = "/Users/example/Documents/Projects/my-project";
       }
-      return item.rawValue ? previewPath : `cwd: ${previewPath}`;
+      return item.rawValue ? `${symbolPrefix}${previewPath}` : `${symbolPrefix}cwd: ${previewPath}`;
     }
     const cwd2 = context.data?.cwd;
     if (!cwd2)
@@ -65334,17 +65918,21 @@ class CurrentWorkingDirWidget {
         }
       }
     }
-    return item.rawValue ? displayPath : `cwd: ${displayPath}`;
+    return item.rawValue ? `${symbolPrefix}${displayPath}` : `${symbolPrefix}cwd: ${displayPath}`;
   }
   getCustomKeybinds() {
     return [
       { key: "h", label: "(h)ome ~", action: "toggle-abbreviate-home" },
       { key: "s", label: "(s)egments", action: "edit-segments" },
-      { key: "f", label: "(f)ish style", action: "toggle-fish-style" }
+      { key: "f", label: "(f)ish style", action: "toggle-fish-style" },
+      getSymbolKeybind()
     ];
   }
   renderEditor(props) {
-    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(CurrentWorkingDirEditor, {
+    if (props.action === SYMBOL_OVERRIDE_ACTION) {
+      return renderSymbolOverrideEditor(props, "");
+    }
+    return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(CurrentWorkingDirEditor, {
       ...props
     }, undefined, false, undefined, this);
   }
@@ -65395,8 +65983,8 @@ class CurrentWorkingDirWidget {
     }
   }
 }
-var import_react31, jsx_dev_runtime5, CurrentWorkingDirEditor = ({ widget, onComplete, onCancel, action }) => {
-  const [segmentsInput, setSegmentsInput] = import_react31.useState(widget.metadata?.segments ?? "");
+var import_react32, jsx_dev_runtime6, CurrentWorkingDirEditor = ({ widget, onComplete, onCancel, action }) => {
+  const [segmentsInput, setSegmentsInput] = import_react32.useState(widget.metadata?.segments ?? "");
   use_input_default((input, key) => {
     if (action === "edit-segments") {
       if (key.return) {
@@ -65426,40 +66014,43 @@ var import_react31, jsx_dev_runtime5, CurrentWorkingDirEditor = ({ widget, onCom
     }
   });
   if (action === "edit-segments") {
-    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Box_default, {
           children: [
-            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
               children: "Enter number of segments to display (blank for full path): "
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
               children: segmentsInput
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
               backgroundColor: "gray",
               color: "black",
               children: " "
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
           dimColor: true,
           children: "Press Enter to save, ESC to cancel"
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(Text, {
+  return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
     children: "Unknown editor mode"
   }, undefined, false, undefined, this);
 };
 var init_CurrentWorkingDir = __esm(async () => {
   init_input_guards();
-  await init_build2();
-  import_react31 = __toESM(require_react(), 1);
-  jsx_dev_runtime5 = __toESM(require_jsx_dev_runtime(), 1);
+  await __promiseAll([
+    init_build2(),
+    init_symbol_override()
+  ]);
+  import_react32 = __toESM(require_react(), 1);
+  jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
 });
 
 // src/widgets/ClaudeSessionId.ts
@@ -66326,12 +66917,12 @@ function getSpeedWidgetCustomKeybinds() {
   }];
 }
 function renderSpeedWidgetEditor(props) {
-  return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(SpeedWindowEditor, {
+  return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(SpeedWindowEditor, {
     ...props
   }, undefined, false, undefined, this);
 }
-var import_react32, jsx_dev_runtime6, WINDOW_EDITOR_ACTION = "edit-window", SPEED_WIDGET_CONFIG, SpeedWindowEditor = ({ widget, onComplete, onCancel, action }) => {
-  const [windowInput, setWindowInput] = import_react32.useState(getWidgetSpeedWindowSeconds(widget).toString());
+var import_react33, jsx_dev_runtime7, WINDOW_EDITOR_ACTION = "edit-window", SPEED_WIDGET_CONFIG, SpeedWindowEditor = ({ widget, onComplete, onCancel, action }) => {
+  const [windowInput, setWindowInput] = import_react33.useState(getWidgetSpeedWindowSeconds(widget).toString());
   use_input_default((input, key) => {
     if (action !== WINDOW_EDITOR_ACTION) {
       return;
@@ -66355,16 +66946,16 @@ var import_react32, jsx_dev_runtime6, WINDOW_EDITOR_ACTION = "edit-window", SPEE
     }
   });
   if (action !== WINDOW_EDITOR_ACTION) {
-    return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
+    return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
       children: "Unknown editor mode"
     }, undefined, false, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Box_default, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
             children: [
               "Enter window in seconds (",
               MIN_SPEED_WINDOW_SECONDS,
@@ -66374,17 +66965,17 @@ var import_react32, jsx_dev_runtime6, WINDOW_EDITOR_ACTION = "edit-window", SPEE
               " "
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
             children: windowInput
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
             backgroundColor: "gray",
             color: "black",
             children: " "
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
         dimColor: true,
         children: "0 disables window mode and averages the full session. Press Enter to save, ESC to cancel."
       }, undefined, false, undefined, this)
@@ -66394,8 +66985,8 @@ var import_react32, jsx_dev_runtime6, WINDOW_EDITOR_ACTION = "edit-window", SPEE
 var init_speed_widget = __esm(async () => {
   init_input_guards();
   await init_build2();
-  import_react32 = __toESM(require_react(), 1);
-  jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
+  import_react33 = __toESM(require_react(), 1);
+  jsx_dev_runtime7 = __toESM(require_jsx_dev_runtime(), 1);
   SPEED_WIDGET_CONFIG = {
     input: {
       label: "In: ",
@@ -66706,12 +67297,12 @@ class SessionUsageWidget {
   getEditorDisplay(item) {
     return {
       displayText: this.getDisplayName(),
-      modifierText: getUsageDisplayModifierText(item)
+      modifierText: getUsageDisplayModifierText(item, { showUsageDirection: true })
     };
   }
   handleEditorAction(action, item) {
     if (action === "toggle-progress") {
-      return cycleUsageDisplayMode(item, [], true);
+      return cycleUsageDisplayMode(item, [], true, true);
     }
     if (action === "toggle-invert") {
       return toggleUsageInverted(item);
@@ -66739,7 +67330,7 @@ class SessionUsageWidget {
         const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent2.toFixed(1)}%` : slider;
         return formatRawOrLabeledValue(item, "Session: ", sliderDisplay);
       }
-      return formatRawOrLabeledValue(item, "Session: ", `${previewPercent.toFixed(1)}%`);
+      return formatRawOrLabeledValue(item, "Session: ", `${renderedPercent2.toFixed(1)}%`);
     }
     const data = context.usageData ?? {};
     if (data.sessionUsage === undefined) {
@@ -66767,7 +67358,7 @@ class SessionUsageWidget {
       const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent.toFixed(1)}%` : slider;
       return formatRawOrLabeledValue(item, "Session: ", sliderDisplay);
     }
-    return formatRawOrLabeledValue(item, "Session: ", `${percent.toFixed(1)}%`);
+    return formatRawOrLabeledValue(item, "Session: ", `${renderedPercent.toFixed(1)}%`);
   }
   getFillRatio(context) {
     const value = context.usageData?.sessionUsage;
@@ -66808,12 +67399,12 @@ class WeeklyUsageWidget {
   getEditorDisplay(item) {
     return {
       displayText: this.getDisplayName(),
-      modifierText: getUsageDisplayModifierText(item)
+      modifierText: getUsageDisplayModifierText(item, { showUsageDirection: true })
     };
   }
   handleEditorAction(action, item) {
     if (action === "toggle-progress") {
-      return cycleUsageDisplayMode(item, [], true);
+      return cycleUsageDisplayMode(item, [], true, true);
     }
     if (action === "toggle-invert") {
       return toggleUsageInverted(item);
@@ -66841,7 +67432,7 @@ class WeeklyUsageWidget {
         const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent2.toFixed(1)}%` : slider;
         return formatRawOrLabeledValue(item, "Weekly: ", sliderDisplay);
       }
-      return formatRawOrLabeledValue(item, "Weekly: ", `${previewPercent.toFixed(1)}%`);
+      return formatRawOrLabeledValue(item, "Weekly: ", `${renderedPercent2.toFixed(1)}%`);
     }
     const data = context.usageData ?? {};
     if (data.weeklyUsage === undefined) {
@@ -66869,7 +67460,7 @@ class WeeklyUsageWidget {
       const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent.toFixed(1)}%` : slider;
       return formatRawOrLabeledValue(item, "Weekly: ", sliderDisplay);
     }
-    return formatRawOrLabeledValue(item, "Weekly: ", `${percent.toFixed(1)}%`);
+    return formatRawOrLabeledValue(item, "Weekly: ", `${renderedPercent.toFixed(1)}%`);
   }
   getFillRatio(context) {
     const value = context.usageData?.weeklyUsage;
@@ -66941,7 +67532,7 @@ class ExtraUsageUtilizationWidget {
   getEditorDisplay(item) {
     return {
       displayText: this.getDisplayName(),
-      modifierText: appendHideDisabledModifier(getUsageDisplayModifierText(item), item)
+      modifierText: appendHideDisabledModifier(getUsageDisplayModifierText(item, { showUsageDirection: true }), item)
     };
   }
   handleEditorAction(action, item) {
@@ -66950,7 +67541,7 @@ class ExtraUsageUtilizationWidget {
       return hideDisabledItem;
     }
     if (action === "toggle-progress") {
-      return cycleUsageDisplayMode(item, [], true);
+      return cycleUsageDisplayMode(item, [], true, true);
     }
     if (action === "toggle-invert") {
       return toggleUsageInverted(item);
@@ -66973,7 +67564,7 @@ class ExtraUsageUtilizationWidget {
         const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent2.toFixed(1)}%` : slider;
         return formatRawOrLabeledValue(item, "Overage: ", sliderDisplay);
       }
-      return formatRawOrLabeledValue(item, "Overage: ", `${previewPercent.toFixed(1)}%`);
+      return formatRawOrLabeledValue(item, "Overage: ", `${renderedPercent2.toFixed(1)}%`);
     }
     const data = context.usageData ?? {};
     if (data.extraUsageEnabled === false) {
@@ -66996,10 +67587,10 @@ class ExtraUsageUtilizationWidget {
       const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent.toFixed(1)}%` : slider;
       return formatRawOrLabeledValue(item, "Overage: ", sliderDisplay);
     }
-    return formatRawOrLabeledValue(item, "Overage: ", `${percent.toFixed(1)}%`);
+    return formatRawOrLabeledValue(item, "Overage: ", `${renderedPercent.toFixed(1)}%`);
   }
   getCustomKeybinds(item) {
-    return [...getUsagePercentCustomKeybinds(item), getHideExtraUsageDisabledKeybind()];
+    return [...getUsagePercentCustomKeybinds(item, false), getHideExtraUsageDisabledKeybind()];
   }
   supportsRawValue() {
     return true;
@@ -67163,12 +67754,12 @@ class WeeklySonnetUsageWidget {
   getEditorDisplay(item) {
     return {
       displayText: this.getDisplayName(),
-      modifierText: getUsageDisplayModifierText(item)
+      modifierText: getUsageDisplayModifierText(item, { showUsageDirection: true })
     };
   }
   handleEditorAction(action, item) {
     if (action === "toggle-progress") {
-      return cycleUsageDisplayMode(item, [], true);
+      return cycleUsageDisplayMode(item, [], true, true);
     }
     if (action === "toggle-invert") {
       return toggleUsageInverted(item);
@@ -67196,7 +67787,7 @@ class WeeklySonnetUsageWidget {
         const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent2.toFixed(1)}%` : slider;
         return formatRawOrLabeledValue(item, LABEL, sliderDisplay);
       }
-      return formatRawOrLabeledValue(item, LABEL, `${previewPercent.toFixed(1)}%`);
+      return formatRawOrLabeledValue(item, LABEL, `${renderedPercent2.toFixed(1)}%`);
     }
     const data = context.usageData ?? {};
     if (data.weeklySonnetUsage === undefined) {
@@ -67224,7 +67815,7 @@ class WeeklySonnetUsageWidget {
       const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent.toFixed(1)}%` : slider;
       return formatRawOrLabeledValue(item, LABEL, sliderDisplay);
     }
-    return formatRawOrLabeledValue(item, LABEL, `${percent.toFixed(1)}%`);
+    return formatRawOrLabeledValue(item, LABEL, `${renderedPercent.toFixed(1)}%`);
   }
   getCustomKeybinds(item) {
     return getUsagePercentCustomKeybinds(item);
@@ -67259,12 +67850,12 @@ class WeeklyOpusUsageWidget {
   getEditorDisplay(item) {
     return {
       displayText: this.getDisplayName(),
-      modifierText: getUsageDisplayModifierText(item)
+      modifierText: getUsageDisplayModifierText(item, { showUsageDirection: true })
     };
   }
   handleEditorAction(action, item) {
     if (action === "toggle-progress") {
-      return cycleUsageDisplayMode(item, [], true);
+      return cycleUsageDisplayMode(item, [], true, true);
     }
     if (action === "toggle-invert") {
       return toggleUsageInverted(item);
@@ -67292,7 +67883,7 @@ class WeeklyOpusUsageWidget {
         const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent2.toFixed(1)}%` : slider;
         return formatRawOrLabeledValue(item, LABEL2, sliderDisplay);
       }
-      return formatRawOrLabeledValue(item, LABEL2, `${previewPercent.toFixed(1)}%`);
+      return formatRawOrLabeledValue(item, LABEL2, `${renderedPercent2.toFixed(1)}%`);
     }
     const data = context.usageData ?? {};
     if (data.weeklyOpusUsage === undefined) {
@@ -67320,7 +67911,7 @@ class WeeklyOpusUsageWidget {
       const sliderDisplay = displayMode === "slider" ? `${slider} ${renderedPercent.toFixed(1)}%` : slider;
       return formatRawOrLabeledValue(item, LABEL2, sliderDisplay);
     }
-    return formatRawOrLabeledValue(item, LABEL2, `${percent.toFixed(1)}%`);
+    return formatRawOrLabeledValue(item, LABEL2, `${renderedPercent.toFixed(1)}%`);
   }
   getCustomKeybinds(item) {
     return getUsagePercentCustomKeybinds(item);
@@ -67354,15 +67945,15 @@ function getVisibleRange(selectedIndex, totalOptions) {
   return { start, end: start + MAX_VISIBLE_OPTIONS };
 }
 function renderUsageLocaleEditor(props) {
-  return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(UsageLocaleEditor, {
+  return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(UsageLocaleEditor, {
     ...props
   }, undefined, false, undefined, this);
 }
-var import_react33, jsx_dev_runtime7, LOCALE_EDITOR_ACTION = "edit-locale", MAX_VISIBLE_OPTIONS = 10, UsageLocaleEditor = ({ widget, onComplete, onCancel, action }) => {
+var import_react34, jsx_dev_runtime8, LOCALE_EDITOR_ACTION = "edit-locale", MAX_VISIBLE_OPTIONS = 10, UsageLocaleEditor = ({ widget, onComplete, onCancel, action }) => {
   const currentLocale = getUsageLocale(widget);
-  const options = import_react33.useMemo(() => getLocaleOptions(currentLocale), [currentLocale]);
-  const [query, setQuery] = import_react33.useState("");
-  const [selectedIndex, setSelectedIndex] = import_react33.useState(() => getInitialSelectedIndex(options, currentLocale));
+  const options = import_react34.useMemo(() => getLocaleOptions(currentLocale), [currentLocale]);
+  const [query, setQuery] = import_react34.useState("");
+  const [selectedIndex, setSelectedIndex] = import_react34.useState(() => getInitialSelectedIndex(options, currentLocale));
   const filteredOptions = filterLocaleOptions(options, query);
   const clampedSelectedIndex = filteredOptions.length === 0 ? 0 : Math.min(selectedIndex, filteredOptions.length - 1);
   const selectedOption = filteredOptions[clampedSelectedIndex];
@@ -67407,20 +67998,20 @@ var import_react33, jsx_dev_runtime7, LOCALE_EDITOR_ACTION = "edit-locale", MAX_
     }
   });
   if (action !== LOCALE_EDITOR_ACTION) {
-    return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+    return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
       children: "Unknown editor mode"
     }, undefined, false, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
             bold: true,
             children: "Locale"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
             dimColor: true,
             children: [
               " ",
@@ -67431,49 +68022,49 @@ var import_react33, jsx_dev_runtime7, LOCALE_EDITOR_ACTION = "edit-locale", MAX_
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
             dimColor: true,
             children: "Search: "
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
             color: "cyan",
             children: query || "(none)"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
         dimColor: true,
         children: "Type to search, Up/Down select, Enter save, ESC cancel"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
-        children: filteredOptions.length === 0 ? /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+        children: filteredOptions.length === 0 ? /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
           dimColor: true,
           children: "No locales match the search."
         }, undefined, false, undefined, this) : visibleOptions.map((option, visibleIndex) => {
           const actualIndex = visibleRange.start + visibleIndex;
           const isSelected = actualIndex === clampedSelectedIndex;
           const segments = getLocaleMatchSegments(option.displayName, query);
-          return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Box_default, {
+          return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
             flexDirection: "row",
             flexWrap: "nowrap",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Box_default, {
+              /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
                 width: 3,
-                children: /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+                children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
                   color: isSelected ? "green" : undefined,
                   children: isSelected ? "> " : "  "
                 }, undefined, false, undefined, this)
               }, undefined, false, undefined, this),
-              segments.map((segment, index) => /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+              segments.map((segment, index) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
                 color: isSelected ? "green" : segment.matched ? "yellowBright" : undefined,
                 bold: isSelected ? true : segment.matched,
                 children: segment.text
               }, index, false, undefined, this)),
-              /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
                 dimColor: true,
                 children: [
                   " ",
@@ -67486,9 +68077,9 @@ var import_react33, jsx_dev_runtime7, LOCALE_EDITOR_ACTION = "edit-locale", MAX_
           }, option.value, true, undefined, this);
         })
       }, undefined, false, undefined, this),
-      filteredOptions.length > MAX_VISIBLE_OPTIONS && /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Box_default, {
+      filteredOptions.length > MAX_VISIBLE_OPTIONS && /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
           dimColor: true,
           children: [
             "Showing",
@@ -67511,8 +68102,8 @@ var init_locale_editor = __esm(async () => {
   init_locales2();
   init_usage_display();
   await init_build2();
-  import_react33 = __toESM(require_react(), 1);
-  jsx_dev_runtime7 = __toESM(require_jsx_dev_runtime(), 1);
+  import_react34 = __toESM(require_react(), 1);
+  jsx_dev_runtime8 = __toESM(require_jsx_dev_runtime(), 1);
 });
 
 // src/utils/timezones.ts
@@ -67628,15 +68219,15 @@ function getVisibleRange2(selectedIndex, totalOptions) {
   return { start, end: start + MAX_VISIBLE_OPTIONS2 };
 }
 function renderUsageTimezoneEditor(props) {
-  return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(UsageTimezoneEditor, {
+  return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(UsageTimezoneEditor, {
     ...props
   }, undefined, false, undefined, this);
 }
-var import_react34, jsx_dev_runtime8, TIMEZONE_EDITOR_ACTION = "edit-timezone", MAX_VISIBLE_OPTIONS2 = 10, UsageTimezoneEditor = ({ widget, onComplete, onCancel, action }) => {
+var import_react35, jsx_dev_runtime9, TIMEZONE_EDITOR_ACTION = "edit-timezone", MAX_VISIBLE_OPTIONS2 = 10, UsageTimezoneEditor = ({ widget, onComplete, onCancel, action }) => {
   const currentTimezone = getUsageTimezone(widget);
-  const options = import_react34.useMemo(() => getTimezoneOptions(currentTimezone), [currentTimezone]);
-  const [query, setQuery] = import_react34.useState("");
-  const [selectedIndex, setSelectedIndex] = import_react34.useState(() => getInitialSelectedIndex2(options, currentTimezone));
+  const options = import_react35.useMemo(() => getTimezoneOptions(currentTimezone), [currentTimezone]);
+  const [query, setQuery] = import_react35.useState("");
+  const [selectedIndex, setSelectedIndex] = import_react35.useState(() => getInitialSelectedIndex2(options, currentTimezone));
   const filteredOptions = filterTimezoneOptions(options, query);
   const clampedSelectedIndex = filteredOptions.length === 0 ? 0 : Math.min(selectedIndex, filteredOptions.length - 1);
   const selectedOption = filteredOptions[clampedSelectedIndex];
@@ -67681,20 +68272,20 @@ var import_react34, jsx_dev_runtime8, TIMEZONE_EDITOR_ACTION = "edit-timezone", 
     }
   });
   if (action !== TIMEZONE_EDITOR_ACTION) {
-    return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+    return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
       children: "Unknown editor mode"
     }, undefined, false, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Box_default, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
             bold: true,
             children: "Timezone"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
             dimColor: true,
             children: [
               " ",
@@ -67705,49 +68296,49 @@ var import_react34, jsx_dev_runtime8, TIMEZONE_EDITOR_ACTION = "edit-timezone", 
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Box_default, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
             dimColor: true,
             children: "Search: "
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
             color: "cyan",
             children: query || "(none)"
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
         dimColor: true,
         children: "Type to search, Up/Down select, Enter save, ESC cancel"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
-        children: filteredOptions.length === 0 ? /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+        children: filteredOptions.length === 0 ? /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
           dimColor: true,
           children: "No timezones match the search."
         }, undefined, false, undefined, this) : visibleOptions.map((option, visibleIndex) => {
           const actualIndex = visibleRange.start + visibleIndex;
           const isSelected = actualIndex === clampedSelectedIndex;
           const segments = getTimezoneMatchSegments(option.displayName, query);
-          return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
+          return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Box_default, {
             flexDirection: "row",
             flexWrap: "nowrap",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
+              /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Box_default, {
                 width: 3,
-                children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+                children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
                   color: isSelected ? "green" : undefined,
                   children: isSelected ? "> " : "  "
                 }, undefined, false, undefined, this)
               }, undefined, false, undefined, this),
-              segments.map((segment, index) => /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+              segments.map((segment, index) => /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
                 color: isSelected ? "green" : segment.matched ? "yellowBright" : undefined,
                 bold: isSelected ? true : segment.matched,
                 children: segment.text
               }, index, false, undefined, this)),
-              /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
                 dimColor: true,
                 children: [
                   " ",
@@ -67760,9 +68351,9 @@ var import_react34, jsx_dev_runtime8, TIMEZONE_EDITOR_ACTION = "edit-timezone", 
           }, option.value, true, undefined, this);
         })
       }, undefined, false, undefined, this),
-      filteredOptions.length > MAX_VISIBLE_OPTIONS2 && /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Box_default, {
+      filteredOptions.length > MAX_VISIBLE_OPTIONS2 && /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
           dimColor: true,
           children: [
             "Showing",
@@ -67785,8 +68376,8 @@ var init_timezone_editor = __esm(async () => {
   init_timezones();
   init_usage_display();
   await init_build2();
-  import_react34 = __toESM(require_react(), 1);
-  jsx_dev_runtime8 = __toESM(require_jsx_dev_runtime(), 1);
+  import_react35 = __toESM(require_react(), 1);
+  jsx_dev_runtime9 = __toESM(require_jsx_dev_runtime(), 1);
 });
 
 // src/widgets/BlockResetTimer.ts
@@ -67863,7 +68454,7 @@ class BlockResetTimerWidget {
       if (usageData.error) {
         return getUsageErrorMessage(usageData.error);
       }
-      return null;
+      return formatRawOrLabeledValue(item, "Reset: ", USAGE_TIMER_LOADING_MESSAGE);
     }
     if (isUsageProgressMode(displayMode)) {
       const barWidth = getUsageProgressBarWidth(displayMode);
@@ -67920,7 +68511,7 @@ class BlockResetTimerWidget {
     return true;
   }
 }
-var BLOCK_RESET_PREVIEW_AT = "2026-03-12T08:30:00.000Z";
+var BLOCK_RESET_PREVIEW_AT = "2026-03-12T08:30:00.000Z", USAGE_TIMER_LOADING_MESSAGE = "[Loading]";
 var init_BlockResetTimer = __esm(async () => {
   init_usage_display();
   await __promiseAll([
@@ -68062,7 +68653,7 @@ class WeeklyResetTimerWidget {
       if (usageData.error) {
         return getUsageErrorMessage(usageData.error);
       }
-      return null;
+      return formatRawOrLabeledValue(item, "Weekly Reset: ", USAGE_TIMER_LOADING_MESSAGE2);
     }
     if (isUsageProgressMode(displayMode)) {
       const barWidth = getUsageProgressBarWidth(displayMode);
@@ -68126,7 +68717,7 @@ class WeeklyResetTimerWidget {
     return true;
   }
 }
-var WEEKLY_PREVIEW_DURATION_MS, WEEKLY_RESET_PREVIEW_AT = "2026-03-15T08:30:00.000Z";
+var WEEKLY_PREVIEW_DURATION_MS, WEEKLY_RESET_PREVIEW_AT = "2026-03-15T08:30:00.000Z", USAGE_TIMER_LOADING_MESSAGE2 = "[Loading]";
 var init_WeeklyResetTimer = __esm(async () => {
   init_usage_display();
   await __promiseAll([
@@ -68218,15 +68809,15 @@ class ContextBarWidget {
     }
     const percent = used / total * 100;
     const clampedPercent = Math.max(0, Math.min(100, percent));
-    const usedK = Math.round(used / 1000);
-    const totalK = Math.round(total / 1000);
+    const usedDisplay = formatTokens(used, 0);
+    const totalDisplay = formatTokens(total, 0);
     if (isBarSliderMode(displayMode)) {
       const slider = makeSliderBar(clampedPercent);
-      const sliderDisplay = displayMode === "slider" ? `${slider} ${usedK}k/${totalK}k (${Math.round(clampedPercent)}%)` : slider;
+      const sliderDisplay = displayMode === "slider" ? `${slider} ${usedDisplay}/${totalDisplay} (${Math.round(clampedPercent)}%)` : slider;
       return item.rawValue ? sliderDisplay : `Context: ${sliderDisplay}`;
     }
     const barWidth = displayMode === "progress" ? 32 : 16;
-    const display = `${makeUsageProgressBar(clampedPercent, barWidth)} ${usedK}k/${totalK}k (${Math.round(clampedPercent)}%)`;
+    const display = `${makeUsageProgressBar(clampedPercent, barWidth)} ${usedDisplay}/${totalDisplay} (${Math.round(clampedPercent)}%)`;
     return item.rawValue ? display : `Context: ${display}`;
   }
   getFillRatio(context) {
@@ -68251,7 +68842,10 @@ class ContextBarWidget {
 var init_ContextBar = __esm(async () => {
   init_context_percentage();
   init_usage_display();
-  await init_usage();
+  await __promiseAll([
+    init_renderer2(),
+    init_usage()
+  ]);
 });
 
 // src/widgets/Link.tsx
@@ -68340,7 +68934,7 @@ class LinkWidget {
     ];
   }
   renderEditor(props) {
-    return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(LinkEditor, {
+    return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(LinkEditor, {
       ...props
     }, undefined, false, undefined, this);
   }
@@ -68357,13 +68951,13 @@ function getEditorMode(action) {
   }
   return "text";
 }
-var import_react35, jsx_dev_runtime9, LinkEditor = ({ widget, onComplete, onCancel, action }) => {
+var import_react36, jsx_dev_runtime10, LinkEditor = ({ widget, onComplete, onCancel, action }) => {
   const initial2 = toEditorMetadata(widget);
   const mode = getEditorMode(action);
-  const [urlInput, setUrlInput] = import_react35.useState(initial2.url);
-  const [urlCursorPos, setUrlCursorPos] = import_react35.useState(initial2.url.length);
-  const [textInput, setTextInput] = import_react35.useState(initial2.text);
-  const [textCursorPos, setTextCursorPos] = import_react35.useState(initial2.text.length);
+  const [urlInput, setUrlInput] = import_react36.useState(initial2.url);
+  const [urlCursorPos, setUrlCursorPos] = import_react36.useState(initial2.url.length);
+  const [textInput, setTextInput] = import_react36.useState(initial2.text);
+  const [textCursorPos, setTextCursorPos] = import_react36.useState(initial2.text.length);
   const isUrlMode = mode === "url";
   const activeValue = isUrlMode ? urlInput : textInput;
   const activeCursor = isUrlMode ? urlCursorPos : textCursorPos;
@@ -68402,14 +68996,14 @@ var import_react35, jsx_dev_runtime9, LinkEditor = ({ widget, onComplete, onCanc
   });
   const showInvalidUrlWarning = isUrlMode && urlInput.trim().length > 0 && !isValidHttpUrl(urlInput.trim());
   const prompt = isUrlMode ? "Enter URL (http/https): " : "Enter link text (blank uses URL): ";
-  return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
         children: [
           prompt,
           activeValue.slice(0, activeCursor),
-          /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
             backgroundColor: "gray",
             color: "black",
             children: activeValue[activeCursor] ?? " "
@@ -68417,14 +69011,14 @@ var import_react35, jsx_dev_runtime9, LinkEditor = ({ widget, onComplete, onCanc
           activeValue.slice(activeCursor + 1)
         ]
       }, undefined, true, undefined, this),
-      isUrlMode ? /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
+      isUrlMode ? /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
         dimColor: true,
         children: [
           "Current text:",
           " ",
           textInput.trim() || "(uses URL)"
         ]
-      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
+      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
         dimColor: true,
         children: [
           "Current URL:",
@@ -68432,11 +69026,11 @@ var import_react35, jsx_dev_runtime9, LinkEditor = ({ widget, onComplete, onCanc
           urlInput.trim() || "(none)"
         ]
       }, undefined, true, undefined, this),
-      showInvalidUrlWarning && /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
+      showInvalidUrlWarning && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
         color: "yellow",
         children: "URL must begin with http:// or https://"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
         dimColor: true,
         children: "←→ move cursor, Enter save, ESC cancel"
       }, undefined, false, undefined, this)
@@ -68447,8 +69041,8 @@ var init_Link = __esm(async () => {
   init_hyperlink();
   init_input_guards();
   await init_build2();
-  import_react35 = __toESM(require_react(), 1);
-  jsx_dev_runtime9 = __toESM(require_jsx_dev_runtime(), 1);
+  import_react36 = __toESM(require_react(), 1);
+  jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
 });
 
 // src/widgets/Skills.tsx
@@ -68536,7 +69130,7 @@ class SkillsWidget {
     return null;
   }
   renderEditor(props) {
-    return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(SkillsEditor, {
+    return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(SkillsEditor, {
       ...props
     }, undefined, false, undefined, this);
   }
@@ -68590,8 +69184,8 @@ class SkillsWidget {
     return isMetadataFlagEnabled(item, HIDE_WHEN_EMPTY_KEY2);
   }
 }
-var import_react36, jsx_dev_runtime10, MODES, MODE_LABELS, HIDE_WHEN_EMPTY_KEY2 = "hideWhenEmpty", LIST_LIMIT_KEY = "listLimit", TOGGLE_HIDE_EMPTY_ACTION2 = "toggle-hide-empty", EDIT_LIST_LIMIT_ACTION = "edit-list-limit", SkillsEditor = ({ widget, onComplete, onCancel, action }) => {
-  const [limitInput, setLimitInput] = import_react36.useState(() => parseListLimit(widget).toString());
+var import_react37, jsx_dev_runtime11, MODES, MODE_LABELS, HIDE_WHEN_EMPTY_KEY2 = "hideWhenEmpty", LIST_LIMIT_KEY = "listLimit", TOGGLE_HIDE_EMPTY_ACTION2 = "toggle-hide-empty", EDIT_LIST_LIMIT_ACTION = "edit-list-limit", SkillsEditor = ({ widget, onComplete, onCancel, action }) => {
+  const [limitInput, setLimitInput] = import_react37.useState(() => parseListLimit(widget).toString());
   use_input_default((input, key) => {
     if (action !== EDIT_LIST_LIMIT_ACTION) {
       return;
@@ -68609,40 +69203,40 @@ var import_react36, jsx_dev_runtime10, MODES, MODE_LABELS, HIDE_WHEN_EMPTY_KEY2 
     }
   });
   if (action === EDIT_LIST_LIMIT_ACTION) {
-    return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Box_default, {
           children: [
-            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
               children: "Enter max skills to show (0 for unlimited): "
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
               children: limitInput
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
               backgroundColor: "gray",
               color: "black",
               children: " "
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
           dimColor: true,
           children: "Press Enter to save, ESC to cancel"
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(Text, {
+  return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
     children: "Unknown editor mode"
   }, undefined, false, undefined, this);
 };
 var init_Skills = __esm(async () => {
   init_input_guards();
   await init_build2();
-  import_react36 = __toESM(require_react(), 1);
-  jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
+  import_react37 = __toESM(require_react(), 1);
+  jsx_dev_runtime11 = __toESM(require_jsx_dev_runtime(), 1);
   MODES = ["current", "count", "list"];
   MODE_LABELS = { current: "last used", count: "total count", list: "unique list" };
 });
@@ -69084,8 +69678,46 @@ function toggleHideZero(item) {
     }
   };
 }
-function formatReclaimedSuffix(tokensReclaimed) {
-  return tokensReclaimed > 0 ? ` ↓${formatTokens(tokensReclaimed)}` : "";
+function getMetric(item) {
+  const metric = item.metadata?.[METRIC_METADATA_KEY];
+  return METRICS.includes(metric ?? "") ? metric : DEFAULT_METRIC;
+}
+function setMetric(item, metric) {
+  if (metric === DEFAULT_METRIC) {
+    const { [METRIC_METADATA_KEY]: removedMetric, ...restMetadata } = item.metadata ?? {};
+    return {
+      ...item,
+      metadata: Object.keys(restMetadata).length > 0 ? restMetadata : undefined
+    };
+  }
+  return {
+    ...item,
+    metadata: {
+      ...item.metadata ?? {},
+      [METRIC_METADATA_KEY]: metric
+    }
+  };
+}
+function getMetricValue(data, metric) {
+  switch (metric) {
+    case "count":
+      return data.count;
+    case "auto":
+      return data.byTrigger.auto;
+    case "manual":
+      return data.byTrigger.manual;
+    case "unknown":
+      return data.byTrigger.unknown;
+    case "reclaimed":
+      return data.tokensReclaimed;
+  }
+}
+function formatReclaimedSuffix(tokensReclaimed, item) {
+  if (tokensReclaimed <= 0) {
+    return "";
+  }
+  const symbol2 = getSlotSymbol(item, RECLAIMED_SLOT);
+  return symbol2.length > 0 ? ` ${symbol2}${formatTokens(tokensReclaimed)}` : ` ${formatTokens(tokensReclaimed)}`;
 }
 function formatTriggerSuffix(byTrigger) {
   const parts = [];
@@ -69106,7 +69738,7 @@ function formatStats(data, item, icon) {
     out += formatTriggerSuffix(data.byTrigger);
   }
   if (isMetadataFlagEnabled(item, SHOW_RECLAIMED_METADATA_KEY)) {
-    out += formatReclaimedSuffix(data.tokensReclaimed);
+    out += formatReclaimedSuffix(data.tokensReclaimed, item);
   }
   return out;
 }
@@ -69158,15 +69790,21 @@ class CompactionCounterWidget {
     return "Context";
   }
   getEditorDisplay(item) {
-    const modifiers = [getFormat2(item)];
-    if (isNerdFontEnabled2(item)) {
-      modifiers.push("nerd font");
-    }
-    if (isMetadataFlagEnabled(item, SHOW_TRIGGERS_METADATA_KEY)) {
-      modifiers.push("trigger split");
-    }
-    if (isMetadataFlagEnabled(item, SHOW_RECLAIMED_METADATA_KEY)) {
-      modifiers.push("reclaimed");
+    const metric = getMetric(item);
+    const modifiers = [];
+    if (metric !== DEFAULT_METRIC) {
+      modifiers.push(`${metric} value`);
+    } else {
+      modifiers.push(getFormat2(item));
+      if (isNerdFontEnabled2(item)) {
+        modifiers.push("nerd font");
+      }
+      if (isMetadataFlagEnabled(item, SHOW_TRIGGERS_METADATA_KEY)) {
+        modifiers.push("trigger split");
+      }
+      if (isMetadataFlagEnabled(item, SHOW_RECLAIMED_METADATA_KEY)) {
+        modifiers.push("reclaimed");
+      }
     }
     if (isHideZeroEnabled(item)) {
       modifiers.push("hide zero");
@@ -69177,6 +69815,11 @@ class CompactionCounterWidget {
     };
   }
   handleEditorAction(action, item) {
+    if (action === CYCLE_METRIC_ACTION) {
+      const currentMetric = getMetric(item);
+      const nextMetric = METRICS[(METRICS.indexOf(currentMetric) + 1) % METRICS.length] ?? DEFAULT_METRIC;
+      return setMetric(item, nextMetric);
+    }
     if (action === CYCLE_FORMAT_ACTION2) {
       const currentFormat = getFormat2(item);
       const nextFormat = FORMATS2[(FORMATS2.indexOf(currentFormat) + 1) % FORMATS2.length] ?? DEFAULT_FORMAT2;
@@ -69197,27 +69840,41 @@ class CompactionCounterWidget {
     return null;
   }
   render(item, context, settings) {
-    const format = getFormat2(item);
-    const icon = getIcon(item, format);
-    if (context.isPreview) {
-      return formatStats(SAMPLE_STATS, item, icon);
+    const data = context.isPreview ? SAMPLE_STATS : context.compactionData ?? ZERO_COMPACTION_STATS;
+    const metric = getMetric(item);
+    if (metric !== DEFAULT_METRIC) {
+      const value = getMetricValue(data, metric);
+      if (value === 0 && isHideZeroEnabled(item) && !context.isPreview) {
+        return null;
+      }
+      return metric === "reclaimed" ? formatTokens(value) : String(value);
     }
-    const data = context.compactionData ?? ZERO_COMPACTION_STATS;
-    if (data.count === 0 && isHideZeroEnabled(item))
+    if (data.count === 0 && isHideZeroEnabled(item) && !context.isPreview) {
       return null;
+    }
+    const icon = getIcon(item, getFormat2(item));
     return formatStats(data, item, icon);
   }
   getCustomKeybinds(item) {
     const keybinds = [
-      { key: "f", label: "(f)ormat", action: CYCLE_FORMAT_ACTION2 }
+      { key: "v", label: "(v)alue", action: CYCLE_METRIC_ACTION }
     ];
+    if (item !== undefined && getMetric(item) !== DEFAULT_METRIC) {
+      keybinds.push({ key: "h", label: "(h)ide when zero", action: TOGGLE_HIDE_ZERO_ACTION });
+      return keybinds;
+    }
+    keybinds.push({ key: "f", label: "(f)ormat", action: CYCLE_FORMAT_ACTION2 });
     if (item === undefined || formatHasIcon(getFormat2(item))) {
       keybinds.push({ key: "n", label: "(n)erd font", action: TOGGLE_NERD_FONT_ACTION2 });
     }
     keybinds.push({ key: "s", label: "(s)plit by trigger", action: TOGGLE_TRIGGERS_ACTION });
     keybinds.push({ key: "t", label: "(t)okens reclaimed", action: TOGGLE_RECLAIMED_ACTION });
     keybinds.push({ key: "h", label: "(h)ide when zero", action: TOGGLE_HIDE_ZERO_ACTION });
+    keybinds.push(getSymbolKeybind());
     return keybinds;
+  }
+  renderEditor(props) {
+    return renderSymbolSlotsEditor(props, [RECLAIMED_SLOT]);
   }
   supportsRawValue() {
     return false;
@@ -69226,11 +69883,14 @@ class CompactionCounterWidget {
     return true;
   }
 }
-var COMPACTION_ICON = "↻", COMPACTION_COMPRESS_NERD_FONT_ICON = "", COMPACTION_TEXT_LABEL = "compact", COMPACTION_NERD_FONT_ICON = "", FORMATS2, ICON_FORMATS, DEFAULT_FORMAT2 = "icon-space-number", CYCLE_FORMAT_ACTION2 = "cycle-format", TOGGLE_HIDE_ZERO_ACTION = "toggle-hide-zero", TOGGLE_NERD_FONT_ACTION2 = "toggle-nerd-font", HIDE_ZERO_METADATA_KEY = "hideZero", NERD_FONT_METADATA_KEY2 = "nerdFont", TOGGLE_TRIGGERS_ACTION = "toggle-triggers", SHOW_TRIGGERS_METADATA_KEY = "showTriggers", TOGGLE_RECLAIMED_ACTION = "toggle-reclaimed", SHOW_RECLAIMED_METADATA_KEY = "showReclaimed", SAMPLE_STATS;
-var init_CompactionCounter = __esm(() => {
+var COMPACTION_ICON = "↻", COMPACTION_COMPRESS_NERD_FONT_ICON = "", COMPACTION_TEXT_LABEL = "compact", COMPACTION_NERD_FONT_ICON = "", FORMATS2, ICON_FORMATS, DEFAULT_FORMAT2 = "icon-space-number", CYCLE_FORMAT_ACTION2 = "cycle-format", TOGGLE_HIDE_ZERO_ACTION = "toggle-hide-zero", TOGGLE_NERD_FONT_ACTION2 = "toggle-nerd-font", HIDE_ZERO_METADATA_KEY = "hideZero", NERD_FONT_METADATA_KEY2 = "nerdFont", TOGGLE_TRIGGERS_ACTION = "toggle-triggers", SHOW_TRIGGERS_METADATA_KEY = "showTriggers", TOGGLE_RECLAIMED_ACTION = "toggle-reclaimed", SHOW_RECLAIMED_METADATA_KEY = "showReclaimed", METRICS, DEFAULT_METRIC = "count", METRIC_METADATA_KEY = "metric", CYCLE_METRIC_ACTION = "cycle-metric", RECLAIMED_SLOT, SAMPLE_STATS;
+var init_CompactionCounter = __esm(async () => {
   init_compaction();
+  await init_symbol_override();
   FORMATS2 = ["icon-space-number", "icon-text-number", "text-and-number", "number"];
   ICON_FORMATS = ["icon-space-number", "icon-text-number"];
+  METRICS = ["count", "auto", "manual", "unknown", "reclaimed"];
+  RECLAIMED_SLOT = { id: "symbolReclaimed", label: "Reclaimed", defaultSymbol: "↓" };
   SAMPLE_STATS = Object.freeze({
     count: 2,
     byTrigger: Object.freeze({ auto: 1, manual: 1, unknown: 0 }),
@@ -69513,7 +70173,6 @@ var init_widgets = __esm(async () => {
   init_GitUnstagedFiles();
   init_GitUntrackedFiles();
   init_GitCleanStatus();
-  init_GitRootDir();
   init_GitPr();
   init_GitSha();
   init_GitOriginOwner();
@@ -69535,9 +70194,9 @@ var init_widgets = __esm(async () => {
   init_FreeMemory();
   init_SessionName();
   init_VimMode();
-  init_CompactionCounter();
   await __promiseAll([
     init_GitBranch(),
+    init_GitRootDir(),
     init_GitWorktree(),
     init_GitStatus(),
     init_GitStaged(),
@@ -69579,6 +70238,7 @@ var init_widgets = __esm(async () => {
     init_Skills(),
     init_ThinkingEffort(),
     init_GitWorktreeMode(),
+    init_CompactionCounter(),
     init_VoiceStatus(),
     init_RemoteControlStatus()
   ]);
@@ -69704,12 +70364,10 @@ function getWidget(type) {
 }
 function getAllWidgetTypes(settings) {
   const allTypes = WIDGET_MANIFEST.map((entry) => entry.type);
-  if (!settings.powerline.enabled) {
-    if (!settings.defaultSeparator) {
-      allTypes.push("separator");
-    }
-    allTypes.push("flex-separator");
+  if (!settings.powerline.enabled && !settings.defaultSeparator) {
+    allTypes.push("separator");
   }
+  allTypes.push("flex-separator");
   return allTypes;
 }
 function getLayoutCatalogEntry(type) {
@@ -69781,11 +70439,36 @@ __export(exports_hooks, {
 function hasWidgetHooks(widget) {
   return Boolean(widget && "getHooks" in widget && typeof widget.getHooks === "function");
 }
+function isCcstatuslineManagedEntry(entry) {
+  return entry._tag === HOOK_TAG;
+}
+function isLegacyCcstatuslineHookCommand(hook) {
+  return CCSTATUSLINE_HOOK_PATTERN.test(hook.command);
+}
+function stripManagedHookEntry(entry) {
+  if (isCcstatuslineManagedEntry(entry)) {
+    return null;
+  }
+  if (!entry.hooks) {
+    return entry;
+  }
+  const remainingHooks = entry.hooks.filter((hook) => !isLegacyCcstatuslineHookCommand(hook));
+  if (remainingHooks.length === entry.hooks.length) {
+    return entry;
+  }
+  if (remainingHooks.length === 0) {
+    return null;
+  }
+  return {
+    ...entry,
+    hooks: remainingHooks
+  };
+}
 function stripManagedHooks(hooks) {
   for (const event of Object.keys(hooks)) {
-    hooks[event] = (hooks[event] ?? []).filter((entry) => entry._tag !== HOOK_TAG);
+    hooks[event] = (hooks[event] ?? []).map(stripManagedHookEntry).filter((entry) => entry !== null);
     if (hooks[event].length === 0) {
-      delete hooks[event];
+      Reflect.deleteProperty(hooks, event);
     }
   }
 }
@@ -69842,18 +70525,22 @@ async function removeManagedHooks() {
   claudeSettings.hooks = Object.keys(hooks).length > 0 ? hooks : undefined;
   await saveClaudeSettings(claudeSettings);
 }
-var HOOK_TAG = "ccstatusline-managed";
+var HOOK_TAG = "ccstatusline-managed", CCSTATUSLINE_HOOK_PATTERN;
 var init_hooks = __esm(async () => {
   await __promiseAll([
     init_claude_settings(),
     init_widgets2()
   ]);
+  CCSTATUSLINE_HOOK_PATTERN = /ccstatusline.* --hook(?:\s|$)/;
 });
 
 // src/utils/config.ts
 import * as fs12 from "fs";
 import * as os9 from "os";
 import * as path8 from "path";
+function getConfigLoadError() {
+  return lastLoadError;
+}
 function initConfigPath(filePath) {
   settingsPath = filePath ? path8.resolve(filePath) : DEFAULT_SETTINGS_PATH;
 }
@@ -69867,49 +70554,78 @@ function settingsFileExists() {
   return fs12.existsSync(settingsPath);
 }
 function getSettingsPaths() {
-  const configDir = path8.dirname(settingsPath);
-  const parsedPath = path8.parse(settingsPath);
-  const backupBaseName = parsedPath.ext ? `${parsedPath.name}.bak` : `${parsedPath.base}.bak`;
   return {
-    configDir,
-    settingsPath,
-    settingsBackupPath: path8.join(configDir, backupBaseName)
+    configDir: path8.dirname(settingsPath),
+    settingsPath
   };
+}
+function getErrorCode(error51) {
+  return typeof error51 === "object" && error51 !== null && "code" in error51 ? String(error51.code) : undefined;
+}
+async function resolveSymlinkTarget(linkPath) {
+  try {
+    return await realpath2(linkPath);
+  } catch (error51) {
+    if (getErrorCode(error51) !== "ENOENT") {
+      throw error51;
+    }
+    const linkTarget = await readlink(linkPath);
+    return path8.resolve(path8.dirname(linkPath), linkTarget);
+  }
+}
+async function resolveAtomicWriteTarget(paths) {
+  try {
+    const stats = await lstat(paths.settingsPath);
+    if (!stats.isSymbolicLink()) {
+      return {
+        targetPath: paths.settingsPath,
+        tempDir: paths.configDir
+      };
+    }
+    const targetPath = await resolveSymlinkTarget(paths.settingsPath);
+    return {
+      targetPath,
+      tempDir: path8.dirname(targetPath)
+    };
+  } catch (error51) {
+    if (getErrorCode(error51) === "ENOENT") {
+      return {
+        targetPath: paths.settingsPath,
+        tempDir: paths.configDir
+      };
+    }
+    throw error51;
+  }
 }
 async function writeSettingsJson(settings, paths) {
   await mkdir(paths.configDir, { recursive: true });
-  await writeFile(paths.settingsPath, JSON.stringify(settings, null, 2), "utf-8");
-}
-async function backupBadSettings(paths) {
+  const writeTarget = await resolveAtomicWriteTarget(paths);
+  const tempPath = path8.join(writeTarget.tempDir, `${path8.basename(writeTarget.targetPath)}.${process.pid}.${Date.now()}.tmp`);
   try {
-    if (fs12.existsSync(paths.settingsPath)) {
-      const content = await readFile3(paths.settingsPath, "utf-8");
-      await writeFile(paths.settingsBackupPath, content, "utf-8");
-      console.error(`Bad settings backed up to ${paths.settingsBackupPath}`);
-    }
+    await writeFile(tempPath, JSON.stringify(settings, null, 2), "utf-8");
+    await rename(tempPath, writeTarget.targetPath);
   } catch (error51) {
-    console.error("Failed to backup bad settings:", error51);
+    try {
+      await unlink(tempPath);
+    } catch {}
+    throw error51;
   }
 }
+function inMemoryDefaults() {
+  return SettingsSchema.parse({});
+}
 async function writeDefaultSettings(paths) {
-  const defaults2 = SettingsSchema.parse({});
-  const settingsWithVersion = {
-    ...defaults2,
-    version: CURRENT_VERSION
-  };
+  const defaults2 = inMemoryDefaults();
   try {
-    await writeSettingsJson(settingsWithVersion, paths);
+    await writeSettingsJson(defaults2, paths);
     console.error(`Default settings written to ${paths.settingsPath}`);
   } catch (error51) {
     console.error("Failed to write default settings:", error51);
   }
   return defaults2;
 }
-async function recoverWithDefaults(paths) {
-  await backupBadSettings(paths);
-  return await writeDefaultSettings(paths);
-}
 async function loadSettings() {
+  lastLoadError = null;
   const paths = getSettingsPaths();
   try {
     if (!fs12.existsSync(paths.settingsPath))
@@ -69919,34 +70635,42 @@ async function loadSettings() {
     try {
       rawData = JSON.parse(content);
     } catch {
-      console.error("Failed to parse settings.json, backing up and using defaults");
-      return await recoverWithDefaults(paths);
+      console.error("Failed to parse settings.json, using defaults (file left unchanged)");
+      lastLoadError = "settings.json is not valid JSON";
+      return inMemoryDefaults();
     }
     const hasVersion = typeof rawData === "object" && rawData !== null && "version" in rawData;
+    let migrated = false;
     if (!hasVersion) {
       const v1Result = SettingsSchema_v1.safeParse(rawData);
       if (!v1Result.success) {
-        console.error("Invalid v1 settings format:", v1Result.error);
-        return await recoverWithDefaults(paths);
+        console.error("Invalid v1 settings format, using defaults (file left unchanged):", v1Result.error);
+        lastLoadError = "settings.json is not in a valid format";
+        return inMemoryDefaults();
       }
       rawData = migrateConfig(rawData, CURRENT_VERSION);
-      await writeSettingsJson(rawData, paths);
+      migrated = true;
     } else if (needsMigration(rawData, CURRENT_VERSION)) {
       rawData = migrateConfig(rawData, CURRENT_VERSION);
-      await writeSettingsJson(rawData, paths);
+      migrated = true;
     }
     const result2 = SettingsSchema.safeParse(rawData);
     if (!result2.success) {
-      console.error("Failed to parse settings:", result2.error);
-      return await recoverWithDefaults(paths);
+      console.error("Failed to parse settings, using defaults (file left unchanged):", result2.error);
+      lastLoadError = "settings.json is not in a valid format";
+      return inMemoryDefaults();
+    }
+    if (migrated) {
+      await writeSettingsJson(rawData, paths);
     }
     return {
       ...result2.data,
       lines: upgradeLegacyWidgetTypes(result2.data.lines)
     };
   } catch (error51) {
-    console.error("Error loading settings:", error51);
-    return await recoverWithDefaults(paths);
+    console.error("Error loading settings, using defaults:", error51);
+    lastLoadError = "settings.json could not be read";
+    return inMemoryDefaults();
   }
 }
 async function saveSettings(settings) {
@@ -69967,6 +70691,10 @@ async function saveInstallationMetadata(metadata) {
     return;
   }
   const settings = await loadSettings();
+  if (getConfigLoadError() !== null) {
+    console.error("Skipping installation-metadata write: settings.json is unreadable (left unchanged).");
+    return;
+  }
   const settingsWithVersion = {
     ...settings,
     version: CURRENT_VERSION
@@ -69978,7 +70706,7 @@ async function saveInstallationMetadata(metadata) {
   }
   await writeSettingsJson(settingsWithVersion, paths);
 }
-var readFile3, writeFile, mkdir, DEFAULT_SETTINGS_PATH, settingsPath;
+var readFile3, writeFile, mkdir, rename, unlink, lstat, readlink, realpath2, DEFAULT_SETTINGS_PATH, settingsPath, lastLoadError = null;
 var init_config = __esm(async () => {
   init_Settings();
   init_migrations();
@@ -69986,6 +70714,11 @@ var init_config = __esm(async () => {
   readFile3 = fs12.promises.readFile;
   writeFile = fs12.promises.writeFile;
   mkdir = fs12.promises.mkdir;
+  rename = fs12.promises.rename;
+  unlink = fs12.promises.unlink;
+  lstat = fs12.promises.lstat;
+  readlink = fs12.promises.readlink;
+  realpath2 = fs12.promises.realpath;
   DEFAULT_SETTINGS_PATH = path8.join(os9.homedir(), ".config", "ccstatusline", "settings.json");
   settingsPath = DEFAULT_SETTINGS_PATH;
 });
@@ -71004,7 +71737,7 @@ var dist_default5 = Gradient;
 
 // src/tui/App.tsx
 await init_claude_settings();
-var import_react52 = __toESM(require_react(), 1);
+var import_react53 = __toESM(require_react(), 1);
 
 // src/utils/clone-settings.ts
 function cloneSettings(settings) {
@@ -71057,11 +71790,13 @@ function getCommandResolutionPaths(command, { platform: platform2 = process.plat
     const output = platform2 === "win32" ? execFileSync5("where", [command], {
       encoding: "utf-8",
       timeout: COMMAND_LOOKUP_TIMEOUT_MS,
-      windowsHide: true
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "ignore"]
     }) : execFileSync5("which", ["-a", command], {
       encoding: "utf-8",
       timeout: COMMAND_LOOKUP_TIMEOUT_MS,
-      windowsHide: true
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "ignore"]
     });
     return splitCommandOutput(output);
   } catch {
@@ -71075,6 +71810,7 @@ function getNpmGlobalBinDir(platform2) {
       encoding: "utf-8",
       timeout: COMMAND_LOOKUP_TIMEOUT_MS,
       windowsHide: true,
+      stdio: ["ignore", "pipe", "ignore"],
       ...getPackageManagerShellOptions(executable, platform2)
     }).trim();
     if (!prefix) {
@@ -71090,7 +71826,8 @@ function getBunGlobalBinDir() {
     const binDir = execFileSync5("bun", ["pm", "bin", "-g"], {
       encoding: "utf-8",
       timeout: COMMAND_LOOKUP_TIMEOUT_MS,
-      windowsHide: true
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "ignore"]
     }).trim();
     return binDir || null;
   } catch {
@@ -71284,6 +72021,7 @@ function getNpmGlobalPackageVersion(platform2) {
       encoding: "utf-8",
       timeout: VERSION_LOOKUP_TIMEOUT_MS,
       windowsHide: true,
+      stdio: ["ignore", "pipe", "ignore"],
       ...getPackageManagerShellOptions(executable, platform2)
     }).trim();
     return rootDir ? readPackageVersion(appendPathSegment(appendPathSegment(rootDir, "ccstatusline"), "package.json")) : null;
@@ -71952,7 +72690,7 @@ await init_build2();
 
 // node_modules/ink-select-input/build/Indicator.js
 await init_build2();
-var import_react37 = __toESM(require_react(), 1);
+var import_react38 = __toESM(require_react(), 1);
 
 // node_modules/is-unicode-supported/index.js
 import process14 from "node:process";
@@ -72243,18 +72981,18 @@ var replacements = Object.entries(specialMainSymbols);
 
 // node_modules/ink-select-input/build/Indicator.js
 function Indicator({ isSelected = false }) {
-  return import_react37.default.createElement(Box_default, { marginRight: 1 }, isSelected ? import_react37.default.createElement(Text, { color: "blue" }, figures_default.pointer) : import_react37.default.createElement(Text, null, " "));
+  return import_react38.default.createElement(Box_default, { marginRight: 1 }, isSelected ? import_react38.default.createElement(Text, { color: "blue" }, figures_default.pointer) : import_react38.default.createElement(Text, null, " "));
 }
 var Indicator_default = Indicator;
 // node_modules/ink-select-input/build/Item.js
 await init_build2();
-var React21 = __toESM(require_react(), 1);
+var React22 = __toESM(require_react(), 1);
 function Item({ isSelected = false, label }) {
-  return React21.createElement(Text, { color: isSelected ? "blue" : undefined }, label);
+  return React22.createElement(Text, { color: isSelected ? "blue" : undefined }, label);
 }
 var Item_default = Item;
 // node_modules/ink-select-input/build/SelectInput.js
-var import_react38 = __toESM(require_react(), 1);
+var import_react39 = __toESM(require_react(), 1);
 import { isDeepStrictEqual } from "node:util";
 
 // node_modules/to-rotated/index.js
@@ -72285,17 +73023,17 @@ function SelectInput({ items = [], isFocused = true, initialIndex = 0, indicator
   const hasLimit = typeof customLimit === "number" && items.length > customLimit;
   const limit = hasLimit ? Math.min(customLimit, items.length) : items.length;
   const lastIndex = limit - 1;
-  const [rotateIndex, setRotateIndex] = import_react38.useState(initialIndex > lastIndex ? lastIndex - initialIndex : 0);
-  const [selectedIndex, setSelectedIndex] = import_react38.useState(initialIndex ? initialIndex > lastIndex ? lastIndex : initialIndex : 0);
-  const previousItems = import_react38.useRef(items);
-  import_react38.useEffect(() => {
+  const [rotateIndex, setRotateIndex] = import_react39.useState(initialIndex > lastIndex ? lastIndex - initialIndex : 0);
+  const [selectedIndex, setSelectedIndex] = import_react39.useState(initialIndex ? initialIndex > lastIndex ? lastIndex : initialIndex : 0);
+  const previousItems = import_react39.useRef(items);
+  import_react39.useEffect(() => {
     if (!isDeepStrictEqual(previousItems.current.map((item) => item.value), items.map((item) => item.value))) {
       setRotateIndex(0);
       setSelectedIndex(0);
     }
     previousItems.current = items;
   }, [items]);
-  use_input_default(import_react38.useCallback((input, key) => {
+  use_input_default(import_react39.useCallback((input, key) => {
     if (input === "k" || key.upArrow) {
       const lastIndex2 = (hasLimit ? limit : items.length) - 1;
       const atFirstIndex = selectedIndex === 0;
@@ -72347,9 +73085,9 @@ function SelectInput({ items = [], isFocused = true, initialIndex = 0, indicator
     onHighlight
   ]), { isActive: isFocused });
   const slicedItems = hasLimit ? toRotated(items, rotateIndex).slice(0, limit) : items;
-  return import_react38.default.createElement(Box_default, { flexDirection: "column" }, slicedItems.map((item, index) => {
+  return import_react39.default.createElement(Box_default, { flexDirection: "column" }, slicedItems.map((item, index) => {
     const isSelected = index === selectedIndex;
-    return import_react38.default.createElement(Box_default, { key: item.key ?? item.value }, import_react38.default.createElement(indicatorComponent, { isSelected }), import_react38.default.createElement(itemComponent, { ...item, isSelected }));
+    return import_react39.default.createElement(Box_default, { key: item.key ?? item.value }, import_react39.default.createElement(indicatorComponent, { isSelected }), import_react39.default.createElement(itemComponent, { ...item, isSelected }));
   }));
 }
 var SelectInput_default = SelectInput;
@@ -72359,15 +73097,15 @@ init_colors();
 init_gradient();
 init_input_guards();
 await init_widgets2();
-var import_react40 = __toESM(require_react(), 1);
+var import_react41 = __toESM(require_react(), 1);
 
 // src/tui/components/ConfirmDialog.tsx
 await init_build2();
 
 // src/tui/components/List.tsx
 await init_build2();
-var import_react39 = __toESM(require_react(), 1);
-var jsx_dev_runtime11 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react40 = __toESM(require_react(), 1);
+var jsx_dev_runtime12 = __toESM(require_jsx_dev_runtime(), 1);
 function List({
   items,
   onSelect,
@@ -72378,9 +73116,9 @@ function List({
   wrapNavigation = true,
   ...boxProps
 }) {
-  const [selectedIndex, setSelectedIndex] = import_react39.useState(initialSelection);
-  const latestOnSelectionChangeRef = import_react39.useRef(onSelectionChange);
-  const _items = import_react39.useMemo(() => {
+  const [selectedIndex, setSelectedIndex] = import_react40.useState(initialSelection);
+  const latestOnSelectionChangeRef = import_react40.useRef(onSelectionChange);
+  const _items = import_react40.useMemo(() => {
     if (showBackButton) {
       return [...items, "-", { label: "← Back", value: "back" }];
     }
@@ -72390,14 +73128,14 @@ function List({
   const selectedItem = selectableItems[selectedIndex];
   const selectedValue = selectedItem?.value;
   const actualIndex = _items.findIndex((item) => item === selectedItem);
-  import_react39.useEffect(() => {
+  import_react40.useEffect(() => {
     latestOnSelectionChangeRef.current = onSelectionChange;
   }, [onSelectionChange]);
-  import_react39.useEffect(() => {
+  import_react40.useEffect(() => {
     const maxIndex = Math.max(selectableItems.length - 1, 0);
     setSelectedIndex(Math.min(initialSelection, maxIndex));
   }, [initialSelection, selectableItems.length]);
-  import_react39.useEffect(() => {
+  import_react40.useEffect(() => {
     if (selectedValue !== undefined) {
       latestOnSelectionChangeRef.current?.(selectedValue, selectedIndex);
     }
@@ -72420,26 +73158,26 @@ function List({
       return;
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Box_default, {
     flexDirection: "column",
     ...boxProps,
     children: [
       _items.map((item, index) => {
         if (item === "-") {
-          return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ListSeparator, {}, index, false, undefined, this);
+          return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ListSeparator, {}, index, false, undefined, this);
         }
         const isSelected = index === actualIndex;
-        return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(ListItem, {
+        return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(ListItem, {
           isSelected,
           color,
           disabled: item.disabled,
           ...item.props,
-          children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Text, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Text, {
                 children: item.label
               }, undefined, false, undefined, this),
-              item.sublabel && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
+              item.sublabel && /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Text, {
                 dimColor: !isSelected,
                 children: [
                   " ",
@@ -72450,10 +73188,10 @@ function List({
           }, undefined, true, undefined, this)
         }, index, false, undefined, this);
       }),
-      selectedItem?.description && /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Box_default, {
+      selectedItem?.description && /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Box_default, {
         marginTop: 1,
         paddingLeft: 2,
-        children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Text, {
           dimColor: true,
           wrap: "wrap",
           children: selectedItem.description
@@ -72469,16 +73207,16 @@ function ListItem({
   disabled,
   ...boxProps
 }) {
-  return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Box_default, {
     ...boxProps,
-    children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
+    children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Text, {
       color: isSelected ? color : undefined,
       dimColor: disabled,
       children: [
-        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Text, {
           children: isSelected ? "▶  " : "   "
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Text, {
           children
         }, undefined, false, undefined, this)
       ]
@@ -72486,13 +73224,13 @@ function ListItem({
   }, undefined, false, undefined, this);
 }
 function ListSeparator() {
-  return /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(Text, {
+  return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Text, {
     children: " "
   }, undefined, false, undefined, this);
 }
 
 // src/tui/components/ConfirmDialog.tsx
-var jsx_dev_runtime12 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime13 = __toESM(require_jsx_dev_runtime(), 1);
 var CONFIRM_OPTIONS = [
   {
     label: "Yes",
@@ -72510,7 +73248,7 @@ var ConfirmDialog = ({ message, onConfirm, onCancel, inline = false }) => {
     }
   });
   if (inline) {
-    return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(List, {
+    return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(List, {
       items: CONFIRM_OPTIONS,
       onSelect: (confirmed) => {
         if (confirmed) {
@@ -72522,15 +73260,15 @@ var ConfirmDialog = ({ message, onConfirm, onCancel, inline = false }) => {
       color: "cyan"
     }, undefined, false, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
         children: message
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime12.jsxDEV(List, {
+        children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(List, {
           items: CONFIRM_OPTIONS,
           onSelect: (confirmed) => {
             if (confirmed) {
@@ -72577,6 +73315,24 @@ function toggleWidgetDynamic(widgets, widgetId) {
     dynamic: !widget.dynamic
   }));
 }
+function cycleWidgetDim(widgets, widgetId) {
+  return updateWidgetById(widgets, widgetId, (widget) => {
+    if (widget.dim === true) {
+      return {
+        ...widget,
+        dim: "parens"
+      };
+    }
+    if (widget.dim === "parens") {
+      const { dim, ...restWidget } = widget;
+      return restWidget;
+    }
+    return {
+      ...widget,
+      dim: true
+    };
+  });
+}
 function resetWidgetStyling(widgets, widgetId) {
   return updateWidgetById(widgets, widgetId, (widget) => {
     const {
@@ -72584,6 +73340,7 @@ function resetWidgetStyling(widgets, widgetId) {
       backgroundColor,
       bold,
       dynamic,
+      dim,
       ...restWidget
     } = widget;
     return restWidget;
@@ -72596,6 +73353,7 @@ function clearAllWidgetStyling(widgets) {
       backgroundColor,
       bold,
       dynamic,
+      dim,
       ...restWidget
     } = widget;
     return restWidget;
@@ -72661,19 +73419,19 @@ function cycleWidgetColor({
 }
 
 // src/tui/components/ColorMenu.tsx
-var jsx_dev_runtime13 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
 var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
-  const [showSeparators, setShowSeparators] = import_react40.useState(false);
-  const [hexInputMode, setHexInputMode] = import_react40.useState(false);
-  const [hexInput, setHexInput] = import_react40.useState("");
-  const [ansi256InputMode, setAnsi256InputMode] = import_react40.useState(false);
-  const [ansi256Input, setAnsi256Input] = import_react40.useState("");
-  const [showClearConfirm, setShowClearConfirm] = import_react40.useState(false);
-  const [gradientMode, setGradientMode] = import_react40.useState(false);
-  const [gradientIndex, setGradientIndex] = import_react40.useState(0);
-  const [gradientCustomStep, setGradientCustomStep] = import_react40.useState(null);
-  const [gradientStartHex, setGradientStartHex] = import_react40.useState("");
-  const [gradientHexInput, setGradientHexInput] = import_react40.useState("");
+  const [showSeparators, setShowSeparators] = import_react41.useState(false);
+  const [hexInputMode, setHexInputMode] = import_react41.useState(false);
+  const [hexInput, setHexInput] = import_react41.useState("");
+  const [ansi256InputMode, setAnsi256InputMode] = import_react41.useState(false);
+  const [ansi256Input, setAnsi256Input] = import_react41.useState("");
+  const [showClearConfirm, setShowClearConfirm] = import_react41.useState(false);
+  const [gradientMode, setGradientMode] = import_react41.useState(false);
+  const [gradientIndex, setGradientIndex] = import_react41.useState(0);
+  const [gradientCustomStep, setGradientCustomStep] = import_react41.useState(null);
+  const [gradientStartHex, setGradientStartHex] = import_react41.useState("");
+  const [gradientHexInput, setGradientHexInput] = import_react41.useState("");
   const powerlineEnabled = settings.powerline.enabled;
   const colorableWidgets = widgets.filter((widget) => {
     if (widget.type === "separator") {
@@ -72682,8 +73440,8 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
     const widgetInstance = getWidget(widget.type);
     return widgetInstance ? widgetInstance.supportsColors(widget) : true;
   });
-  const [highlightedItemId, setHighlightedItemId] = import_react40.useState(colorableWidgets[0]?.id ?? null);
-  const [editingBackground, setEditingBackground] = import_react40.useState(false);
+  const [highlightedItemId, setHighlightedItemId] = import_react41.useState(colorableWidgets[0]?.id ?? null);
+  const [editingBackground, setEditingBackground] = import_react41.useState(false);
   const hasNoItems = colorableWidgets.length === 0;
   use_input_default((input, key) => {
     if (hasNoItems) {
@@ -72855,6 +73613,14 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
     } else if (input === "d" || input === "D") {
       if (highlightedItemId && highlightedItemId !== "back") {
         const selectedWidget2 = colorableWidgets.find((widget) => widget.id === highlightedItemId);
+        if (selectedWidget2) {
+          const newItems = cycleWidgetDim(widgets, selectedWidget2.id);
+          onUpdate(newItems);
+        }
+      }
+    } else if (input === "y" || input === "Y") {
+      if (highlightedItemId && highlightedItemId !== "back") {
+        const selectedWidget2 = colorableWidgets.find((widget) => widget.id === highlightedItemId);
         if (selectedWidget2 && getWidget(selectedWidget2.type)?.getFillRatio) {
           const newItems = toggleWidgetDynamic(widgets, selectedWidget2.id);
           onUpdate(newItems);
@@ -72888,30 +73654,30 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
     }
   });
   if (hasNoItems) {
-    return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
           bold: true,
           children: [
             "Configure Colors",
             lineIndex !== undefined ? ` - Line ${lineIndex + 1}` : ""
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             dimColor: true,
             children: "No colorable widgets in the status line."
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
           dimColor: true,
           children: "Add a widget first to continue."
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: "Press any key to go back..."
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this)
@@ -72943,7 +73709,7 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
         defaultColor = widgetImpl.getDefaultColor();
       }
     }
-    const styledLabel = applyColors(label, widget.color ?? defaultColor, widget.backgroundColor, widget.bold, level);
+    const styledLabel = applyColors(label, widget.color ?? defaultColor, widget.backgroundColor, widget.bold, level, widget.dim);
     const dynamicMarker = widget.dynamic ? source_default.dim(" [dyn]") : "";
     return {
       label: styledLabel + dynamicMarker,
@@ -73011,48 +73777,54 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
       colorDisplay = applyColors(displayName, currentColor, undefined, false, level);
     }
   }
+  const styleIndicators = [
+    selectedWidget?.bold ? "[BOLD]" : null,
+    selectedWidget?.dim === true ? "[DIM]" : null,
+    selectedWidget?.dim === "parens" ? "[DIM ()]" : null,
+    selectedWidget?.dynamic ? "[DYN]" : null
+  ].filter((indicator) => indicator !== null).join(" ");
   if (gradientMode) {
     const level = getColorLevelString(settings.colorLevel);
     const widgetName = selectedWidget ? getItemLabel(selectedWidget) : "";
     if (gradientCustomStep) {
-      return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             bold: true,
             children: [
               "Custom Gradient",
               widgetName ? ` - ${widgetName}` : ""
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
             marginTop: 1,
             flexDirection: "column",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
                 children: gradientCustomStep === "start" ? "Enter START hex color (without #):" : "Enter END hex color (without #):"
               }, undefined, false, undefined, this),
-              gradientCustomStep === "end" && /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+              gradientCustomStep === "end" && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
                 dimColor: true,
                 children: [
                   "Start: #",
                   gradientStartHex
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
                 children: [
                   "#",
                   gradientHexInput,
-                  /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
                     dimColor: true,
                     children: gradientHexInput.length < 6 ? "_".repeat(6 - gradientHexInput.length) : ""
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
                 children: " "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
                 dimColor: true,
                 children: "Press Enter when done, ESC to go back"
               }, undefined, false, undefined, this)
@@ -73061,34 +73833,34 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
         ]
       }, undefined, true, undefined, this);
     }
-    return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
           bold: true,
           children: [
             "Select Gradient",
             widgetName ? ` - ${widgetName}` : ""
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             dimColor: true,
             children: "↑↓ to select, Enter to apply, ESC to cancel"
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
           marginTop: 1,
           flexDirection: "column",
           children: [
-            GRADIENT_PRESET_NAMES.map((name, idx) => /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+            GRADIENT_PRESET_NAMES.map((name, idx) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
               children: [
                 idx === gradientIndex ? "▶ " : "  ",
                 applyColors(name, `gradient:${name}`, undefined, idx === gradientIndex, level)
               ]
             }, name, true, undefined, this)),
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
               children: [
                 gradientIndex === GRADIENT_PRESET_NAMES.length ? "▶ " : "  ",
                 "Custom (enter two hex stops)"
@@ -73100,36 +73872,36 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
     }, undefined, true, undefined, this);
   }
   if (showClearConfirm) {
-    return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
           bold: true,
           color: "yellow",
           children: "⚠ Confirm Clear All Colors"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
           marginTop: 1,
           flexDirection: "column",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
               children: "This will reset all colors for all widgets to their defaults."
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
               color: "red",
               children: "This action cannot be undone!"
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
           marginTop: 2,
-          children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: "Continue?"
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(ConfirmDialog, {
+          children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(ConfirmDialog, {
             inline: true,
             onConfirm: () => {
               const newItems = clearAllWidgetStyling(widgets);
@@ -73147,12 +73919,12 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
   const hasGlobalFgOverride = !!settings.overrideForegroundColor;
   const hasGlobalBgOverride = !!settings.overrideBackgroundColor && !powerlineEnabled;
   const globalOverrideMessage = hasGlobalFgOverride && hasGlobalBgOverride ? "⚠ Global override for FG and BG active" : hasGlobalFgOverride ? "⚠ Global override for FG active" : hasGlobalBgOverride ? "⚠ Global override for BG active" : null;
-  return /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             bold: true,
             children: [
               "Configure Colors",
@@ -73160,7 +73932,7 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
               editingBackground && source_default.yellow(" [Background Mode]")
             ]
           }, undefined, true, undefined, this),
-          globalOverrideMessage && /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          globalOverrideMessage && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             color: "yellow",
             dimColor: true,
             children: [
@@ -73170,79 +73942,79 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      hexInputMode ? /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+      hexInputMode ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: "Enter 6-digit hex color code (without #):"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: [
               "#",
               hexInput,
-              /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
                 dimColor: true,
                 children: hexInput.length < 6 ? "_".repeat(6 - hexInput.length) : ""
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: " "
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             dimColor: true,
             children: "Press Enter when done, ESC to cancel"
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : ansi256InputMode ? /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+      }, undefined, true, undefined, this) : ansi256InputMode ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: "Enter ANSI 256 color code (0-255):"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: [
               ansi256Input,
-              /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
                 dimColor: true,
                 children: ansi256Input.length === 0 ? "___" : ansi256Input.length === 1 ? "__" : ansi256Input.length === 2 ? "_" : ""
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: " "
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             dimColor: true,
             children: "Press Enter when done, ESC to cancel"
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(jsx_dev_runtime13.Fragment, {
+      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(jsx_dev_runtime14.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             dimColor: true,
             children: [
               "↑↓ to select, ←→ to cycle",
               " ",
               editingBackground ? "background" : "foreground",
-              ", (f) to toggle bg/fg, (b)old,",
+              ", (f) to toggle bg/fg, (b)old, (d)im,",
               settings.colorLevel === 3 ? " (h)ex," : settings.colorLevel === 2 ? " (a)nsi256," : "",
               !editingBackground && settings.colorLevel >= 2 ? " (g)radient," : "",
-              !editingBackground && selectedWidget && getWidget(selectedWidget.type)?.getFillRatio ? " (d)ynamic," : "",
+              !editingBackground && selectedWidget && getWidget(selectedWidget.type)?.getFillRatio ? " (y) dynamic," : "",
               " ",
               "(r)eset, (c)lear all, ESC to go back"
             ]
           }, undefined, true, undefined, this),
-          !settings.powerline.enabled && !settings.defaultSeparator && /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          !settings.powerline.enabled && !settings.defaultSeparator && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             dimColor: true,
             children: [
               "(s)how separators:",
               showSeparators ? source_default.green("ON") : source_default.gray("OFF")
             ]
           }, undefined, true, undefined, this),
-          selectedWidget ? /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+          selectedWidget ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
               children: [
                 "Current",
                 " ",
@@ -73253,23 +74025,22 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
                 "):",
                 " ",
                 colorDisplay,
-                selectedWidget.bold && source_default.bold(" [BOLD]"),
-                selectedWidget.dynamic && source_default.dim(" [DYN]")
+                styleIndicators && ` ${styleIndicators}`
               ]
             }, undefined, true, undefined, this)
-          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
               children: " "
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
         marginTop: 1,
-        children: hexInputMode || ansi256InputMode ? /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+        children: hexInputMode || ansi256InputMode ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
           flexDirection: "column",
-          children: menuItems.map((item) => /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          children: menuItems.map((item) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             color: item.value === highlightedItemId ? "cyan" : "white",
             bold: item.value === highlightedItemId,
             children: [
@@ -73277,28 +74048,28 @@ var ColorMenu = ({ widgets, lineIndex, settings, onUpdate, onBack }) => {
               item.label
             ]
           }, item.value, true, undefined, this))
-        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(SelectInput_default, {
+        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(SelectInput_default, {
           items: menuItems,
           onSelect: handleSelect,
           onHighlight: handleHighlight,
           initialIndex: Math.max(0, menuItems.findIndex((item) => item.value === highlightedItemId)),
-          indicatorComponent: ({ isSelected }) => /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          indicatorComponent: ({ isSelected }) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: isSelected ? "▶" : "  "
           }, undefined, false, undefined, this),
-          itemComponent: ({ isSelected, label }) => /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          itemComponent: ({ isSelected, label }) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             children: ` ${label}`
           }, undefined, false, undefined, this)
         }, `${showSeparators}-${highlightedItemId}`, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             color: "yellow",
             children: "⚠ VSCode Users: "
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime13.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
             dimColor: true,
             wrap: "wrap",
             children: 'If colors appear incorrect in the VSCode integrated terminal, the "Terminal › Integrated: Minimum Contrast Ratio" (`terminal.integrated.minimumContrastRatio`) setting is forcing a minimum contrast between foreground and background colors. You can adjust this setting to 1 to disable the contrast enforcement, or use a standalone terminal for accurate colors.'
@@ -73314,22 +74085,22 @@ init_colors();
 init_gradient();
 init_input_guards();
 await init_build2();
-var import_react41 = __toESM(require_react(), 1);
-var jsx_dev_runtime14 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react42 = __toESM(require_react(), 1);
+var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
 var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
-  const [editingPadding, setEditingPadding] = import_react41.useState(false);
-  const [editingSeparator, setEditingSeparator] = import_react41.useState(false);
-  const [confirmingSeparator, setConfirmingSeparator] = import_react41.useState(false);
-  const [paddingInput, setPaddingInput] = import_react41.useState(settings.defaultPadding ?? "");
-  const [separatorInput, setSeparatorInput] = import_react41.useState(settings.defaultSeparator ?? "");
-  const [inheritColors, setInheritColors] = import_react41.useState(settings.inheritSeparatorColors);
-  const [globalBold, setGlobalBold] = import_react41.useState(settings.globalBold);
-  const [minimalistMode, setMinimalistMode] = import_react41.useState(settings.minimalistMode);
-  const [gradientMode, setGradientMode] = import_react41.useState(false);
-  const [gradientIndex, setGradientIndex] = import_react41.useState(0);
-  const [gradientCustomStep, setGradientCustomStep] = import_react41.useState(null);
-  const [gradientStartHex, setGradientStartHex] = import_react41.useState("");
-  const [gradientHexInput, setGradientHexInput] = import_react41.useState("");
+  const [editingPadding, setEditingPadding] = import_react42.useState(false);
+  const [editingSeparator, setEditingSeparator] = import_react42.useState(false);
+  const [confirmingSeparator, setConfirmingSeparator] = import_react42.useState(false);
+  const [paddingInput, setPaddingInput] = import_react42.useState(settings.defaultPadding ?? "");
+  const [separatorInput, setSeparatorInput] = import_react42.useState(settings.defaultSeparator ?? "");
+  const [inheritColors, setInheritColors] = import_react42.useState(settings.inheritSeparatorColors);
+  const [globalBold, setGlobalBold] = import_react42.useState(settings.globalBold);
+  const [minimalistMode, setMinimalistMode] = import_react42.useState(settings.minimalistMode);
+  const [gradientMode, setGradientMode] = import_react42.useState(false);
+  const [gradientIndex, setGradientIndex] = import_react42.useState(0);
+  const [gradientCustomStep, setGradientCustomStep] = import_react42.useState(null);
+  const [gradientStartHex, setGradientStartHex] = import_react42.useState("");
+  const [gradientHexInput, setGradientHexInput] = import_react42.useState("");
   const isPowerlineEnabled = settings.powerline.enabled;
   const hasManualSeparators = settings.lines.some((line) => line.some((item) => item.type === "separator"));
   const bgColors = ["none", ...COLOR_MAP.filter((c) => c.isBackground).map((c) => c.name)];
@@ -73502,41 +74273,41 @@ var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
   if (gradientMode) {
     const level = getColorLevelString(settings.colorLevel);
     if (gradientCustomStep) {
-      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
             bold: true,
             children: "Custom Gradient - Override FG Color"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             marginTop: 1,
             flexDirection: "column",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: gradientCustomStep === "start" ? "Enter START hex color (without #):" : "Enter END hex color (without #):"
               }, undefined, false, undefined, this),
-              gradientCustomStep === "end" && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              gradientCustomStep === "end" && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 children: [
                   "Start: #",
                   gradientStartHex
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: [
                   "#",
                   gradientHexInput,
-                  /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                     dimColor: true,
                     children: gradientHexInput.length < 6 ? "_".repeat(6 - gradientHexInput.length) : ""
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: " "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 children: "Press Enter when done, ESC to go back"
               }, undefined, false, undefined, this)
@@ -73545,31 +74316,31 @@ var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
         ]
       }, undefined, true, undefined, this);
     }
-    return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
           bold: true,
           children: "Select Gradient - Override FG Color"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
             dimColor: true,
             children: "↑↓ to select, Enter to apply, ESC to cancel"
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
           marginTop: 1,
           flexDirection: "column",
           children: [
-            GRADIENT_PRESET_NAMES.map((name, idx) => /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+            GRADIENT_PRESET_NAMES.map((name, idx) => /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
               children: [
                 idx === gradientIndex ? "▶ " : "  ",
                 applyColors(name, `gradient:${name}`, undefined, idx === gradientIndex, level)
               ]
             }, name, true, undefined, this)),
-            /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
               children: [
                 gradientIndex === GRADIENT_PRESET_NAMES.length ? "▶ " : "  ",
                 "Custom (enter two hex stops)"
@@ -73580,95 +74351,95 @@ var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
         bold: true,
         children: "Global Overrides"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
         dimColor: true,
         children: "Configure automatic padding and separators between widgets"
       }, undefined, false, undefined, this),
-      isPowerlineEnabled && /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+      isPowerlineEnabled && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
           color: "yellow",
           children: "⚠ Some options are disabled while Powerline mode is active"
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
         marginTop: 1
       }, undefined, false, undefined, this),
-      editingPadding ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+      editingPadding ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "Enter default padding (applied to left and right of each widget): "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 color: "cyan",
                 children: paddingInput ? `"${paddingInput}"` : "(empty)"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
             dimColor: true,
             children: "Press Enter to save, ESC to cancel"
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : editingSeparator ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+      }, undefined, true, undefined, this) : editingSeparator ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "Enter default separator (placed between widgets): "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 color: "cyan",
                 children: separatorInput ? `"${separatorInput}"` : "(empty - no separator will be added)"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
             dimColor: true,
             children: "Press Enter to save, ESC to cancel"
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : confirmingSeparator ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+      }, undefined, true, undefined, this) : confirmingSeparator ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             marginBottom: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
               color: "yellow",
               children: "⚠ Warning: Setting a default separator will remove all existing manual separators from your status lines."
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "New default separator: "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 color: "cyan",
                 children: separatorInput ? `"${separatorInput}"` : "(empty)"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
               children: "Do you want to continue? "
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(ConfirmDialog, {
+            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(ConfirmDialog, {
               inline: true,
               onConfirm: () => {
                 const updatedSettings = {
@@ -73686,62 +74457,62 @@ var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(jsx_dev_runtime14.Fragment, {
+      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(jsx_dev_runtime15.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "      Global Bold: "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 color: globalBold ? "green" : "red",
                 children: globalBold ? "✓ Enabled" : "✗ Disabled"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 children: " - Press (o) to toggle"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "  Minimalist Mode: "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 color: minimalistMode ? "green" : "red",
                 children: minimalistMode ? "✓ Enabled" : "✗ Disabled"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 children: " - Press (m) to toggle"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "  Default Padding: "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 color: "cyan",
                 children: settings.defaultPadding ? `"${settings.defaultPadding}"` : "(none)"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 children: " - Press (p) to edit"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "Override FG Color: "
               }, undefined, false, undefined, this),
               (() => {
                 const fgColor = settings.overrideForegroundColor ?? "none";
                 if (fgColor === "none") {
-                  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                     color: "gray",
                     children: "(none)"
                   }, undefined, false, undefined, this);
@@ -73749,38 +74520,38 @@ var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
                   const body = fgColor.substring(9);
                   const displayName = GRADIENT_PRESET_NAMES.includes(body.toLowerCase()) ? `Gradient: ${body.toLowerCase()}` : `Gradient: ${body}`;
                   const level = getColorLevelString(settings.colorLevel);
-                  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                     children: applyColors(displayName, fgColor, undefined, false, level)
                   }, undefined, false, undefined, this);
                 } else {
                   const displayName = getColorDisplayName(fgColor);
                   const fgChalk = getChalkColor(fgColor, "ansi16", false);
                   const display = fgChalk ? fgChalk(displayName) : displayName;
-                  return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                     children: display
                   }, undefined, false, undefined, this);
                 }
               })(),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 children: " - (f) cycle, (g) gradient, (x) clear"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "Override BG Color: "
               }, undefined, false, undefined, this),
-              isPowerlineEnabled ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              isPowerlineEnabled ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 children: "[disabled - Powerline active]"
-              }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(jsx_dev_runtime14.Fragment, {
+              }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(jsx_dev_runtime15.Fragment, {
                 children: [
                   (() => {
                     const bgColor = settings.overrideBackgroundColor ?? "none";
                     if (bgColor === "none") {
-                      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                         color: "gray",
                         children: "(none)"
                       }, undefined, false, undefined, this);
@@ -73788,12 +74559,12 @@ var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
                       const displayName = getColorDisplayName(bgColor);
                       const bgChalk = getChalkColor(bgColor, "ansi16", true);
                       const display = bgChalk ? bgChalk(` ${displayName} `) : displayName;
-                      return /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                      return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                         children: display
                       }, undefined, false, undefined, this);
                     }
                   })(),
-                  /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                     dimColor: true,
                     children: " - (b) cycle, (c) clear"
                   }, undefined, false, undefined, this)
@@ -73801,21 +74572,21 @@ var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "   Inherit Colors: "
               }, undefined, false, undefined, this),
-              isPowerlineEnabled ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              isPowerlineEnabled ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 children: "[disabled - Powerline active]"
-              }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(jsx_dev_runtime14.Fragment, {
+              }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(jsx_dev_runtime15.Fragment, {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                     color: inheritColors ? "green" : "red",
                     children: inheritColors ? "✓ Enabled" : "✗ Disabled"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                     dimColor: true,
                     children: " - Press (i) to toggle"
                   }, undefined, false, undefined, this)
@@ -73823,21 +74594,21 @@ var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 children: "Default Separator: "
               }, undefined, false, undefined, this),
-              isPowerlineEnabled ? /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              isPowerlineEnabled ? /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 children: "[disabled - Powerline active]"
-              }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(jsx_dev_runtime14.Fragment, {
+              }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(jsx_dev_runtime15.Fragment, {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                     color: "cyan",
                     children: settings.defaultSeparator ? `"${settings.defaultSeparator}"` : "(none)"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                     dimColor: true,
                     children: " - Press (s) to edit"
                   }, undefined, false, undefined, this)
@@ -73845,38 +74616,38 @@ var GlobalOverridesMenu = ({ settings, onUpdate, onBack }) => {
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             marginTop: 2,
-            children: /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
               dimColor: true,
               children: "Press ESC to go back"
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
             marginTop: 1,
             flexDirection: "column",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 wrap: "wrap",
                 children: "Note: These settings are applied during rendering and don't add widgets to your widget list."
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 wrap: "wrap",
                 children: "• Inherit colors: Separators will use colors from the preceding widget"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 wrap: "wrap",
                 children: "• Global Bold: Makes all text bold regardless of individual settings"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 wrap: "wrap",
                 children: "• Minimalist Mode: Strips decorative prefixes and labels from widgets"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime14.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
                 dimColor: true,
                 wrap: "wrap",
                 children: "• Override colors: All widgets will use these colors instead of their configured colors"
@@ -73893,8 +74664,8 @@ await __promiseAll([
   init_build2(),
   init_claude_settings()
 ]);
-var import_react42 = __toESM(require_react(), 1);
-var jsx_dev_runtime15 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react43 = __toESM(require_react(), 1);
+var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
 var AUTO_UPDATE_DESCRIPTION = "Runs `@latest` through npx/bunx. Stays current automatically, with a small startup cost when the package runner checks or resolves the package. Because it follows the latest published package, pinned install is available if you prefer explicit updates.";
 function getPinnedDescription(currentVersion) {
   return `Installs \`ccstatusline@${currentVersion}\` globally and Claude Code runs \`ccstatusline\`. Fast on each render because Claude Code runs the installed ccstatusline binary directly. The version changes only when you update the global install.`;
@@ -73978,8 +74749,8 @@ var InstallMenu = ({
   onCancel,
   initialPackageSelection = 0
 }) => {
-  const [step, setStep] = import_react42.useState("style");
-  const [updateStyle, setUpdateStyle] = import_react42.useState("pinned");
+  const [step, setStep] = import_react43.useState("style");
+  const [updateStyle, setUpdateStyle] = import_react43.useState("pinned");
   use_input_default((_, key) => {
     if (key.escape) {
       if (step === "manager") {
@@ -73989,16 +74760,16 @@ var InstallMenu = ({
       onCancel();
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
         bold: true,
         children: "Install ccstatusline to Claude Code"
       }, undefined, false, undefined, this),
-      existingStatusLine && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
+      existingStatusLine && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
         marginBottom: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
           color: "yellow",
           children: [
             '⚠ Current status line: "',
@@ -74007,15 +74778,15 @@ var InstallMenu = ({
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      step === "style" && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(jsx_dev_runtime15.Fragment, {
+      step === "style" && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(jsx_dev_runtime16.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
-            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+            children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
               dimColor: true,
               children: "Select update style:"
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(List, {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(List, {
             color: "blue",
             marginTop: 1,
             items: getStyleItems(currentVersion),
@@ -74032,15 +74803,15 @@ var InstallMenu = ({
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      step === "manager" && /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(jsx_dev_runtime15.Fragment, {
+      step === "manager" && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(jsx_dev_runtime16.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
-            children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+            children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
               dimColor: true,
               children: "Select package manager:"
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(List, {
+          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(List, {
             color: "blue",
             marginTop: 1,
             items: getManagerItems(updateStyle, commandAvailability, currentVersion),
@@ -74056,9 +74827,9 @@ var InstallMenu = ({
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
         marginTop: 2,
-        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
           dimColor: true,
           children: [
             "The selected command will be written to",
@@ -74067,9 +74838,9 @@ var InstallMenu = ({
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime15.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
           dimColor: true,
           children: "Press Enter to select, ESC to go back"
         }, undefined, false, undefined, this)
@@ -74084,7 +74855,7 @@ await __promiseAll([
   init_build2(),
   init_widgets2()
 ]);
-var import_react43 = __toESM(require_react(), 1);
+var import_react44 = __toESM(require_react(), 1);
 
 // src/tui/components/items-editor/input-handlers.ts
 await init_widgets2();
@@ -74298,6 +75069,7 @@ function handleNormalInputMode({
   key,
   widgets,
   selectedIndex,
+  canExcludeAlign = false,
   separatorChars,
   onBack,
   onUpdate,
@@ -74394,6 +75166,18 @@ function handleNormalInputMode({
       }
       onUpdate(newWidgets);
     }
+  } else if (input === "x" && widgets.length > 0) {
+    const currentWidget = widgets[selectedIndex];
+    if (canExcludeAlign && currentWidget && currentWidget.type !== "separator" && currentWidget.type !== "flex-separator") {
+      const newWidgets = [...widgets];
+      if (currentWidget.excludeFromAutoAlign) {
+        const { excludeFromAutoAlign, ...rest2 } = currentWidget;
+        newWidgets[selectedIndex] = rest2;
+      } else {
+        newWidgets[selectedIndex] = { ...currentWidget, excludeFromAutoAlign: true };
+      }
+      onUpdate(newWidgets);
+    }
   } else if (key.escape) {
     onBack();
   } else if (widgets.length > 0) {
@@ -74424,13 +75208,19 @@ function handleNormalInputMode({
 }
 
 // src/tui/components/ItemsEditor.tsx
-var jsx_dev_runtime16 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
+function isMergedIntoPreviousWidget(widgets, index) {
+  if (index <= 0) {
+    return false;
+  }
+  return Boolean(widgets[index - 1]?.merge);
+}
 var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
-  const [selectedIndex, setSelectedIndex] = import_react43.useState(0);
-  const [moveMode, setMoveMode] = import_react43.useState(false);
-  const [customEditorWidget, setCustomEditorWidget] = import_react43.useState(null);
-  const [widgetPicker, setWidgetPicker] = import_react43.useState(null);
-  const [showClearConfirm, setShowClearConfirm] = import_react43.useState(false);
+  const [selectedIndex, setSelectedIndex] = import_react44.useState(0);
+  const [moveMode, setMoveMode] = import_react44.useState(false);
+  const [customEditorWidget, setCustomEditorWidget] = import_react44.useState(null);
+  const [widgetPicker, setWidgetPicker] = import_react44.useState(null);
+  const [showClearConfirm, setShowClearConfirm] = import_react44.useState(false);
   const separatorChars = ["|", "-", ",", " "];
   const widgetCatalog = getWidgetCatalog(settings);
   const widgetCategories = ["All", ...getWidgetCatalogCategories(widgetCatalog)];
@@ -74506,6 +75296,23 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
     }
     setWidgetPicker(null);
   };
+  const currentWidget = widgets[selectedIndex];
+  const isSeparator = currentWidget?.type === "separator";
+  const isFlexSeparator = currentWidget?.type === "flex-separator";
+  let canToggleRaw = false;
+  let customKeybinds = [];
+  if (currentWidget && !isSeparator && !isFlexSeparator) {
+    const widgetImpl = getWidget(currentWidget.type);
+    if (widgetImpl) {
+      canToggleRaw = widgetImpl.supportsRawValue();
+      customKeybinds = getCustomKeybindsForWidget(widgetImpl, currentWidget);
+    } else {
+      canToggleRaw = false;
+    }
+  }
+  const canMerge = currentWidget && selectedIndex < widgets.length - 1 && !isSeparator && !isFlexSeparator;
+  const canExcludeAlign = Boolean(currentWidget) && !isSeparator && !isFlexSeparator && settings.powerline.enabled && settings.powerline.autoAlign && !isMergedIntoPreviousWidget(widgets, selectedIndex);
+  const hasWidgets = widgets.length > 0;
   use_input_default((input, key) => {
     if (customEditorWidget) {
       return;
@@ -74541,6 +75348,7 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
       key,
       widgets,
       selectedIndex,
+      canExcludeAlign,
       separatorChars,
       onBack,
       onUpdate,
@@ -74577,22 +75385,6 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
   const selectedTopLevelSearchEntry = widgetPicker ? topLevelSearchEntries.find((entry) => entry.type === widgetPicker.selectedType) ?? topLevelSearchEntries[0] : null;
   const pickerEntries = widgetPicker ? filterWidgetCatalog(widgetCatalog, selectedPickerCategory ?? "All", widgetPicker.widgetQuery) : [];
   const selectedPickerEntry = widgetPicker ? pickerEntries.find((entry) => entry.type === widgetPicker.selectedType) ?? pickerEntries[0] : null;
-  const currentWidget = widgets[selectedIndex];
-  const isSeparator = currentWidget?.type === "separator";
-  const isFlexSeparator = currentWidget?.type === "flex-separator";
-  let canToggleRaw = false;
-  let customKeybinds = [];
-  if (currentWidget && !isSeparator && !isFlexSeparator) {
-    const widgetImpl = getWidget(currentWidget.type);
-    if (widgetImpl) {
-      canToggleRaw = widgetImpl.supportsRawValue();
-      customKeybinds = getCustomKeybindsForWidget(widgetImpl, currentWidget);
-    } else {
-      canToggleRaw = false;
-    }
-  }
-  const canMerge = currentWidget && selectedIndex < widgets.length - 1 && !isSeparator && !isFlexSeparator;
-  const hasWidgets = widgets.length > 0;
   let helpText = hasWidgets ? "↑↓ select, ←→ open type picker" : "(a)dd via picker, (i)nsert via picker";
   if (isSeparator) {
     helpText += ", Space edit separator";
@@ -74606,6 +75398,9 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
   if (canMerge) {
     helpText += ", (m)erge";
   }
+  if (canExcludeAlign) {
+    helpText += ", e(x)clude align";
+  }
   helpText += ", ESC back";
   const customKeybindsText = customKeybinds.map((kb) => kb.label).join(", ");
   const pickerActionLabel = widgetPicker?.action === "add" ? "Add Widget" : widgetPicker?.action === "insert" ? "Insert Widget" : "Change Widget Type";
@@ -74618,19 +75413,19 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
     });
   }
   if (showClearConfirm) {
-    return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
           bold: true,
           color: "yellow",
           children: "⚠ Confirm Clear Line"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
           marginTop: 1,
           flexDirection: "column",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
               children: [
                 "This will remove all widgets from Line",
                 " ",
@@ -74638,21 +75433,21 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
                 "."
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
               color: "red",
               children: "This action cannot be undone!"
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
           marginTop: 2,
-          children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
             children: "Continue?"
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(ConfirmDialog, {
+          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ConfirmDialog, {
             inline: true,
             onConfirm: () => {
               onUpdate([]);
@@ -74667,12 +75462,12 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
             bold: true,
             children: [
               "Edit Line",
@@ -74681,67 +75476,67 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
               " "
             ]
           }, undefined, true, undefined, this),
-          moveMode && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+          moveMode && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
             color: "blue",
             children: "[MOVE MODE]"
           }, undefined, false, undefined, this),
-          widgetPicker && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+          widgetPicker && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
             color: "cyan",
             children: `[${pickerActionLabel.toUpperCase()}]`
           }, undefined, false, undefined, this),
-          (settings.powerline.enabled || Boolean(settings.defaultSeparator)) && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+          (settings.powerline.enabled || Boolean(settings.defaultSeparator)) && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
             marginLeft: 2,
-            children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
               color: "yellow",
               children: [
                 "⚠",
                 " ",
-                settings.powerline.enabled ? "Powerline mode active: separators controlled by powerline settings" : "Default separator active: manual separators disabled"
+                settings.powerline.enabled ? "Powerline mode active: manual separators disabled" : "Default separator active: manual separators disabled"
               ]
             }, undefined, true, undefined, this)
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      moveMode ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+      moveMode ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
         flexDirection: "column",
         marginBottom: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
           dimColor: true,
           children: "↑↓ to move widget, ESC or Enter to exit move mode"
         }, undefined, false, undefined, this)
-      }, undefined, false, undefined, this) : widgetPicker ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+      }, undefined, false, undefined, this) : widgetPicker ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
         flexDirection: "column",
-        children: widgetPicker.level === "category" ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(jsx_dev_runtime16.Fragment, {
+        children: widgetPicker.level === "category" ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(jsx_dev_runtime17.Fragment, {
           children: [
-            widgetPicker.categoryQuery.trim().length > 0 ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+            widgetPicker.categoryQuery.trim().length > 0 ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
               dimColor: true,
               children: "↑↓ select widget match, Enter apply, ESC clear/cancel"
-            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+            }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
               dimColor: true,
               children: "↑↓ select category, type to search all widgets, Enter continue, ESC cancel"
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                   dimColor: true,
                   children: "Search: "
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                   color: "cyan",
                   children: widgetPicker.categoryQuery || "(none)"
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this)
           ]
-        }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(jsx_dev_runtime16.Fragment, {
+        }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(jsx_dev_runtime17.Fragment, {
           children: [
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
               dimColor: true,
               children: "↑↓ select widget, type to search widgets, Enter apply, ESC back"
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
               children: [
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                   dimColor: true,
                   children: [
                     "Category:",
@@ -74752,7 +75547,7 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
                     " "
                   ]
                 }, undefined, true, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                   color: "cyan",
                   children: widgetPicker.widgetQuery || "(none)"
                 }, undefined, false, undefined, this)
@@ -74760,59 +75555,59 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
             }, undefined, true, undefined, this)
           ]
         }, undefined, true, undefined, this)
-      }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+      }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
             dimColor: true,
             children: helpText
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
             dimColor: true,
             children: customKeybindsText || " "
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      hasFlexSeparator && !widthDetectionAvailable && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+      hasFlexSeparator && !widthDetectionAvailable && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
         marginTop: 1,
         children: [
-          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
             color: "yellow",
             children: "⚠ Note: Terminal width detection is currently unavailable in your environment."
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
             dimColor: true,
             children: "  Flex separators will act as normal separators until width detection is available."
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      widgetPicker && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+      widgetPicker && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
-        children: widgetPicker.level === "category" ? widgetPicker.categoryQuery.trim().length > 0 ? topLevelSearchEntries.length === 0 ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+        children: widgetPicker.level === "category" ? widgetPicker.categoryQuery.trim().length > 0 ? topLevelSearchEntries.length === 0 ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
           dimColor: true,
           children: "No widgets match the search."
-        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(jsx_dev_runtime16.Fragment, {
+        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(jsx_dev_runtime17.Fragment, {
           children: [
             topLevelSearchEntries.map((entry, index) => {
               const isSelected = entry.type === selectedTopLevelSearchEntry?.type;
               const segments = getMatchSegments(entry.displayName, widgetPicker.categoryQuery);
-              return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+              return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
                 flexDirection: "row",
                 flexWrap: "nowrap",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
                     width: 3,
-                    children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                    children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                       color: isSelected ? "green" : undefined,
                       children: isSelected ? "▶ " : "  "
                     }, undefined, false, undefined, this)
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     color: isSelected ? "green" : undefined,
                     children: `${index + 1}. `
                   }, undefined, false, undefined, this),
-                  segments.map((seg, i) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  segments.map((seg, i) => /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     color: isSelected ? "green" : seg.matched ? "yellowBright" : undefined,
                     bold: isSelected ? true : seg.matched,
                     children: seg.text
@@ -74820,73 +75615,73 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
                 ]
               }, entry.type, true, undefined, this);
             }),
-            selectedTopLevelSearchEntry && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+            selectedTopLevelSearchEntry && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
               marginTop: 1,
               paddingLeft: 2,
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                 dimColor: true,
                 children: selectedTopLevelSearchEntry.description
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this)
           ]
-        }, undefined, true, undefined, this) : pickerCategories.length === 0 ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+        }, undefined, true, undefined, this) : pickerCategories.length === 0 ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
           dimColor: true,
           children: "No categories available."
-        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(jsx_dev_runtime16.Fragment, {
+        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(jsx_dev_runtime17.Fragment, {
           children: [
             pickerCategories.map((category, index) => {
               const isSelected = category === selectedPickerCategory;
-              return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+              return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
                 flexDirection: "row",
                 flexWrap: "nowrap",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
                     width: 3,
-                    children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                    children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                       color: isSelected ? "green" : undefined,
                       children: isSelected ? "▶ " : "  "
                     }, undefined, false, undefined, this)
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     color: isSelected ? "green" : undefined,
                     children: `${index + 1}. ${category}`
                   }, undefined, false, undefined, this)
                 ]
               }, category, true, undefined, this);
             }),
-            selectedPickerCategory === "All" && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+            selectedPickerCategory === "All" && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
               marginTop: 1,
               paddingLeft: 2,
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                 dimColor: true,
                 children: "Search across all widget categories."
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this)
           ]
-        }, undefined, true, undefined, this) : pickerEntries.length === 0 ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+        }, undefined, true, undefined, this) : pickerEntries.length === 0 ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
           dimColor: true,
           children: "No widgets match the current category/search."
-        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(jsx_dev_runtime16.Fragment, {
+        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(jsx_dev_runtime17.Fragment, {
           children: [
             pickerEntries.map((entry, index) => {
               const isSelected = entry.type === selectedPickerEntry?.type;
               const segments = getMatchSegments(entry.displayName, widgetPicker.widgetQuery);
-              return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+              return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
                 flexDirection: "row",
                 flexWrap: "nowrap",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
                     width: 3,
-                    children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                    children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                       color: isSelected ? "green" : undefined,
                       children: isSelected ? "▶ " : "  "
                     }, undefined, false, undefined, this)
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     color: isSelected ? "green" : undefined,
                     children: `${index + 1}. `
                   }, undefined, false, undefined, this),
-                  segments.map((seg, i) => /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  segments.map((seg, i) => /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     color: isSelected ? "green" : seg.matched ? "yellowBright" : undefined,
                     bold: seg.matched,
                     children: seg.text
@@ -74894,10 +75689,10 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
                 ]
               }, entry.type, true, undefined, this);
             }),
-            selectedPickerEntry && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+            selectedPickerEntry && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
               marginTop: 1,
               paddingLeft: 2,
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                 dimColor: true,
                 children: selectedPickerEntry.description
               }, undefined, false, undefined, this)
@@ -74905,60 +75700,64 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      !widgetPicker && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+      !widgetPicker && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
-        children: widgets.length === 0 ? /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+        children: widgets.length === 0 ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
           dimColor: true,
           children: "No widgets. Press 'a' to add one."
-        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(jsx_dev_runtime16.Fragment, {
+        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(jsx_dev_runtime17.Fragment, {
           children: [
             widgets.map((widget, index) => {
               const isSelected = index === selectedIndex;
               const widgetImpl = widget.type !== "separator" && widget.type !== "flex-separator" ? getWidget(widget.type) : null;
               const { displayText, modifierText } = widgetImpl?.getEditorDisplay(widget) ?? { displayText: getWidgetDisplay(widget) };
               const supportsRawValue = widgetImpl?.supportsRawValue() ?? false;
-              return /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+              return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
                 flexDirection: "row",
                 flexWrap: "nowrap",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
                     width: 3,
-                    children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                    children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                       color: isSelected ? moveMode ? "blue" : "green" : undefined,
                       children: isSelected ? moveMode ? "◆ " : "▶ " : "  "
                     }, undefined, false, undefined, this)
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     color: isSelected ? moveMode ? "blue" : "green" : undefined,
                     children: `${index + 1}. ${displayText || getWidgetDisplay(widget)}`
                   }, undefined, false, undefined, this),
-                  modifierText && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  modifierText && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     dimColor: true,
                     children: [
                       " ",
                       modifierText
                     ]
                   }, undefined, true, undefined, this),
-                  supportsRawValue && widget.rawValue && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  supportsRawValue && widget.rawValue && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     dimColor: true,
                     children: " (raw value)"
                   }, undefined, false, undefined, this),
-                  widget.merge === true && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  widget.merge === true && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     dimColor: true,
                     children: " (merged→)"
                   }, undefined, false, undefined, this),
-                  widget.merge === "no-padding" && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+                  widget.merge === "no-padding" && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                     dimColor: true,
                     children: " (merged-no-pad→)"
+                  }, undefined, false, undefined, this),
+                  widget.excludeFromAutoAlign && settings.powerline.enabled && settings.powerline.autoAlign && !isMergedIntoPreviousWidget(widgets, index) && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+                    dimColor: true,
+                    children: " (no-align)"
                   }, undefined, false, undefined, this)
                 ]
               }, widget.id, true, undefined, this);
             }),
-            currentWidget && /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Box_default, {
+            currentWidget && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
               marginTop: 1,
               paddingLeft: 2,
-              children: /* @__PURE__ */ jsx_dev_runtime16.jsxDEV(Text, {
+              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
                 dimColor: true,
                 children: (() => {
                   if (currentWidget.type === "separator") {
@@ -74981,8 +75780,8 @@ var ItemsEditor = ({ widgets, onUpdate, onBack, lineNumber, settings }) => {
 // src/tui/components/LineSelector.tsx
 await init_build2();
 var import_pluralize = __toESM(require_pluralize(), 1);
-var import_react44 = __toESM(require_react(), 1);
-var jsx_dev_runtime17 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react45 = __toESM(require_react(), 1);
+var jsx_dev_runtime18 = __toESM(require_jsx_dev_runtime(), 1);
 var LineSelector = ({
   lines,
   onSelect,
@@ -74994,17 +75793,17 @@ var LineSelector = ({
   settings,
   allowEditing = false
 }) => {
-  const [selectedIndex, setSelectedIndex] = import_react44.useState(initialSelection);
-  const [showDeleteDialog, setShowDeleteDialog] = import_react44.useState(false);
-  const [moveMode, setMoveMode] = import_react44.useState(false);
-  const [localLines, setLocalLines] = import_react44.useState(lines);
-  import_react44.useEffect(() => {
+  const [selectedIndex, setSelectedIndex] = import_react45.useState(initialSelection);
+  const [showDeleteDialog, setShowDeleteDialog] = import_react45.useState(false);
+  const [moveMode, setMoveMode] = import_react45.useState(false);
+  const [localLines, setLocalLines] = import_react45.useState(lines);
+  import_react45.useEffect(() => {
     setLocalLines(lines);
   }, [lines]);
-  import_react44.useEffect(() => {
+  import_react45.useEffect(() => {
     setSelectedIndex(initialSelection);
   }, [initialSelection]);
-  const selectedLine = import_react44.useMemo(() => localLines[selectedIndex], [localLines, selectedIndex]);
+  const selectedLine = import_react45.useMemo(() => localLines[selectedIndex], [localLines, selectedIndex]);
   const appendLine = () => {
     const newLines = [...localLines, []];
     setLocalLines(newLines);
@@ -75081,16 +75880,16 @@ var LineSelector = ({
     }
   });
   if (isThemeManaged) {
-    return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
           bold: true,
           children: title ?? "Select Line"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
             color: "yellow",
             children: [
               "⚠ Colors are currently managed by the Powerline theme:",
@@ -75098,30 +75897,30 @@ var LineSelector = ({
             ]
           }, undefined, true, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
             dimColor: true,
             children: "To customize colors, either:"
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
           marginLeft: 2,
-          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
             dimColor: true,
             children: "• Change to 'Custom' theme in Powerline Configuration → Themes"
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
           marginLeft: 2,
-          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
             dimColor: true,
             children: "• Disable Powerline mode in Powerline Configuration"
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
           marginTop: 2,
-          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
             children: "Press any key to go back..."
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this)
@@ -75130,25 +75929,25 @@ var LineSelector = ({
   }
   if (showDeleteDialog && selectedLine) {
     const suffix = selectedLine.length > 0 ? import_pluralize.default("widget", selectedLine.length, true) : "empty";
-    return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
           flexDirection: "column",
           gap: 1,
           children: [
-            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
               bold: true,
-              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+              children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
                     children: [
                       "☰ Line",
                       selectedIndex + 1
                     ]
                   }, undefined, true, undefined, this),
                   " ",
-                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
                     dimColor: true,
                     children: [
                       "(",
@@ -75159,15 +75958,15 @@ var LineSelector = ({
                 ]
               }, undefined, true, undefined, this)
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
               bold: true,
               children: "Are you sure you want to delete line?"
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(ConfirmDialog, {
+          children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(ConfirmDialog, {
             inline: true,
             onConfirm: () => {
               deleteLine(selectedIndex);
@@ -75187,52 +75986,52 @@ var LineSelector = ({
     sublabel: `(${line.length > 0 ? import_pluralize.default("widget", line.length, true) : "empty"})`,
     value: index
   }));
-  return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(jsx_dev_runtime17.Fragment, {
-    children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(jsx_dev_runtime18.Fragment, {
+    children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
           children: [
-            /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
               bold: true,
               children: [
                 title ?? "Select Line to Edit",
                 " "
               ]
             }, undefined, true, undefined, this),
-            moveMode && /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+            moveMode && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
               color: "blue",
               children: "[MOVE MODE]"
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
           dimColor: true,
           children: "Choose which status line to configure"
         }, undefined, false, undefined, this),
-        moveMode ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+        moveMode ? /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
           dimColor: true,
           children: "↑↓ to move line, ESC or Enter to exit move mode"
-        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
           dimColor: true,
           children: allowEditing ? localLines.length > 1 ? "(a) to append new line, (d) to delete line, (m) to move line, ESC to go back" : "(a) to append new line, ESC to go back" : "ESC to go back"
         }, undefined, false, undefined, this),
-        moveMode ? /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
+        moveMode ? /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
           marginTop: 1,
           flexDirection: "column",
           children: localLines.map((line, index) => {
             const isSelected = selectedIndex === index;
             const suffix = line.length ? import_pluralize.default("widget", line.length, true) : "empty";
-            return /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Box_default, {
-              children: /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+            return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
+              children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
                 color: isSelected ? "blue" : undefined,
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
                     children: isSelected ? "◆  " : "   "
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+                      /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
                         children: [
                           "☰ Line",
                           " ",
@@ -75240,7 +76039,7 @@ var LineSelector = ({
                         ]
                       }, undefined, true, undefined, this),
                       " ",
-                      /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(Text, {
+                      /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
                         dimColor: !isSelected,
                         children: [
                           "(",
@@ -75254,7 +76053,7 @@ var LineSelector = ({
               }, undefined, true, undefined, this)
             }, index, false, undefined, this);
           })
-        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime17.jsxDEV(List, {
+        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(List, {
           marginTop: 1,
           items: lineItems,
           onSelect: (line) => {
@@ -75276,7 +76075,7 @@ var LineSelector = ({
 };
 // src/tui/components/MainMenu.tsx
 await init_build2();
-var jsx_dev_runtime18 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime19 = __toESM(require_jsx_dev_runtime(), 1);
 function usesManageInstallation(installation) {
   return installation?.method === "pinned" || installation?.method === "self-managed";
 }
@@ -75397,21 +76196,21 @@ var MainMenu = ({
 }) => {
   const menuItems = buildMainMenuItems(isClaudeInstalled, hasChanges, installation);
   const showTruncationWarning = previewIsTruncated && settings?.flexMode === "full-minus-40";
-  return /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      showTruncationWarning && /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Box_default, {
+      showTruncationWarning && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Box_default, {
         marginBottom: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Text, {
           color: "yellow",
           children: "⚠ Some lines are truncated, see Terminal Options → Terminal Width for info"
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Text, {
         bold: true,
         children: "Main Menu"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime18.jsxDEV(List, {
+      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(List, {
         items: menuItems,
         marginTop: 1,
         onSelect: (value, index) => {
@@ -75427,7 +76226,7 @@ var MainMenu = ({
 };
 // src/tui/components/ManageInstallationMenu.tsx
 await init_build2();
-var jsx_dev_runtime19 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime20 = __toESM(require_jsx_dev_runtime(), 1);
 function getInstallationLabel(installation) {
   if (installation.method === "pinned") {
     const version2 = installation.installedVersion ? ` ${installation.installedVersion}` : "";
@@ -75506,16 +76305,16 @@ var ManageInstallationMenu = ({
       onBack();
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
         bold: true,
         children: "Manage Installation"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
           children: [
             "Current:",
             " ",
@@ -75523,21 +76322,21 @@ var ManageInstallationMenu = ({
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      activeCommandLabel && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Box_default, {
-        children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Text, {
+      activeCommandLabel && /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
+        children: /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
           dimColor: true,
           children: activeCommandLabel
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      activeCommand?.warning && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Box_default, {
+      activeCommand?.warning && /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
           color: "yellow",
           wrap: "wrap",
           children: activeCommand.warning
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(List, {
+      /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(List, {
         marginTop: 1,
         items: buildManageInstallationItems(),
         onSelect: (value) => {
@@ -75564,28 +76363,28 @@ var UninstallMenu = ({
       onBack();
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
         bold: true,
         children: "Uninstall ccstatusline"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
           dimColor: true,
           children: "Choose what to remove from this machine."
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      detectedManagers.length === 0 && /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Box_default, {
+      detectedManagers.length === 0 && /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
           dimColor: true,
           children: "No global npm or bun ccstatusline package was detected."
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime19.jsxDEV(List, {
+      /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(List, {
         marginTop: 1,
         items,
         onSelect: (value) => {
@@ -75602,7 +76401,7 @@ var UninstallMenu = ({
 };
 // src/tui/components/PowerlineSetup.tsx
 await init_build2();
-var import_react47 = __toESM(require_react(), 1);
+var import_react48 = __toESM(require_react(), 1);
 import * as os13 from "os";
 
 // src/utils/powerline-settings.ts
@@ -75615,7 +76414,7 @@ function resolveEnabledPowerlineTheme(theme) {
 }
 function buildEnabledPowerlineSettings(settings, removeManualSeparators) {
   const powerlineConfig = settings.powerline;
-  const lines = removeManualSeparators ? settings.lines.map((line) => line.filter((item) => item.type !== "separator" && item.type !== "flex-separator")) : settings.lines;
+  const lines = removeManualSeparators ? settings.lines.map((line) => line.filter((item) => item.type !== "separator")) : settings.lines;
   return {
     ...settings,
     powerline: {
@@ -75633,8 +76432,8 @@ function buildEnabledPowerlineSettings(settings, removeManualSeparators) {
 // src/tui/components/PowerlineSeparatorEditor.tsx
 init_input_guards();
 await init_build2();
-var import_react45 = __toESM(require_react(), 1);
-var jsx_dev_runtime20 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react46 = __toESM(require_react(), 1);
+var jsx_dev_runtime21 = __toESM(require_jsx_dev_runtime(), 1);
 var PowerlineSeparatorEditor = ({
   settings,
   mode,
@@ -75654,10 +76453,10 @@ var PowerlineSeparatorEditor = ({
   };
   const separators = getItems();
   const invertBgs = mode === "separator" ? powerlineConfig.separatorInvertBackground : [];
-  const [selectedIndex, setSelectedIndex] = import_react45.useState(0);
-  const [hexInputMode, setHexInputMode] = import_react45.useState(false);
-  const [hexInput, setHexInput] = import_react45.useState("");
-  const [cursorPos, setCursorPos] = import_react45.useState(0);
+  const [selectedIndex, setSelectedIndex] = import_react46.useState(0);
+  const [hexInputMode, setHexInputMode] = import_react46.useState(false);
+  const [hexInput, setHexInput] = import_react46.useState("");
+  const [cursorPos, setCursorPos] = import_react46.useState(0);
   const getPresets = () => {
     if (mode === "separator") {
       return [
@@ -75849,18 +76648,18 @@ var PowerlineSeparatorEditor = ({
     }
   };
   const canDelete = mode !== "separator" || separators.length > 1;
-  return /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
         bold: true,
         children: getTitle()
       }, undefined, false, undefined, this),
-      hexInputMode ? /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
+      hexInputMode ? /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
         marginTop: 2,
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
             children: [
               "Enter hex code (4-6 digits) for",
               " ",
@@ -75869,51 +76668,51 @@ var PowerlineSeparatorEditor = ({
               ":"
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
             children: [
               "U+",
               hexInput.slice(0, cursorPos),
-              /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
                 backgroundColor: "gray",
                 color: "black",
                 children: hexInput[cursorPos] ?? "_"
               }, undefined, false, undefined, this),
               hexInput.slice(cursorPos + 1),
-              hexInput.length < 6 && hexInput.length === cursorPos && /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+              hexInput.length < 6 && hexInput.length === cursorPos && /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
                 dimColor: true,
                 children: "_".repeat(6 - hexInput.length - 1)
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
             dimColor: true,
             children: "Enter 4-6 hex digits (0-9, A-F) for a Unicode code point, then press Enter. ESC to cancel."
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
             dimColor: true,
             children: "Examples: E0B0 (powerline), 1F984 (\uD83E\uDD84), 2764 (❤)"
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(jsx_dev_runtime20.Fragment, {
+      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(jsx_dev_runtime21.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
-            children: /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
+            children: /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
               dimColor: true,
               children: `↑↓ select, ← → cycle, (a)dd, (i)nsert${canDelete ? ", (d)elete" : ""}, (c)lear, (h)ex${mode === "separator" ? ", (t)oggle invert" : ""}, ESC back`
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
             marginTop: 2,
             flexDirection: "column",
-            children: separators.length > 0 ? separators.map((sep2, index) => /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Box_default, {
-              children: /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+            children: separators.length > 0 ? separators.map((sep2, index) => /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
+              children: /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
                 color: index === selectedIndex ? "green" : undefined,
                 children: [
                   index === selectedIndex ? "▶  " : "   ",
                   `${index + 1}: ${getSeparatorDisplay(sep2, index)}`
                 ]
               }, undefined, true, undefined, this)
-            }, index, false, undefined, this)) : /* @__PURE__ */ jsx_dev_runtime20.jsxDEV(Text, {
+            }, index, false, undefined, this)) : /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
               dimColor: true,
               children: "(none configured - press 'a' to add)"
             }, undefined, false, undefined, this)
@@ -75928,8 +76727,8 @@ var PowerlineSeparatorEditor = ({
 init_ColorLevel();
 init_colors();
 await init_build2();
-var import_react46 = __toESM(require_react(), 1);
-var jsx_dev_runtime21 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react47 = __toESM(require_react(), 1);
+var jsx_dev_runtime22 = __toESM(require_jsx_dev_runtime(), 1);
 function buildPowerlineThemeItems(themes, originalTheme) {
   return themes.map((themeName) => {
     const theme = getPowerlineTheme(themeName);
@@ -75982,20 +76781,20 @@ var PowerlineThemeSelector = ({
   onUpdate,
   onBack
 }) => {
-  const themes = import_react46.useMemo(() => getPowerlineThemes(), []);
+  const themes = import_react47.useMemo(() => getPowerlineThemes(), []);
   const currentTheme = settings.powerline.theme ?? "custom";
-  const [selectedIndex, setSelectedIndex] = import_react46.useState(Math.max(0, themes.indexOf(currentTheme)));
-  const [showCustomizeConfirm, setShowCustomizeConfirm] = import_react46.useState(false);
-  const originalThemeRef = import_react46.useRef(currentTheme);
-  const originalSettingsRef = import_react46.useRef(settings);
-  const latestSettingsRef = import_react46.useRef(settings);
-  const latestOnUpdateRef = import_react46.useRef(onUpdate);
-  const didHandleInitialSelectionRef = import_react46.useRef(false);
-  import_react46.useEffect(() => {
+  const [selectedIndex, setSelectedIndex] = import_react47.useState(Math.max(0, themes.indexOf(currentTheme)));
+  const [showCustomizeConfirm, setShowCustomizeConfirm] = import_react47.useState(false);
+  const originalThemeRef = import_react47.useRef(currentTheme);
+  const originalSettingsRef = import_react47.useRef(settings);
+  const latestSettingsRef = import_react47.useRef(settings);
+  const latestOnUpdateRef = import_react47.useRef(onUpdate);
+  const didHandleInitialSelectionRef = import_react47.useRef(false);
+  import_react47.useEffect(() => {
     latestSettingsRef.current = settings;
     latestOnUpdateRef.current = onUpdate;
   }, [settings, onUpdate]);
-  import_react46.useEffect(() => {
+  import_react47.useEffect(() => {
     const themeName = themes[selectedIndex];
     if (!themeName) {
       return;
@@ -76027,41 +76826,41 @@ var PowerlineThemeSelector = ({
     }
   });
   const selectedThemeName = themes[selectedIndex];
-  const themeItems = import_react46.useMemo(() => buildPowerlineThemeItems(themes, originalThemeRef.current), [themes]);
+  const themeItems = import_react47.useMemo(() => buildPowerlineThemeItems(themes, originalThemeRef.current), [themes]);
   if (showCustomizeConfirm) {
-    return /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
           bold: true,
           color: "yellow",
           children: "⚠ Confirm Customization"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
           marginTop: 1,
           flexDirection: "column",
           children: [
-            /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
               children: "This will copy the current theme colors to your widgets"
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
               children: "and switch to Custom theme mode."
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
               color: "red",
               children: "This will overwrite any existing custom colors!"
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
           marginTop: 2,
-          children: /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
             children: "Continue?"
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(ConfirmDialog, {
+          children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(ConfirmDialog, {
             inline: true,
             onConfirm: () => {
               if (selectedThemeName) {
@@ -76081,26 +76880,26 @@ var PowerlineThemeSelector = ({
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
         bold: true,
         children: [
           `Powerline Theme Selection  |  `,
-          /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
             dimColor: true,
             children: `Original: ${originalThemeRef.current}`
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
-        children: /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+        children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
           dimColor: true,
           children: `↑↓ navigate, Enter apply${selectedThemeName && selectedThemeName !== "custom" ? ", (c)ustomize theme" : ""}, ESC cancel`
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(List, {
+      /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(List, {
         marginTop: 1,
         items: themeItems,
         onSelect: () => {
@@ -76114,16 +76913,16 @@ var PowerlineThemeSelector = ({
         },
         initialSelection: selectedIndex
       }, undefined, false, undefined, this),
-      selectedThemeName && selectedThemeName !== "custom" && /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
+      selectedThemeName && selectedThemeName !== "custom" && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
           dimColor: true,
           children: "Press (c) to customize this theme - copies colors to widgets"
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      settings.colorLevel === 1 && /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Box_default, {
+      settings.colorLevel === 1 && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime21.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
           color: "yellow",
           children: "⚠ 16 color mode themes have a very limited palette, we recommend switching color level in Terminal Options"
         }, undefined, false, undefined, this)
@@ -76133,7 +76932,7 @@ var PowerlineThemeSelector = ({
 };
 
 // src/tui/components/PowerlineSetup.tsx
-var jsx_dev_runtime22 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime23 = __toESM(require_jsx_dev_runtime(), 1);
 var POWERLINE_MENU_LABEL_WIDTH = 11;
 function formatPowerlineMenuLabel(label) {
   return label.padEnd(POWERLINE_MENU_LABEL_WIDTH, " ");
@@ -76236,11 +77035,11 @@ var PowerlineSetup = ({
   onClearMessage
 }) => {
   const powerlineConfig = settings.powerline;
-  const [screen, setScreen] = import_react47.useState("menu");
-  const [selectedMenuItem, setSelectedMenuItem] = import_react47.useState(0);
-  const [confirmingEnable, setConfirmingEnable] = import_react47.useState(false);
-  const [confirmingFontInstall, setConfirmingFontInstall] = import_react47.useState(false);
-  const hasSeparatorItems = settings.lines.some((line) => line.some((item) => item.type === "separator" || item.type === "flex-separator"));
+  const [screen, setScreen] = import_react48.useState("menu");
+  const [selectedMenuItem, setSelectedMenuItem] = import_react48.useState(0);
+  const [confirmingEnable, setConfirmingEnable] = import_react48.useState(false);
+  const [confirmingFontInstall, setConfirmingFontInstall] = import_react48.useState(false);
+  const hasManualSeparatorItems = settings.lines.some((line) => line.some((item) => item.type === "separator"));
   const hasGlobalFgOverride = Boolean(settings.overrideForegroundColor && settings.overrideForegroundColor !== "none");
   const globalOverrideMessage = hasGlobalFgOverride ? "⚠ Global override for FG active" : null;
   use_input_default((input, key) => {
@@ -76258,7 +77057,7 @@ var PowerlineSetup = ({
         onBack();
       } else if (input === "t" || input === "T") {
         if (!powerlineConfig.enabled) {
-          if (hasSeparatorItems) {
+          if (hasManualSeparatorItems) {
             setConfirmingEnable(true);
           } else {
             onUpdate(buildEnabledPowerlineSettings(settings, false));
@@ -76294,7 +77093,7 @@ var PowerlineSetup = ({
     }
   });
   if (screen === "separator") {
-    return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(PowerlineSeparatorEditor, {
+    return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(PowerlineSeparatorEditor, {
       settings,
       mode: "separator",
       onUpdate,
@@ -76304,7 +77103,7 @@ var PowerlineSetup = ({
     }, undefined, false, undefined, this);
   }
   if (screen === "startCap") {
-    return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(PowerlineSeparatorEditor, {
+    return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(PowerlineSeparatorEditor, {
       settings,
       mode: "startCap",
       onUpdate,
@@ -76314,7 +77113,7 @@ var PowerlineSetup = ({
     }, undefined, false, undefined, this);
   }
   if (screen === "endCap") {
-    return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(PowerlineSeparatorEditor, {
+    return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(PowerlineSeparatorEditor, {
       settings,
       mode: "endCap",
       onUpdate,
@@ -76324,7 +77123,7 @@ var PowerlineSetup = ({
     }, undefined, false, undefined, this);
   }
   if (screen === "themes") {
-    return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(PowerlineThemeSelector, {
+    return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(PowerlineThemeSelector, {
       settings,
       onUpdate,
       onBack: () => {
@@ -76332,16 +77131,16 @@ var PowerlineSetup = ({
       }
     }, undefined, false, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      !confirmingFontInstall && !installingFonts && !fontInstallMessage && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+      !confirmingFontInstall && !installingFonts && !fontInstallMessage && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
             bold: true,
             children: "Powerline Setup"
           }, undefined, false, undefined, this),
-          globalOverrideMessage && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+          globalOverrideMessage && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
             color: "yellow",
             dimColor: true,
             children: [
@@ -76351,133 +77150,133 @@ var PowerlineSetup = ({
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      confirmingFontInstall ? /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+      confirmingFontInstall ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             marginBottom: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
               color: "cyan",
               bold: true,
               children: "Font Installation"
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             marginBottom: 1,
             flexDirection: "column",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 bold: true,
                 children: "What will happen:"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "• Clone fonts from "
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     color: "blue",
                     children: "https://github.com/powerline/fonts"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              os13.platform() === "darwin" && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(jsx_dev_runtime22.Fragment, {
+              os13.platform() === "darwin" && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(jsx_dev_runtime23.Fragment, {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "• Run install.sh script which will:"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "  - Copy all .ttf/.otf files to ~/Library/Fonts"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "  - Register fonts with macOS"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              os13.platform() === "linux" && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(jsx_dev_runtime22.Fragment, {
+              os13.platform() === "linux" && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(jsx_dev_runtime23.Fragment, {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "• Run install.sh script which will:"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "  - Copy all .ttf/.otf files to ~/.local/share/fonts"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "  - Run fc-cache to update font cache"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              os13.platform() === "win32" && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(jsx_dev_runtime22.Fragment, {
+              os13.platform() === "win32" && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(jsx_dev_runtime23.Fragment, {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "• Copy Powerline .ttf/.otf files to:"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "  AppData\\Local\\Microsoft\\Windows\\Fonts"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 dimColor: true,
                 children: "• Clean up temporary files"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             marginBottom: 1,
             children: [
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 color: "yellow",
                 bold: true,
                 children: "Requirements: "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 dimColor: true,
                 children: "Git installed, Internet connection, Write permissions"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             marginBottom: 1,
             flexDirection: "column",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 color: "green",
                 bold: true,
                 children: "After install:"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 dimColor: true,
                 children: "• Restart terminal"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 dimColor: true,
                 children: "• Select a Powerline font"
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 dimColor: true,
                 children: '  (e.g. "Meslo LG S for Powerline")'
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
               children: "Proceed? "
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(ConfirmDialog, {
+            children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(ConfirmDialog, {
               inline: true,
               onConfirm: () => {
                 setConfirmingFontInstall(false);
@@ -76489,36 +77288,36 @@ var PowerlineSetup = ({
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : confirmingEnable ? /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+      }, undefined, true, undefined, this) : confirmingEnable ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
         flexDirection: "column",
         marginTop: 1,
         children: [
-          hasSeparatorItems && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(jsx_dev_runtime22.Fragment, {
+          hasManualSeparatorItems && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(jsx_dev_runtime23.Fragment, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
-                children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
+                children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                   color: "yellow",
-                  children: "⚠ Warning: Enabling Powerline mode will remove all existing separators and flex-separators from your status lines."
+                  children: "⚠ Warning: Enabling Powerline mode will remove all existing manual separators from your status lines."
                 }, undefined, false, undefined, this)
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
                 marginBottom: 1,
-                children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                   dimColor: true,
                   children: "Powerline mode uses its own separator system and is incompatible with manual separators."
                 }, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
-            marginTop: hasSeparatorItems ? 1 : 0,
-            children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
+            marginTop: hasManualSeparatorItems ? 1 : 0,
+            children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
               children: "Do you want to continue? "
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(ConfirmDialog, {
+            children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(ConfirmDialog, {
               inline: true,
               onConfirm: () => {
                 onUpdate(buildEnabledPowerlineSettings(settings, true));
@@ -76530,51 +77329,51 @@ var PowerlineSetup = ({
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : installingFonts ? /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
-        children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+      }, undefined, true, undefined, this) : installingFonts ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
+        children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
           color: "yellow",
           children: "Installing Powerline fonts... This may take a moment."
         }, undefined, false, undefined, this)
-      }, undefined, false, undefined, this) : fontInstallMessage ? /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+      }, undefined, false, undefined, this) : fontInstallMessage ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
             color: fontInstallMessage.includes("success") ? "green" : "red",
             children: fontInstallMessage
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
               dimColor: true,
               children: "Press any key to continue..."
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(jsx_dev_runtime22.Fragment, {
+      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(jsx_dev_runtime23.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             flexDirection: "column",
-            children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
               children: [
                 "    Font Status: ",
-                powerlineFontStatus.installed ? /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(jsx_dev_runtime22.Fragment, {
+                powerlineFontStatus.installed ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(jsx_dev_runtime23.Fragment, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                    /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                       color: "green",
                       children: "✓ Installed"
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                    /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                       dimColor: true,
                       children: " - Ensure fonts are active in your terminal"
                     }, undefined, false, undefined, this)
                   ]
-                }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(jsx_dev_runtime22.Fragment, {
+                }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(jsx_dev_runtime23.Fragment, {
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                    /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                       color: "yellow",
                       children: "✗ Not Installed"
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                    /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                       dimColor: true,
                       children: " - Press (i) to install Powerline fonts"
                     }, undefined, false, undefined, this)
@@ -76583,62 +77382,62 @@ var PowerlineSetup = ({
               ]
             }, undefined, true, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 children: " Powerline Mode: "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 color: powerlineConfig.enabled ? "green" : "red",
                 children: powerlineConfig.enabled ? "✓ Enabled  " : "✗ Disabled "
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                 dimColor: true,
                 children: " - Press (t) to toggle"
               }, undefined, false, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          powerlineConfig.enabled && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(jsx_dev_runtime22.Fragment, {
+          powerlineConfig.enabled && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(jsx_dev_runtime23.Fragment, {
             children: [
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     children: "  Align Widgets: "
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     color: powerlineConfig.autoAlign ? "green" : "red",
                     children: powerlineConfig.autoAlign ? "✓ Enabled  " : "✗ Disabled "
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: " - Press (a) to toggle"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     children: " Continue Theme: "
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     color: powerlineConfig.continueThemeAcrossLines ? "green" : "red",
                     children: powerlineConfig.continueThemeAcrossLines ? "✓ Enabled  " : "✗ Disabled "
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: " - Press (c) to toggle"
                   }, undefined, false, undefined, this)
                 ]
               }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+              /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
                 flexDirection: "column",
                 marginTop: 1,
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "Powerline mode uses its own separator system"
                   }, undefined, false, undefined, this),
-                  /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+                  /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
                     dimColor: true,
                     children: "Continue Theme keeps the Powerline color sequence running across lines"
                   }, undefined, false, undefined, this)
@@ -76646,14 +77445,14 @@ var PowerlineSetup = ({
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          !powerlineConfig.enabled && /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Box_default, {
+          !powerlineConfig.enabled && /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
               dimColor: true,
               children: "Enable Powerline mode to configure separators, caps, and themes."
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime22.jsxDEV(List, {
+          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(List, {
             marginTop: 1,
             items: buildPowerlineSetupMenuItems(powerlineConfig),
             onSelect: (value) => {
@@ -76677,8 +77476,8 @@ var PowerlineSetup = ({
 // src/tui/components/RefreshIntervalMenu.tsx
 init_input_guards();
 await init_build2();
-var import_react48 = __toESM(require_react(), 1);
-var jsx_dev_runtime23 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react49 = __toESM(require_react(), 1);
+var jsx_dev_runtime24 = __toESM(require_jsx_dev_runtime(), 1);
 function getRefreshInputValue(interval) {
   return interval === null ? "" : String(interval);
 }
@@ -76749,11 +77548,11 @@ var RefreshIntervalMenu = ({
   onGitCacheTtlUpdate,
   onBack
 }) => {
-  const [editingRefreshInterval, setEditingRefreshInterval] = import_react48.useState(false);
-  const [editingGitCacheTtl, setEditingGitCacheTtl] = import_react48.useState(false);
-  const [refreshInput, setRefreshInput] = import_react48.useState(() => getRefreshInputValue(currentInterval));
-  const [gitCacheTtlInput, setGitCacheTtlInput] = import_react48.useState(() => String(gitCacheTtlSeconds));
-  const [validationError, setValidationError] = import_react48.useState(null);
+  const [editingRefreshInterval, setEditingRefreshInterval] = import_react49.useState(false);
+  const [editingGitCacheTtl, setEditingGitCacheTtl] = import_react49.useState(false);
+  const [refreshInput, setRefreshInput] = import_react49.useState(() => getRefreshInputValue(currentInterval));
+  const [gitCacheTtlInput, setGitCacheTtlInput] = import_react49.useState(() => String(gitCacheTtlSeconds));
+  const [validationError, setValidationError] = import_react49.useState(null);
   use_input_default((input, key) => {
     if (editingRefreshInterval) {
       if (key.return) {
@@ -76819,22 +77618,22 @@ var RefreshIntervalMenu = ({
       onBack();
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
         bold: true,
         children: "Configure Status Line"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
         color: "white",
         children: "Configure Claude Code status line settings"
       }, undefined, false, undefined, this),
-      editingRefreshInterval ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
+      editingRefreshInterval ? /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
             children: [
               "Enter refresh interval in seconds (1-60):",
               " ",
@@ -76842,19 +77641,19 @@ var RefreshIntervalMenu = ({
               refreshInput.length > 0 ? "s" : ""
             ]
           }, undefined, true, undefined, this),
-          validationError ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+          validationError ? /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
             color: "red",
             children: validationError
-          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
             dimColor: true,
             children: "Press Enter to confirm, ESC to cancel. Leave empty to remove."
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : editingGitCacheTtl ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Box_default, {
+      }, undefined, true, undefined, this) : editingGitCacheTtl ? /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
             children: [
               "Enter Git cache TTL in seconds (0-60):",
               " ",
@@ -76862,27 +77661,27 @@ var RefreshIntervalMenu = ({
               gitCacheTtlInput.length > 0 ? "s" : ""
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
             children: " "
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
             dimColor: true,
             wrap: "wrap",
             children: "This affects how quickly git widgets notice unstaged and untracked working-tree changes."
           }, undefined, false, undefined, this),
-          validationError ? /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+          validationError ? /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
             color: "red",
             children: validationError
-          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
             dimColor: true,
             children: "0 disables age-based expiry; cache validity uses .git/HEAD and .git/index mtimes only."
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
             dimColor: true,
             children: "Press Enter to confirm, ESC to cancel."
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime23.jsxDEV(List, {
+      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(List, {
         marginTop: 1,
         items: buildConfigureStatusLineItems(currentInterval, supportsRefreshInterval, gitCacheTtlSeconds),
         onSelect: (value) => {
@@ -76907,14 +77706,18 @@ var RefreshIntervalMenu = ({
 init_source();
 init_ansi();
 await init_build2();
-var import_react49 = __toESM(require_react(), 1);
+var import_react50 = __toESM(require_react(), 1);
 
 // src/utils/powerline-theme-index.ts
 function countPowerlineThemeSlots(entries) {
   let previousVisibleWidget = null;
   let slotCount = 0;
   for (const entry of entries) {
-    if (!entry.content || entry.widget.type === "separator" || entry.widget.type === "flex-separator") {
+    if (entry.widget.type === "separator" || entry.widget.type === "flex-separator") {
+      previousVisibleWidget = null;
+      continue;
+    }
+    if (!entry.content) {
       continue;
     }
     if (!previousVisibleWidget?.merge) {
@@ -76932,17 +77735,47 @@ function advanceGlobalPowerlineThemeIndex(currentIndex, entries) {
 await init_renderer2();
 
 // src/utils/separator-index.ts
-function countSeparatorSlots(widgets) {
-  const nonMergedWidgets = widgets.filter((_, idx) => idx === widgets.length - 1 || !widgets[idx]?.merge);
-  return Math.max(0, nonMergedWidgets.length - 1);
+function hasRenderedContent(widgetIndex, preRenderedWidgets) {
+  return preRenderedWidgets ? Boolean(preRenderedWidgets[widgetIndex]?.content) : true;
 }
-function advanceGlobalSeparatorIndex(currentIndex, widgets) {
-  return currentIndex + countSeparatorSlots(widgets);
+function countSeparatorSlots(widgets, preRenderedWidgets) {
+  let count = 0;
+  let hasPreviousRenderableWidget = false;
+  let previousRenderableWidgetMergesWithNext = false;
+  for (let i = 0;i < widgets.length; i++) {
+    const widget = widgets[i];
+    if (!widget) {
+      continue;
+    }
+    if (widget.type === "separator") {
+      if (hasPreviousRenderableWidget) {
+        previousRenderableWidgetMergesWithNext = false;
+      }
+      continue;
+    }
+    if (widget.type === "flex-separator") {
+      hasPreviousRenderableWidget = false;
+      previousRenderableWidgetMergesWithNext = false;
+      continue;
+    }
+    if (!hasRenderedContent(i, preRenderedWidgets)) {
+      continue;
+    }
+    if (hasPreviousRenderableWidget && !previousRenderableWidgetMergesWithNext) {
+      count++;
+    }
+    hasPreviousRenderableWidget = true;
+    previousRenderableWidgetMergesWithNext = Boolean(widget.merge);
+  }
+  return count;
+}
+function advanceGlobalSeparatorIndex(currentIndex, widgets, preRenderedWidgets) {
+  return currentIndex + countSeparatorSlots(widgets, preRenderedWidgets);
 }
 
 // src/tui/components/StatusLinePreview.tsx
-var jsx_dev_runtime24 = __toESM(require_jsx_dev_runtime(), 1);
-var renderSingleLine = (widgets, terminalWidth, settings, lineIndex, globalSeparatorIndex, globalPowerlineThemeIndex, preRenderedWidgets, preCalculatedMaxWidths) => {
+var jsx_dev_runtime25 = __toESM(require_jsx_dev_runtime(), 1);
+var renderSingleLine = (widgets, terminalWidth, settings, lineIndex, globalSeparatorIndex, globalPowerlineThemeIndex, globalPowerlineStartCapIndex, preRenderedWidgets, preCalculatedMaxWidths) => {
   const context = {
     terminalWidth,
     isPreview: true,
@@ -76950,7 +77783,8 @@ var renderSingleLine = (widgets, terminalWidth, settings, lineIndex, globalSepar
     gitCacheTtlSeconds: settings.gitCacheTtlSeconds,
     lineIndex,
     globalSeparatorIndex,
-    globalPowerlineThemeIndex
+    globalPowerlineThemeIndex,
+    globalPowerlineStartCapIndex
   };
   return renderStatusLineWithInfo(widgets, settings, context, preRenderedWidgets, preCalculatedMaxWidths);
 };
@@ -76961,7 +77795,7 @@ function preparePreviewLineForTerminal(line, terminalWidth) {
   return truncateStyledText(printableLine, availableWidth, { ellipsis: true });
 }
 var StatusLinePreview = ({ lines, terminalWidth, settings, onTruncationChange }) => {
-  const { renderedLines, anyTruncated } = import_react49.default.useMemo(() => {
+  const { renderedLines, anyTruncated } = import_react50.default.useMemo(() => {
     if (!settings)
       return { renderedLines: [], anyTruncated: false };
     const preRenderedLines = preRenderAllWidgets(lines, settings, {
@@ -76973,18 +77807,22 @@ var StatusLinePreview = ({ lines, terminalWidth, settings, onTruncationChange })
     const preCalculatedMaxWidths = calculateMaxWidthsFromPreRendered(preRenderedLines, settings);
     let globalSeparatorIndex = 0;
     let globalPowerlineThemeIndex = 0;
+    let globalPowerlineStartCapIndex = 0;
     const result2 = [];
     let truncated = false;
     for (let i = 0;i < lines.length; i++) {
       const lineItems = lines[i];
       if (lineItems && lineItems.length > 0) {
         const preRenderedWidgets = preRenderedLines[i] ?? [];
-        const renderResult = renderSingleLine(lineItems, terminalWidth, settings, i, globalSeparatorIndex, globalPowerlineThemeIndex, preRenderedWidgets, preCalculatedMaxWidths);
+        const renderResult = renderSingleLine(lineItems, terminalWidth, settings, i, globalSeparatorIndex, globalPowerlineThemeIndex, globalPowerlineStartCapIndex, preRenderedWidgets, preCalculatedMaxWidths);
         result2.push(renderResult.line);
         if (renderResult.wasTruncated) {
           truncated = true;
         }
-        globalSeparatorIndex = advanceGlobalSeparatorIndex(globalSeparatorIndex, lineItems);
+        globalSeparatorIndex = advanceGlobalSeparatorIndex(globalSeparatorIndex, lineItems, preRenderedWidgets);
+        if (settings.powerline.enabled) {
+          globalPowerlineStartCapIndex += countPowerlineStartCapSlots(lineItems, preRenderedWidgets);
+        }
         if (settings.powerline.enabled && settings.powerline.continueThemeAcrossLines) {
           globalPowerlineThemeIndex = advanceGlobalPowerlineThemeIndex(globalPowerlineThemeIndex, preRenderedWidgets);
         }
@@ -76992,29 +77830,29 @@ var StatusLinePreview = ({ lines, terminalWidth, settings, onTruncationChange })
     }
     return { renderedLines: result2, anyTruncated: truncated };
   }, [lines, terminalWidth, settings]);
-  import_react49.default.useEffect(() => {
+  import_react50.default.useEffect(() => {
     onTruncationChange?.(anyTruncated);
   }, [anyTruncated, onTruncationChange]);
-  return /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Box_default, {
         borderStyle: "round",
         borderColor: "gray",
         borderDimColor: true,
         width: "100%",
         paddingLeft: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Text, {
           children: [
             ">",
-            /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Text, {
               dimColor: true,
               children: " Preview  (ctrl+s to save configuration at any time)"
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      renderedLines.map((line, index) => /* @__PURE__ */ jsx_dev_runtime24.jsxDEV(Text, {
+      renderedLines.map((line, index) => /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Text, {
         wrap: "truncate",
         children: [
           PREVIEW_LINE_INDENT,
@@ -77028,7 +77866,7 @@ var StatusLinePreview = ({ lines, terminalWidth, settings, onTruncationChange })
 // src/tui/components/TerminalOptionsMenu.tsx
 init_source();
 await init_build2();
-var import_react50 = __toESM(require_react(), 1);
+var import_react51 = __toESM(require_react(), 1);
 
 // src/utils/color-sanitize.ts
 await init_widgets2();
@@ -77083,7 +77921,7 @@ function sanitizeLinesForColorLevel(lines, nextLevel) {
 }
 
 // src/tui/components/TerminalOptionsMenu.tsx
-var jsx_dev_runtime25 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime26 = __toESM(require_jsx_dev_runtime(), 1);
 function getNextColorLevel(level) {
   return (level + 1) % 4;
 }
@@ -77117,8 +77955,8 @@ var TerminalOptionsMenu = ({
   onUpdate,
   onBack
 }) => {
-  const [showColorWarning, setShowColorWarning] = import_react50.useState(false);
-  const [pendingColorLevel, setPendingColorLevel] = import_react50.useState(null);
+  const [showColorWarning, setShowColorWarning] = import_react51.useState(false);
+  const [pendingColorLevel, setPendingColorLevel] = import_react51.useState(null);
   const handleSelect = (value) => {
     if (value === "back") {
       onBack();
@@ -77166,27 +78004,27 @@ var TerminalOptionsMenu = ({
       onBack();
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
         bold: true,
         children: "Terminal Options"
       }, undefined, false, undefined, this),
-      showColorWarning ? /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Box_default, {
+      showColorWarning ? /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Box_default, {
         flexDirection: "column",
         marginTop: 1,
         children: [
-          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
             color: "yellow",
             children: "⚠ Warning: Custom colors detected!"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
             children: "Switching color modes will reset custom ansi256 or hex colors to defaults."
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(ConfirmDialog, {
+            children: /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(ConfirmDialog, {
               message: "Continue?",
               onConfirm: handleColorConfirm,
               onCancel: handleColorCancel,
@@ -77194,13 +78032,13 @@ var TerminalOptionsMenu = ({
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(jsx_dev_runtime25.Fragment, {
+      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(jsx_dev_runtime26.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
             color: "white",
             children: "Configure terminal-specific settings for optimal display"
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime25.jsxDEV(List, {
+          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(List, {
             marginTop: 1,
             items: buildTerminalOptionsItems(settings.colorLevel),
             onSelect: handleSelect,
@@ -77229,8 +78067,8 @@ var getColorLevelLabel = (level) => {
 // src/tui/components/TerminalWidthMenu.tsx
 init_input_guards();
 await init_build2();
-var import_react51 = __toESM(require_react(), 1);
-var jsx_dev_runtime26 = __toESM(require_jsx_dev_runtime(), 1);
+var import_react52 = __toESM(require_react(), 1);
+var jsx_dev_runtime27 = __toESM(require_jsx_dev_runtime(), 1);
 var TERMINAL_WIDTH_OPTIONS = ["full", "full-minus-40", "full-until-compact"];
 function getTerminalWidthSelectionIndex(selectedOption) {
   const selectedIndex = TERMINAL_WIDTH_OPTIONS.indexOf(selectedOption);
@@ -77277,11 +78115,11 @@ var TerminalWidthMenu = ({
   onUpdate,
   onBack
 }) => {
-  const [selectedOption, setSelectedOption] = import_react51.useState(settings.flexMode);
-  const [compactThreshold, setCompactThreshold] = import_react51.useState(settings.compactThreshold);
-  const [editingThreshold, setEditingThreshold] = import_react51.useState(false);
-  const [thresholdInput, setThresholdInput] = import_react51.useState(String(settings.compactThreshold));
-  const [validationError, setValidationError] = import_react51.useState(null);
+  const [selectedOption, setSelectedOption] = import_react52.useState(settings.flexMode);
+  const [compactThreshold, setCompactThreshold] = import_react52.useState(settings.compactThreshold);
+  const [editingThreshold, setEditingThreshold] = import_react52.useState(false);
+  const [thresholdInput, setThresholdInput] = import_react52.useState(String(settings.compactThreshold));
+  const [validationError, setValidationError] = import_react52.useState(null);
   use_input_default((input, key) => {
     if (editingThreshold) {
       if (key.return) {
@@ -77320,27 +78158,27 @@ var TerminalWidthMenu = ({
       onBack();
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
         bold: true,
         children: "Terminal Width"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
         color: "white",
         children: "These settings affect where long lines are truncated, and where right-alignment occurs when using flex separators"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
         dimColor: true,
         wrap: "wrap",
         children: "Claude code does not currently provide an available width variable for the statusline and features like IDE integration, auto-compaction notices, etc all cause the statusline to wrap if we do not truncate it"
       }, undefined, false, undefined, this),
-      editingThreshold ? /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Box_default, {
+      editingThreshold ? /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
             children: [
               "Enter compact threshold (1-99):",
               " ",
@@ -77348,15 +78186,15 @@ var TerminalWidthMenu = ({
               "%"
             ]
           }, undefined, true, undefined, this),
-          validationError ? /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
+          validationError ? /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
             color: "red",
             children: validationError
-          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(Text, {
+          }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
             dimColor: true,
             children: "Press Enter to confirm, ESC to cancel"
           }, undefined, false, undefined, this)
         ]
-      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime26.jsxDEV(List, {
+      }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(List, {
         marginTop: 1,
         items: buildTerminalWidthItems(selectedOption, compactThreshold),
         initialSelection: getTerminalWidthSelectionIndex(selectedOption),
@@ -77383,7 +78221,7 @@ var TerminalWidthMenu = ({
 };
 // src/tui/components/UpdateCheckerMenu.tsx
 await init_build2();
-var jsx_dev_runtime27 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime28 = __toESM(require_jsx_dev_runtime(), 1);
 function getInstallationLabel2(result2) {
   const { installation } = result2;
   if (installation.method === "auto-update") {
@@ -77434,16 +78272,16 @@ var UpdateCheckerMenu = ({
     }
   });
   if (state.status === "checking") {
-    return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
           bold: true,
           children: "Check for Updates"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
           marginTop: 1,
-          children: /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+          children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
             dimColor: true,
             children: "Checking npm registry..."
           }, undefined, false, undefined, this)
@@ -77451,32 +78289,32 @@ var UpdateCheckerMenu = ({
       ]
     }, undefined, true, undefined, this);
   }
-  return /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
         bold: true,
         children: "Check for Updates"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
             children: [
               "Current:",
               " ",
               state.currentVersion
             ]
           }, undefined, true, undefined, this),
-          state.status !== "registry-failure" && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+          state.status !== "registry-failure" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
             children: [
               "Latest:",
               " ",
               state.latestVersion
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
             children: [
               "Install:",
               " ",
@@ -77485,11 +78323,11 @@ var UpdateCheckerMenu = ({
           }, undefined, true, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      state.status === "registry-failure" && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(jsx_dev_runtime27.Fragment, {
+      state.status === "registry-failure" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(jsx_dev_runtime28.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
               color: "red",
               children: [
                 "Registry check failed:",
@@ -77498,7 +78336,7 @@ var UpdateCheckerMenu = ({
               ]
             }, undefined, true, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(List, {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(List, {
             marginTop: 1,
             items: [{ label: "Check again", value: "refresh" }],
             onSelect: (value) => {
@@ -77512,16 +78350,16 @@ var UpdateCheckerMenu = ({
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      state.status === "up-to-date" && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(jsx_dev_runtime27.Fragment, {
+      state.status === "up-to-date" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(jsx_dev_runtime28.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
               color: "green",
               children: "ccstatusline is up to date."
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(List, {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(List, {
             marginTop: 1,
             items: [{ label: "Check again", value: "refresh" }],
             onSelect: (value) => {
@@ -77535,26 +78373,26 @@ var UpdateCheckerMenu = ({
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      state.status === "update-available" && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(jsx_dev_runtime27.Fragment, {
+      state.status === "update-available" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(jsx_dev_runtime28.Fragment, {
         children: [
-          /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
+          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
             marginTop: 1,
-            children: /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+            children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
               color: "yellow",
               children: "An update is available."
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          state.installation.method === "auto-update" && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Box_default, {
+          state.installation.method === "auto-update" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
             marginTop: 1,
             flexDirection: "column",
             children: [
-              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
                 children: "No manual hook change is needed. Claude Code already runs @latest."
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
                 children: "The next @latest invocation will resolve the latest package."
               }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(Text, {
+              /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
                 children: [
                   "Launch command for a fresh TUI:",
                   " ",
@@ -77563,7 +78401,7 @@ var UpdateCheckerMenu = ({
               }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this),
-          state.actions.length > 0 && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(List, {
+          state.actions.length > 0 && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(List, {
             marginTop: 1,
             items: getActionItems(state.actions),
             onSelect: (value) => {
@@ -77579,7 +78417,7 @@ var UpdateCheckerMenu = ({
             },
             showBackButton: true
           }, undefined, false, undefined, this),
-          state.actions.length === 0 && /* @__PURE__ */ jsx_dev_runtime27.jsxDEV(List, {
+          state.actions.length === 0 && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(List, {
             marginTop: 1,
             items: [{ label: "Check again", value: "refresh" }],
             onSelect: (value) => {
@@ -77597,7 +78435,7 @@ var UpdateCheckerMenu = ({
   }, undefined, true, undefined, this);
 };
 // src/tui/App.tsx
-var jsx_dev_runtime28 = __toESM(require_jsx_dev_runtime(), 1);
+var jsx_dev_runtime29 = __toESM(require_jsx_dev_runtime(), 1);
 var GITHUB_REPO_URL = "https://github.com/sirmalloc/ccstatusline";
 var NOTICE_ITEMS = [
   {
@@ -77616,22 +78454,22 @@ var FlowNotice = ({
       onContinue();
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
         bold: true,
         children: title
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
         marginTop: 1,
-        children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
           color,
           wrap: "wrap",
           children: message
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(List, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(List, {
         marginTop: 1,
         items: NOTICE_ITEMS,
         onSelect: () => {
@@ -77671,18 +78509,18 @@ var PinnedVersionMismatchScreen = ({
       onExit();
     }
   });
-  return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+  return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
         bold: true,
         children: "Pinned Install Version Mismatch"
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
             color: "yellow",
             children: [
               "Claude Code is pinned to ccstatusline v",
@@ -77692,17 +78530,17 @@ var PinnedVersionMismatchScreen = ({
               "."
             ]
           }, undefined, true, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
             dimColor: true,
             wrap: "wrap",
             children: "To avoid writing config that the pinned runtime may not support, update the pinned global install or exit and relaunch the pinned version."
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
         marginTop: 1,
         flexDirection: "column",
-        children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+        children: /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
           children: [
             "Current pinned version:",
             " ",
@@ -77710,7 +78548,7 @@ var PinnedVersionMismatchScreen = ({
           ]
         }, undefined, true, undefined, this)
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(List, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(List, {
         marginTop: 1,
         items: getPinnedMismatchItems(mismatch, canRunPackageManager),
         onSelect: (value) => {
@@ -77816,33 +78654,53 @@ function clearInstallMenuSelection(menuSelections) {
   delete next.installPackage;
   return next;
 }
+function buildConfigLoadWarning(configLoadError) {
+  if (!configLoadError) {
+    return null;
+  }
+  return `⚠ ${configLoadError} — showing defaults; saving here overwrites the file.`;
+}
+function buildInvalidConfigSaveConfirm(configLoadError, onConfirm) {
+  if (!configLoadError) {
+    return null;
+  }
+  return {
+    message: `${configLoadError} and is preserved on disk. Saving replaces it with the current configuration. Continue?`,
+    action: () => {
+      onConfirm();
+      return Promise.resolve();
+    },
+    cancelScreen: "main"
+  };
+}
 var App2 = () => {
   const { exit } = use_app_default();
-  const [settings, setSettings] = import_react52.useState(null);
-  const [originalSettings, setOriginalSettings] = import_react52.useState(null);
-  const [hasChanges, setHasChanges] = import_react52.useState(false);
-  const [screen, setScreen] = import_react52.useState("main");
-  const [selectedLine, setSelectedLine] = import_react52.useState(0);
-  const [menuSelections, setMenuSelections] = import_react52.useState({});
-  const [confirmDialog, setConfirmDialog] = import_react52.useState(null);
-  const [isClaudeInstalled, setIsClaudeInstalled] = import_react52.useState(false);
-  const [terminalWidth, setTerminalWidth] = import_react52.useState(process.stdout.columns || 80);
-  const [powerlineFontStatus, setPowerlineFontStatus] = import_react52.useState({ installed: false });
-  const [installingFonts, setInstallingFonts] = import_react52.useState(false);
-  const [fontInstallMessage, setFontInstallMessage] = import_react52.useState(null);
-  const [existingStatusLine, setExistingStatusLine] = import_react52.useState(null);
-  const [flashMessage, setFlashMessage] = import_react52.useState(null);
-  const [previewIsTruncated, setPreviewIsTruncated] = import_react52.useState(false);
-  const [currentRefreshInterval, setCurrentRefreshInterval] = import_react52.useState(null);
-  const [supportsRefreshInterval] = import_react52.useState(() => isClaudeCodeVersionAtLeast("2.1.97"));
-  const [commandAvailability] = import_react52.useState(() => getPackageCommandAvailability());
-  const [updateCheckerState, setUpdateCheckerState] = import_react52.useState({ status: "checking" });
-  const [flowNotice, setFlowNotice] = import_react52.useState(null);
-  const [globalPackageInstallations, setGlobalPackageInstallations] = import_react52.useState([]);
-  const [updatesReturnScreen, setUpdatesReturnScreen] = import_react52.useState("main");
-  const [hasLoadedClaudeStatus, setHasLoadedClaudeStatus] = import_react52.useState(false);
-  const [hasLoadedInstalledState, setHasLoadedInstalledState] = import_react52.useState(false);
-  import_react52.useEffect(() => {
+  const [settings, setSettings] = import_react53.useState(null);
+  const [originalSettings, setOriginalSettings] = import_react53.useState(null);
+  const [hasChanges, setHasChanges] = import_react53.useState(false);
+  const [configLoadError, setConfigLoadError] = import_react53.useState(null);
+  const [screen, setScreen] = import_react53.useState("main");
+  const [selectedLine, setSelectedLine] = import_react53.useState(0);
+  const [menuSelections, setMenuSelections] = import_react53.useState({});
+  const [confirmDialog, setConfirmDialog] = import_react53.useState(null);
+  const [isClaudeInstalled, setIsClaudeInstalled] = import_react53.useState(false);
+  const [terminalWidth, setTerminalWidth] = import_react53.useState(process.stdout.columns || 80);
+  const [powerlineFontStatus, setPowerlineFontStatus] = import_react53.useState({ installed: false });
+  const [installingFonts, setInstallingFonts] = import_react53.useState(false);
+  const [fontInstallMessage, setFontInstallMessage] = import_react53.useState(null);
+  const [existingStatusLine, setExistingStatusLine] = import_react53.useState(null);
+  const [flashMessage, setFlashMessage] = import_react53.useState(null);
+  const [previewIsTruncated, setPreviewIsTruncated] = import_react53.useState(false);
+  const [currentRefreshInterval, setCurrentRefreshInterval] = import_react53.useState(null);
+  const [supportsRefreshInterval] = import_react53.useState(() => isClaudeCodeVersionAtLeast("2.1.97"));
+  const [commandAvailability] = import_react53.useState(() => getPackageCommandAvailability());
+  const [updateCheckerState, setUpdateCheckerState] = import_react53.useState({ status: "checking" });
+  const [flowNotice, setFlowNotice] = import_react53.useState(null);
+  const [globalPackageInstallations, setGlobalPackageInstallations] = import_react53.useState([]);
+  const [updatesReturnScreen, setUpdatesReturnScreen] = import_react53.useState("main");
+  const [hasLoadedClaudeStatus, setHasLoadedClaudeStatus] = import_react53.useState(false);
+  const [hasLoadedInstalledState, setHasLoadedInstalledState] = import_react53.useState(false);
+  import_react53.useEffect(() => {
     loadClaudeStatusLineState().then((statusLineState) => {
       setExistingStatusLine(statusLineState.existingStatusLine);
       setCurrentRefreshInterval(statusLineState.refreshInterval);
@@ -77856,6 +78714,7 @@ var App2 = () => {
       source_default.level = loadedSettings.colorLevel;
       setSettings(loadedSettings);
       setOriginalSettings(cloneSettings(loadedSettings));
+      setConfigLoadError(getConfigLoadError());
     });
     isInstalled().then(setIsClaudeInstalled).catch(() => {
       setIsClaudeInstalled(false);
@@ -77875,13 +78734,13 @@ var App2 = () => {
       process.stdout.off("resize", handleResize);
     };
   }, []);
-  import_react52.useEffect(() => {
+  import_react53.useEffect(() => {
     if (originalSettings) {
       const hasAnyChanges = JSON.stringify(settings) !== JSON.stringify(originalSettings);
       setHasChanges(hasAnyChanges);
     }
   }, [settings, originalSettings]);
-  import_react52.useEffect(() => {
+  import_react53.useEffect(() => {
     if (flashMessage) {
       const timer = setTimeout(() => {
         setFlashMessage(null);
@@ -77895,7 +78754,7 @@ var App2 = () => {
     if (key.ctrl && input === "c") {
       exit();
     }
-    if (key.ctrl && input === "s" && settings) {
+    if (key.ctrl && input === "s" && settings && screen !== "confirm") {
       const installation = getCurrentInstallation(isClaudeInstalled, existingStatusLine, settings);
       const activeCommand = installation.method === "pinned" || installation.method === "self-managed" ? inspectActiveGlobalCommand({ commandAvailability }) : null;
       const effectiveInstallation2 = getPathInferredInstallation(installation, activeCommand);
@@ -77903,19 +78762,40 @@ var App2 = () => {
       if (mismatch) {
         return;
       }
-      (async () => {
-        await saveSettings(settings);
-        setOriginalSettings(cloneSettings(settings));
-        setHasChanges(false);
-        setFlashMessage({
-          text: "✓ Configuration saved",
-          color: "green"
-        });
-      })();
+      const performSave = () => {
+        (async () => {
+          try {
+            await saveSettings(settings);
+            setOriginalSettings(cloneSettings(settings));
+            setHasChanges(false);
+            setConfigLoadError(null);
+            setFlashMessage({
+              text: "✓ Configuration saved",
+              color: "green"
+            });
+          } catch {
+            setFlashMessage({
+              text: "✗ Could not save configuration",
+              color: "red"
+            });
+          }
+        })();
+      };
+      const saveGuard = buildInvalidConfigSaveConfirm(configLoadError, () => {
+        setConfirmDialog(null);
+        setScreen("main");
+        performSave();
+      });
+      if (saveGuard) {
+        setConfirmDialog(saveGuard);
+        setScreen("confirm");
+      } else {
+        performSave();
+      }
     }
   });
-  const getGlobalResolutionWarning = import_react52.useCallback((packageManager) => inspectGlobalCommandResolution(packageManager).warning, []);
-  const handleInstallSelection = import_react52.useCallback((selection) => {
+  const getGlobalResolutionWarning = import_react53.useCallback((packageManager) => inspectGlobalCommandResolution(packageManager).warning, []);
+  const handleInstallSelection = import_react53.useCallback((selection) => {
     getExistingStatusLine().then((existing) => {
       const isAlreadyInstalled = isKnownCommand(existing ?? "");
       const finalCommand = buildStatusLineCommand(selection.commandMode);
@@ -77958,6 +78838,7 @@ Continue?`;
               supportsRefreshInterval,
               installationMetadata: selection.metadata
             });
+            setConfigLoadError(getConfigLoadError());
             const installedStatusLineState = await loadClaudeStatusLineState();
             setIsClaudeInstalled(true);
             setExistingStatusLine(installedStatusLineState.existingStatusLine ?? finalCommand);
@@ -78000,11 +78881,11 @@ ${resolutionWarning}`,
       setScreen("confirm");
     });
   }, [getGlobalResolutionWarning, supportsRefreshInterval]);
-  const handleInstallMenuCancel = import_react52.useCallback(() => {
+  const handleInstallMenuCancel = import_react53.useCallback(() => {
     setMenuSelections(clearInstallMenuSelection);
     setScreen("main");
   }, []);
-  const handleUpdateCheck = import_react52.useCallback(() => {
+  const handleUpdateCheck = import_react53.useCallback(() => {
     setUpdateCheckerState({ status: "checking" });
     const installation = settings ? getCurrentInstallation(isClaudeInstalled, existingStatusLine, settings) : classifyInstallation(existingStatusLine, undefined);
     const activeCommand = installation.method === "pinned" || installation.method === "self-managed" ? inspectActiveGlobalCommand({ commandAvailability }) : null;
@@ -78017,7 +78898,7 @@ ${resolutionWarning}`,
       commandAvailability
     }).then(setUpdateCheckerState);
   }, [commandAvailability, existingStatusLine, isClaudeInstalled, settings]);
-  const handleRunUpdateAction = import_react52.useCallback((action) => {
+  const handleRunUpdateAction = import_react53.useCallback((action) => {
     setConfirmDialog({
       message: `Run global update command?
 
@@ -78033,6 +78914,7 @@ Claude settings will not be changed.`,
             installedVersion: action.version
           };
           await saveInstallationMetadata(installation);
+          setConfigLoadError(getConfigLoadError());
           setSettings((prev) => prev ? { ...prev, installation } : prev);
           setOriginalSettings((prev) => prev ? { ...prev, installation } : prev);
           const resolutionWarning = getGlobalResolutionWarning(action.packageManager);
@@ -78067,7 +78949,7 @@ ${resolutionWarning}`,
     setScreen("confirm");
   }, [getGlobalResolutionWarning]);
   if (!settings || !hasLoadedClaudeStatus || !hasLoadedInstalledState) {
-    return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+    return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
       children: "Loading settings..."
     }, undefined, false, undefined, this);
   }
@@ -78084,6 +78966,7 @@ ${resolutionWarning}`,
         installedVersion: mismatch.runningVersion
       };
       await saveInstallationMetadata(installation);
+      setConfigLoadError(getConfigLoadError());
       setSettings((prev) => prev ? { ...prev, installation } : prev);
       setOriginalSettings((prev) => prev ? { ...prev, installation } : prev);
       const resolutionWarning = getGlobalResolutionWarning(mismatch.packageManager);
@@ -78120,6 +79003,7 @@ ${resolutionWarning}`,
         let removedClaudeSettings = false;
         try {
           await uninstallStatusLine();
+          setConfigLoadError(getConfigLoadError());
           removedClaudeSettings = true;
           for (const packageManager of selection.packageManagers) {
             await runGlobalPackageUninstall(packageManager);
@@ -78240,43 +79124,64 @@ ${GITHUB_REPO_URL}`,
         });
         setScreen("confirm");
         break;
-      case "save":
-        await saveSettings(settings);
-        setOriginalSettings(cloneSettings(settings));
-        setHasChanges(false);
-        exit();
+      case "save": {
+        const saveAndExit = async () => {
+          try {
+            await saveSettings(settings);
+            setOriginalSettings(cloneSettings(settings));
+            setHasChanges(false);
+            exit();
+          } catch {
+            setFlashMessage({
+              text: "✗ Could not save configuration",
+              color: "red"
+            });
+          }
+        };
+        const saveGuard = buildInvalidConfigSaveConfirm(configLoadError, () => {
+          setConfirmDialog(null);
+          setScreen("main");
+          saveAndExit();
+        });
+        if (saveGuard) {
+          setConfirmDialog(saveGuard);
+          setScreen("confirm");
+        } else {
+          await saveAndExit();
+        }
         break;
+      }
       case "exit":
         exit();
         break;
     }
   };
   if (pinnedVersionMismatch) {
-    return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+    return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
       flexDirection: "column",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+        /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
           marginBottom: 1,
           children: [
-            /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
               bold: true,
-              children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(dist_default5, {
+              children: /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(dist_default5, {
                 name: "retro",
                 children: "CCStatusline Configuration"
               }, undefined, false, undefined, this)
             }, undefined, false, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+            /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
               bold: true,
               children: ` | ${runningVersion && `v${runningVersion}`}`
             }, undefined, false, undefined, this),
-            flashMessage && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+            flashMessage && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
               color: flashMessage.color,
               bold: true,
               children: `  ${flashMessage.text}`
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(PinnedVersionMismatchScreen, {
+        /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(PinnedVersionMismatchScreen, {
           mismatch: pinnedVersionMismatch,
           canRunPackageManager: commandAvailability[pinnedVersionMismatch.packageManager],
           onUpdate: () => {
@@ -78299,44 +79204,50 @@ ${GITHUB_REPO_URL}`,
     setSelectedLine(lineIndex);
     setScreen("items");
   };
-  return /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+  const configWarning = buildConfigLoadWarning(configLoadError);
+  return /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
     flexDirection: "column",
     children: [
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
         marginBottom: 1,
         children: [
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
             bold: true,
-            children: /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(dist_default5, {
+            children: /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(dist_default5, {
               name: "retro",
               children: "CCStatusline Configuration"
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
-          /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+          /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
             bold: true,
             children: ` | ${runningVersion && `v${runningVersion}`}`
           }, undefined, false, undefined, this),
-          flashMessage && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+          flashMessage && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
             color: flashMessage.color,
             bold: true,
             children: `  ${flashMessage.text}`
           }, undefined, false, undefined, this)
         ]
       }, undefined, true, undefined, this),
-      isCustomConfigPath() && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Text, {
+      configWarning && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
+        color: "red",
+        wrap: "wrap",
+        children: configWarning
+      }, undefined, false, undefined, this),
+      isCustomConfigPath() && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Text, {
         dimColor: true,
         children: `Config: ${getConfigPath()}`
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(StatusLinePreview, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(StatusLinePreview, {
         lines: settings.lines,
         terminalWidth,
         settings,
         onTruncationChange: setPreviewIsTruncated
       }, undefined, false, undefined, this),
-      /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(Box_default, {
+      /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(Box_default, {
         marginTop: 1,
         children: [
-          screen === "main" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(MainMenu, {
+          screen === "main" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(MainMenu, {
             onSelect: (value, index) => {
               if (value !== "save" && value !== "exit") {
                 setMenuSelections((prev) => ({ ...prev, main: index }));
@@ -78351,7 +79262,7 @@ ${GITHUB_REPO_URL}`,
             installation: effectiveInstallation,
             previewIsTruncated
           }, undefined, false, undefined, this),
-          screen === "lines" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(LineSelector, {
+          screen === "lines" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(LineSelector, {
             lines: settings.lines,
             onSelect: (line) => {
               setMenuSelections((prev) => ({ ...prev, lines: line }));
@@ -78366,7 +79277,7 @@ ${GITHUB_REPO_URL}`,
             title: "Select Line to Edit Items",
             allowEditing: true
           }, undefined, false, undefined, this),
-          screen === "items" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(ItemsEditor, {
+          screen === "items" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(ItemsEditor, {
             widgets: settings.lines[selectedLine] ?? [],
             onUpdate: (widgets) => {
               updateLine(selectedLine, widgets);
@@ -78378,7 +79289,7 @@ ${GITHUB_REPO_URL}`,
             lineNumber: selectedLine + 1,
             settings
           }, undefined, false, undefined, this),
-          screen === "colorLines" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(LineSelector, {
+          screen === "colorLines" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(LineSelector, {
             lines: settings.lines,
             onLinesUpdate: updateLines,
             onSelect: (line) => {
@@ -78396,7 +79307,7 @@ ${GITHUB_REPO_URL}`,
             settings,
             allowEditing: false
           }, undefined, false, undefined, this),
-          screen === "colors" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(ColorMenu, {
+          screen === "colors" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(ColorMenu, {
             widgets: settings.lines[selectedLine] ?? [],
             lineIndex: selectedLine,
             settings,
@@ -78409,7 +79320,7 @@ ${GITHUB_REPO_URL}`,
               setScreen("colorLines");
             }
           }, undefined, false, undefined, this),
-          screen === "terminalConfig" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(TerminalOptionsMenu, {
+          screen === "terminalConfig" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(TerminalOptionsMenu, {
             settings,
             onUpdate: (updatedSettings) => {
               setSettings(updatedSettings);
@@ -78423,7 +79334,7 @@ ${GITHUB_REPO_URL}`,
               }
             }
           }, undefined, false, undefined, this),
-          screen === "terminalWidth" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(TerminalWidthMenu, {
+          screen === "terminalWidth" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(TerminalWidthMenu, {
             settings,
             onUpdate: (updatedSettings) => {
               setSettings(updatedSettings);
@@ -78432,7 +79343,7 @@ ${GITHUB_REPO_URL}`,
               setScreen("terminalConfig");
             }
           }, undefined, false, undefined, this),
-          screen === "globalOverrides" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(GlobalOverridesMenu, {
+          screen === "globalOverrides" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(GlobalOverridesMenu, {
             settings,
             onUpdate: (updatedSettings) => {
               setSettings(updatedSettings);
@@ -78442,7 +79353,7 @@ ${GITHUB_REPO_URL}`,
               setScreen("main");
             }
           }, undefined, false, undefined, this),
-          screen === "confirm" && confirmDialog && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(ConfirmDialog, {
+          screen === "confirm" && confirmDialog && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(ConfirmDialog, {
             message: confirmDialog.message,
             onConfirm: () => void confirmDialog.action(),
             onCancel: () => {
@@ -78450,14 +79361,14 @@ ${GITHUB_REPO_URL}`,
               setConfirmDialog(null);
             }
           }, undefined, false, undefined, this),
-          screen === "flowNotice" && flowNotice && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(FlowNotice, {
+          screen === "flowNotice" && flowNotice && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(FlowNotice, {
             ...flowNotice,
             onContinue: () => {
               setScreen(flowNotice.continueScreen);
               setFlowNotice(null);
             }
           }, undefined, false, undefined, this),
-          screen === "install" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(InstallMenu, {
+          screen === "install" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(InstallMenu, {
             commandAvailability,
             currentVersion: getPackageVersion(),
             existingStatusLine,
@@ -78471,7 +79382,7 @@ ${GITHUB_REPO_URL}`,
             onCancel: handleInstallMenuCancel,
             initialPackageSelection: menuSelections.installPackage
           }, undefined, false, undefined, this),
-          screen === "manageInstallation" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(ManageInstallationMenu, {
+          screen === "manageInstallation" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(ManageInstallationMenu, {
             installation: effectiveInstallation,
             activeCommand: activeGlobalCommand,
             onSelect: handleManageInstallationSelect,
@@ -78483,7 +79394,7 @@ ${GITHUB_REPO_URL}`,
               setScreen("main");
             }
           }, undefined, false, undefined, this),
-          screen === "uninstallOptions" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(UninstallMenu, {
+          screen === "uninstallOptions" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(UninstallMenu, {
             installations: globalPackageInstallations,
             onSelect: (selection) => {
               handleUninstallSelection(selection, "uninstallOptions");
@@ -78492,7 +79403,7 @@ ${GITHUB_REPO_URL}`,
               setScreen("manageInstallation");
             }
           }, undefined, false, undefined, this),
-          screen === "updates" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(UpdateCheckerMenu, {
+          screen === "updates" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(UpdateCheckerMenu, {
             state: updateCheckerState,
             onBack: () => {
               setScreen(updatesReturnScreen);
@@ -78500,7 +79411,7 @@ ${GITHUB_REPO_URL}`,
             onRefresh: handleUpdateCheck,
             onRunAction: handleRunUpdateAction
           }, undefined, false, undefined, this),
-          screen === "refreshInterval" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(RefreshIntervalMenu, {
+          screen === "refreshInterval" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(RefreshIntervalMenu, {
             currentInterval: currentRefreshInterval,
             supportsRefreshInterval,
             gitCacheTtlSeconds: settings.gitCacheTtlSeconds,
@@ -78536,7 +79447,7 @@ ${GITHUB_REPO_URL}`,
               setScreen("main");
             }
           }, undefined, false, undefined, this),
-          screen === "powerline" && /* @__PURE__ */ jsx_dev_runtime28.jsxDEV(PowerlineSetup, {
+          screen === "powerline" && /* @__PURE__ */ jsx_dev_runtime29.jsxDEV(PowerlineSetup, {
             settings,
             powerlineFontStatus,
             onUpdate: (updatedSettings) => {
@@ -78570,7 +79481,7 @@ ${GITHUB_REPO_URL}`,
 };
 function runTUI() {
   process.stdout.write("\x1B[2J\x1B[H");
-  render_default(/* @__PURE__ */ jsx_dev_runtime28.jsxDEV(App2, {}, undefined, false, undefined, this));
+  render_default(/* @__PURE__ */ jsx_dev_runtime29.jsxDEV(App2, {}, undefined, false, undefined, this));
 }
 // src/types/StatusJSON.ts
 init_zod();
@@ -80905,9 +81816,9 @@ var USAGE_WIDGET_REQUIREMENTS = {
   "weekly-usage": [{ field: "weeklyUsage" }],
   "weekly-sonnet-usage": [{ field: "weeklySonnetUsage" }],
   "weekly-opus-usage": [{ field: "weeklyOpusUsage" }],
-  "block-timer": [{ field: "sessionResetAt" }],
-  "reset-timer": [{ field: "sessionResetAt" }],
-  "weekly-reset-timer": [{ field: "weeklyResetAt" }],
+  "block-timer": [{ field: "sessionResetAt", suppressFetchError: true }],
+  "reset-timer": [{ field: "sessionResetAt", suppressFetchError: true }],
+  "weekly-reset-timer": [{ field: "weeklyResetAt", suppressFetchError: true }],
   "extra-usage-utilization": [
     { field: "extraUsageEnabled" },
     { field: "extraUsageUtilization" }
@@ -80956,14 +81867,21 @@ function isUsageRequirementSatisfied(data, requirement) {
   }
   return requirement.alternatives?.some((field) => hasUsageDataField(data, field)) ?? false;
 }
-function getMissingFetchFields(data, requirements) {
+function getMissingFetchRequirements(data, requirements) {
   const missing = new Set;
+  let hasUnsuppressedMissingRequirement = false;
   for (const requirement of requirements) {
     if (!isUsageRequirementSatisfied(data, requirement)) {
       missing.add(requirement.field);
+      if (!requirement.suppressFetchError) {
+        hasUnsuppressedMissingRequirement = true;
+      }
     }
   }
-  return Array.from(missing);
+  return {
+    fields: Array.from(missing),
+    suppressFetchError: missing.size > 0 && !hasUnsuppressedMissingRequirement
+  };
 }
 function hasAnyUsageDataField(data) {
   return USAGE_DATA_FIELDS.some((field) => data?.[field] !== undefined);
@@ -81028,11 +81946,15 @@ async function prefetchUsageDataIfNeeded(lines, data) {
   }
   const rateLimitsData = extractUsageDataFromRateLimits(data?.rate_limits);
   const requirements = getUsageFieldRequirements(lines);
-  const missingFields = getMissingFetchFields(rateLimitsData, requirements);
+  const missingRequirements = getMissingFetchRequirements(rateLimitsData, requirements);
+  const missingFields = missingRequirements.fields;
   if (missingFields.length === 0) {
     return rateLimitsData;
   }
   const apiData = await fetchUsageData({ requiredFields: missingFields });
+  if (apiData.error && missingRequirements.suppressFetchError) {
+    return rateLimitsData;
+  }
   return mergeUsageData(rateLimitsData, apiData);
 }
 
@@ -81074,6 +81996,7 @@ async function ensureWindowsUtf8CodePage() {
 }
 async function renderMultipleLines(data) {
   const settings = await loadSettings();
+  const configError = getConfigLoadError();
   source_default.level = settings.colorLevel;
   updateColorMap();
   const lines = settings.lines;
@@ -81131,6 +82054,8 @@ async function renderMultipleLines(data) {
   const preCalculatedMaxWidths = calculateMaxWidthsFromPreRendered(preRenderedLines, settings);
   let globalSeparatorIndex = 0;
   let globalPowerlineThemeIndex = 0;
+  let globalPowerlineStartCapIndex = 0;
+  let configBadgePrepended = false;
   for (let i = 0;i < lines.length; i++) {
     const lineItems = lines[i];
     if (lineItems && lineItems.length > 0) {
@@ -81139,20 +82064,31 @@ async function renderMultipleLines(data) {
         ...context,
         lineIndex: i,
         globalSeparatorIndex,
-        globalPowerlineThemeIndex
+        globalPowerlineThemeIndex,
+        globalPowerlineStartCapIndex
       };
-      const line = renderStatusLine(lineItems, settings, lineContext, preRenderedWidgets, preCalculatedMaxWidths);
+      let line = renderStatusLine(lineItems, settings, lineContext, preRenderedWidgets, preCalculatedMaxWidths);
       const strippedLine = getVisibleText(line).trim();
       if (strippedLine.length > 0) {
+        if (configError && !configBadgePrepended) {
+          line = `${buildConfigWarningBadge(settings.colorLevel)} | ${line}`;
+          configBadgePrepended = true;
+        }
         let outputLine = line.replace(/ /g, " ");
         outputLine = "\x1B[0m" + outputLine;
         console.log(outputLine);
-        globalSeparatorIndex = advanceGlobalSeparatorIndex(globalSeparatorIndex, lineItems);
+        globalSeparatorIndex = advanceGlobalSeparatorIndex(globalSeparatorIndex, lineItems, preRenderedWidgets);
+        if (settings.powerline.enabled) {
+          globalPowerlineStartCapIndex += countPowerlineStartCapSlots(lineItems, preRenderedWidgets);
+        }
         if (settings.powerline.enabled && settings.powerline.continueThemeAcrossLines) {
           globalPowerlineThemeIndex = advanceGlobalPowerlineThemeIndex(globalPowerlineThemeIndex, preRenderedWidgets);
         }
       }
     }
+  }
+  if (configError && !configBadgePrepended) {
+    console.log("\x1B[0m" + buildConfigWarningBadge(settings.colorLevel).replace(/ /g, " "));
   }
   if (settings.updatemessage?.message && settings.updatemessage.message.trim() !== "" && settings.updatemessage.remaining && settings.updatemessage.remaining > 0) {
     console.log(settings.updatemessage.message);
@@ -81188,6 +82124,10 @@ async function handleHook() {
   handleHookInput(input);
 }
 async function main() {
+  if (process.argv.includes("--version")) {
+    console.log(getPackageVersion());
+    process.exit(0);
+  }
   initConfigPath(parseConfigArg());
   if (process.argv.includes("--hook")) {
     await handleHook();
