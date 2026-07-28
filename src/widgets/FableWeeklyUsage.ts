@@ -119,6 +119,14 @@ export class FableWeeklyUsageWidget implements Widget {
         return formatRawOrLabeledValue(item, LABEL, `${renderedPercent.toFixed(1)}%`);
     }
 
+    getFillRatio(context: RenderContext): number | null {
+        const value = context.usageData?.fableUsage;
+        if (value === undefined) {
+            return null;
+        }
+        return Math.max(0, Math.min(1, value / 100));
+    }
+
     getCustomKeybinds(item?: WidgetItem): CustomKeybind[] {
         return getUsagePercentCustomKeybinds(item);
     }

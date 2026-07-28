@@ -106,3 +106,19 @@ describe('FableWeeklyUsageWidget', () => {
         usageValue: 42.06
     });
 });
+
+describe('FableWeeklyUsageWidget.getFillRatio', () => {
+    const widget = new FableWeeklyUsageWidget();
+    const ctx = (usageData?: Record<string, unknown>): RenderContext => (({ usageData }));
+
+    it('returns null when fable usage is absent', () => {
+        expect(widget.getFillRatio(ctx())).toBeNull();
+        expect(widget.getFillRatio(ctx({}))).toBeNull();
+    });
+
+    it('returns fableUsage/100, clamped to [0,1]', () => {
+        expect(widget.getFillRatio(ctx({ fableUsage: 70 }))).toBeCloseTo(0.7);
+        expect(widget.getFillRatio(ctx({ fableUsage: 150 }))).toBe(1);
+        expect(widget.getFillRatio(ctx({ fableUsage: -10 }))).toBe(0);
+    });
+});
